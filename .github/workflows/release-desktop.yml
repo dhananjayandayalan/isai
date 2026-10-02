@@ -1,0 +1,20 @@
+name: Release desktop (stub until Phase 5)
+
+# TODO Phase 5 (spec §6, ADR-010/016):
+#  - matrix windows-latest / macos-latest (arm64 + x64) / ubuntu-22.04
+#  - Rust toolchain + tauri-apps/tauri-action building apps/desktop from apps/web
+#  - Windows: code-signing certificate (Azure Trusted Signing or OV cert)
+#  - macOS: Apple Developer ID cert + notarisation (APPLE_* secrets)
+#  - Linux: AppImage + deb + rpm
+#  - Tauri updater keys, GitHub Release with signatures
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  stub:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "::notice::Desktop releases start in Phase 5."

@@ -1,0 +1,26 @@
+[project]
+name = "isai-engine"
+version = "0.0.0"
+description = "Isai research engine: MIR pipeline, benchmark harness and ONNX export (ADR-016)"
+requires-python = "==3.11.*"   # ADR-002: pinned for basic-pitch; research engine only
+dependencies = []              # MIR stack is added and verified one by one in Phase 0 (see engine-deps workflow)
+
+[dependency-groups]
+dev = ["ruff>=0.6", "pytest>=8"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/isai"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

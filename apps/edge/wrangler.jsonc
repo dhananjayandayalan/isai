@@ -1,0 +1,43 @@
+// Isai edge Worker (ADR-021): LLM proxy, shared analysis cache, model host.
+// Top level = local dev (`wrangler dev`, Miniflare). Real resource IDs for
+// staging/production are written by `node infra/bootstrap.mjs --env <env>`.
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "isai-edge-dev",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-15",
+  "observability": { "enabled": true },
+  "vars": { "ISAI_ENV": "dev", "TEACH_DAILY_CEILING": "500" },
+  "d1_databases": [
+    { "binding": "DB", "database_name": "isai-dev", "database_id": "local", "migrations_dir": "migrations" }
+  ],
+  "r2_buckets": [{ "binding": "MODELS", "bucket_name": "isai-models-dev" }],
+  "ratelimits": [
+    { "name": "WRITE_LIMITER", "namespace_id": "1001", "simple": { "limit": 10, "period": 60 } }
+  ],
+
+  "env": {
+    "staging": {
+      "name": "isai-edge-staging",
+      "vars": { "ISAI_ENV": "staging", "TEACH_DAILY_CEILING": "500" },
+      "d1_databases": [
+        { "binding": "DB", "database_name": "isai-staging", "database_id": "REPLACED_BY_BOOTSTRAP", "migrations_dir": "migrations" }
+      ],
+      "r2_buckets": [{ "binding": "MODELS", "bucket_name": "isai-models-staging" }],
+      "ratelimits": [
+        { "name": "WRITE_LIMITER", "namespace_id": "1002", "simple": { "limit": 10, "period": 60 } }
+      ]
+    },
+    "production": {
+      "name": "isai-edge",
+      "vars": { "ISAI_ENV": "production", "TEACH_DAILY_CEILING": "5000" },
+      "d1_databases": [
+        { "binding": "DB", "database_name": "isai-prod", "database_id": "REPLACED_BY_BOOTSTRAP", "migrations_dir": "migrations" }
+      ],
+      "r2_buckets": [{ "binding": "MODELS", "bucket_name": "isai-models" }],
+      "ratelimits": [
+        { "name": "WRITE_LIMITER", "namespace_id": "1003", "simple": { "limit": 10, "period": 60 } }
+      ]
+    }
+  }
+}

@@ -1,0 +1,47 @@
+name: Engine dependency matrix
+
+# Phase 0 task: prove every MIR dependency installs and imports on Python 3.11
+# on all three desktop OSes (ADR-002). Produces a verification log per OS.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+      - name: Install and import each dependency
+        run: |
+          uv venv --python 3.11 .deps-venv
+          if [ -f .deps-venv/Scripts/python.exe ]; then PY=.deps-venv/Scripts/python.exe; else PY=.deps-venv/bin/python; fi
+          LOG=deps-${{ matrix.os }}.md
+          echo "| package | import | result |" > $LOG
+          echo "|---|---|---|" >> $LOG
+          for pair in torch:torch demucs:demucs beat-this:beat_this librosa:librosa basic-pitch:basic_pitch music21:music21 onnx:onnx onnxruntime:onnxruntime; do
+            pkg=${pair%%:*}; mod=${pair##*:}
+            if uv pip install --python $PY "$pkg" >/dev/null 2>&1 && $PY -c "import $mod" >/dev/null 2>&1; then
+              ver=$($PY -c "import importlib.metadata as m; print(m.version('$pkg'))")
+              echo "| $pkg | $mod | ✅ $ver |" >> $LOG
+            else
+              echo "| $pkg | $mod | ❌ |" >> $LOG
+            fi
+          done
+          if command -v ffmpeg >/dev/null; then echo "| ffmpeg | (binary) | ✅ |" >> $LOG; else echo "| ffmpeg | (binary) | ❌ not on PATH |" >> $LOG; fi
+          cat $LOG >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: deps-${{ matrix.os }}
+          path: deps-${{ matrix.os }}.md

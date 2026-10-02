@@ -1,0 +1,20 @@
+{
+  "name": "@isai/edge",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "deploy:staging": "wrangler d1 migrations apply DB --env staging --remote && wrangler deploy --env staging",
+    "deploy:production": "wrangler d1 migrations apply DB --env production --remote && wrangler deploy --env production"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "catalog:",
+    "@cloudflare/workers-types": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:",
+    "wrangler": "catalog:"
+  }
+}

@@ -1,0 +1,18 @@
+name: Release mobile (stub until Phase 7)
+
+# TODO Phase 7 (spec §6, ADR-010/017):
+#  - Expo dev/production builds via EAS (EXPO_TOKEN secret), onnxruntime-react-native config plugin
+#  - Android: Play Console service account, upload key
+#  - iOS: Apple Developer account, App Store Connect API key
+#  - eas submit for store releases
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  stub:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "::notice::Mobile releases start in Phase 7."

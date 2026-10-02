@@ -1,0 +1,9 @@
+{
+  "$comment": "ADR-021 Teacher routing. Tried in order; first schema-valid response wins. Model ids are config, re-check free-tier terms each release. Keys are Worker secrets named in key_secret.",
+  "teacher": [
+    { "provider": "groq",       "base_url": "https://api.groq.com/openai/v1",                          "model": "TBD-phase-2", "key_secret": "GROQ_API_KEY",       "timeout_ms": 8000 },
+    { "provider": "cerebras",   "base_url": "https://api.cerebras.ai/v1",                              "model": "TBD-phase-2", "key_secret": "CEREBRAS_API_KEY",   "timeout_ms": 8000 },
+    { "provider": "google",     "base_url": "https://generativelanguage.googleapis.com/v1beta/openai", "model": "TBD-phase-2", "key_secret": "GOOGLE_AI_API_KEY",  "timeout_ms": 12000 },
+    { "provider": "openrouter", "base_url": "https://openrouter.ai/api/v1",                            "model": "TBD-phase-2", "key_secret": "OPENROUTER_API_KEY", "timeout_ms": 15000 }
+  ]
+}

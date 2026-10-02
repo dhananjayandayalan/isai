@@ -1,0 +1,17 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+# One version of each shared tool across the workspace
+catalog:
+  typescript: ^5.9.3
+  vitest: ^4.1.0
+  wrangler: ^4.140.0
+  "@cloudflare/vitest-pool-workers": ^0.22.0
+  "@cloudflare/workers-types": ^5.20260901.0
+
+# Native binaries that must run their install scripts
+allowBuilds:
+  esbuild: true
+  workerd: true
+  sharp: false

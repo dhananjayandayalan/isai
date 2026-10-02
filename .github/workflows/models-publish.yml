@@ -1,0 +1,16 @@
+name: Publish model (stub until Phase 1)
+
+# Phase 1: export a model in engine/export, then publish it with
+#   node infra/publish-model.mjs --env <env> --name <name> --version <semver> --file <path>
+# This workflow will run the export + publish in CI once export scripts exist.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  stub:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "::notice::Model export arrives in Phase 1. Publish locally with infra/publish-model.mjs until then."

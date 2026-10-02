@@ -1,0 +1,53 @@
+name: Edge deploy
+
+# Push to main deploys staging. Production is a manual dispatch through the
+# `production` GitHub environment, which requires approval.
+# Disabled until the repo variable CLOUDFLARE_READY is "true" (set after infra/bootstrap.mjs).
+on:
+  push:
+    branches: [main]
+    paths: ["apps/edge/**", "pnpm-lock.yaml"]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Environment to deploy
+        type: choice
+        options: [staging, production]
+        default: staging
+
+permissions:
+  contents: read
+
+concurrency:
+  group: edge-deploy-${{ github.event.inputs.target || 'staging' }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: vars.CLOUDFLARE_READY == 'true'
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.target || 'staging' }}
+    env:
+      TARGET: ${{ github.event.inputs.target || 'staging' }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @isai/edge test
+      - uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: apps/edge
+          packageManager: pnpm
+          command: |
+            d1 migrations apply DB --env ${{ env.TARGET }} --remote
+            deploy --env ${{ env.TARGET }}
+      - name: Smoke test
+        run: |
+          URL=$(node -e "console.log(process.env.TARGET === 'production' ? 'isai-edge' : 'isai-edge-staging')")
+          curl -fsS "https://$URL.${{ vars.WORKERS_SUBDOMAIN }}.workers.dev/health"

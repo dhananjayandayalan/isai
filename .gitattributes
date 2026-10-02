@@ -1,0 +1,8 @@
+* text=auto eol=lf
+*.onnx binary
+*.npz binary
+*.npy binary
+*.wav binary
+*.mp3 binary
+*.docx binary
+*.png binary

@@ -1,0 +1,11 @@
+# Copy to .dev.vars for `wrangler dev`. Never commit .dev.vars.
+# Deployed values are set with: pnpm wrangler secret put <NAME> --env staging|production
+
+# Salt for hashing client IPs in the cache (any long random string)
+IP_SALT=change-me-to-a-long-random-string
+
+# Teacher providers (Phase 2) — free-tier keys, tried in providers.json order
+GROQ_API_KEY=
+CEREBRAS_API_KEY=
+GOOGLE_AI_API_KEY=
+OPENROUTER_API_KEY=
