@@ -2,10 +2,9 @@ name: Engine dependency matrix
 
 # Phase 0 task: prove every MIR dependency installs and imports on Python 3.11
 # on all three desktop OSes (ADR-002). Produces a verification log per OS.
+# Manual only: on a private repo macOS minutes bill at 10x and Windows at 2x.
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 3 * * 1"
 
 permissions:
   contents: read
