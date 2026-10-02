@@ -25,7 +25,12 @@ Everything runs on free tiers: GitHub (code, CI) and Cloudflare (Worker, D1, R2)
    gh variable set WORKERS_SUBDOMAIN --body <your-subdomain>   # <x>.workers.dev
    gh variable set CLOUDFLARE_READY --body true
    ```
-   In GitHub → Settings → Environments, create `staging` and `production`. Give `production` a required reviewer.
+   The `staging` and `production` GitHub environments already exist.
+
+## GitHub plan limits (free, private repo)
+- **Branch rulesets and required reviewers are unavailable.** `main` is unprotected, and production is guarded only by being manual-dispatch. Making the repo public, or upgrading to Pro, enables both. Then add a ruleset requiring the two CI checks, and a `production` reviewer.
+- **Secret scanning is unavailable.** `.gitignore` excludes `.dev.vars` and all audio; keep keys out of commits.
+- **Actions minutes:** 2,000/month, with macOS billed at 10× and Windows at 2×. `engine-deps.yml` is manual-only for that reason.
 
 ## Secrets
 
