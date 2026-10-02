@@ -4,8 +4,8 @@ packages:
 
 # One version of each shared tool across the workspace
 catalog:
-  typescript: ^5.9.3
-  vitest: ^4.1.0
+  typescript: ^7.0.2
+  vitest: ^5.0.2
   wrangler: ^4.140.0
   "@cloudflare/vitest-pool-workers": ^0.22.0
   "@cloudflare/workers-types": ^5.20260901.0
