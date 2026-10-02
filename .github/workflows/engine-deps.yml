@@ -22,7 +22,7 @@ jobs:
         shell: bash
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10
+      - uses: astral-sh/setup-uv@v10.2.0
       - name: Install and import each dependency
         run: |
           uv venv --python 3.11 .deps-venv
