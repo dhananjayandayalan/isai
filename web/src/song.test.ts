@@ -42,6 +42,13 @@ describe('parseSong', () => {
     expect(() => parseSong(badDate)).toThrow(/createdAt/);
   });
 
+  it('accepts an empty song with no notes, chords or beats', () => {
+    const empty = { ...frere, durationSec: 0, notes: [], chords: [], tempo: { bpm: 120, beats: [] } };
+    const song = parseSong(empty);
+    expect(song.notes).toEqual([]);
+    expect(song.chords).toEqual([]);
+  });
+
   it('rejects things that are not songs', () => {
     expect(() => parseSong(null)).toThrow(SongParseError);
     expect(() => parseSong('song')).toThrow(SongParseError);
