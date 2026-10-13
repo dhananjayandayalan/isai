@@ -1,10 +1,15 @@
+import json
+import shutil
+from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
 from jsonschema import Draft202012Validator
 
 from isai.schema import (
+    SchemaNotFoundError,
     SongValidationError,
+    _validator,  # pyright: ignore[reportPrivateUsage]
     examples_dir,
     load_json,
     load_schema,
@@ -112,15 +117,43 @@ def test_time_rules_report_every_problem() -> None:
     assert len(exc.value.errors) == 2
 
 
-def test_schema_dir_env_override(monkeypatch: pytest.MonkeyPatch) -> None:
+@pytest.fixture
+def fresh_caches() -> Iterator[None]:
+    """Clear the schema and validator caches around a test that changes ISAI_SCHEMA_DIR."""
+    load_schema.cache_clear()
+    _validator.cache_clear()
+    yield
+    load_schema.cache_clear()
+    _validator.cache_clear()
+
+
+def test_validator_is_cached() -> None:
+    assert _validator() is _validator()
+
+
+@pytest.mark.usefixtures("fresh_caches")
+def test_schema_dir_env_override(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     real = schema_dir()
     monkeypatch.setenv("ISAI_SCHEMA_DIR", str(real))
     assert schema_dir() == real
 
+    # A different schema behind the override is what validation then uses.
+    shutil.copytree(real, tmp_path / "schema")
+    loose = load_json(real / "song.schema.json")
+    loose["$defs"]["Note"]["properties"]["midi"]["maximum"] = 200
+    (tmp_path / "schema" / "song.schema.json").write_text(json.dumps(loose), encoding="utf-8")
+    monkeypatch.setenv("ISAI_SCHEMA_DIR", str(tmp_path / "schema"))
+    load_schema.cache_clear()
+    _validator.cache_clear()
+    doc = load_json(examples_dir() / "twinkle-g-major.json")
+    doc["notes"][0]["midi"] = 150
+    assert song_errors(doc) == []
 
+
+@pytest.mark.usefixtures("fresh_caches")
 def test_schema_dir_env_override_must_exist(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     monkeypatch.setenv("ISAI_SCHEMA_DIR", str(tmp_path))
-    with pytest.raises(FileNotFoundError, match="ISAI_SCHEMA_DIR"):
+    with pytest.raises(SchemaNotFoundError, match="ISAI_SCHEMA_DIR"):
         schema_dir()

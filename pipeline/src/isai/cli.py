@@ -16,7 +16,13 @@ from pathlib import Path
 from typing import Any
 
 from isai import __version__
-from isai.schema import SongValidationError, examples_dir, load_json, validate_song
+from isai.schema import (
+    SchemaNotFoundError,
+    SongValidationError,
+    examples_dir,
+    load_json,
+    validate_song,
+)
 
 PLACEHOLDER_EXAMPLE = "twinkle-g-major.json"
 
@@ -61,6 +67,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.command == "analyse":
         try:
             out_path = analyse(args.file, args.out, args.title)
+        except SchemaNotFoundError as e:
+            # A broken install, not a user mistake: say so and how to fix it.
+            print(f"isai: {e}. Is the repo's schema/ folder present?", file=sys.stderr)
+            return 3
         except FileNotFoundError as e:
             print(f"isai: {e}", file=sys.stderr)
             return 2

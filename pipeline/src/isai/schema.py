@@ -23,6 +23,10 @@ class SongValidationError(ValueError):
         super().__init__("Song JSON is invalid:\n" + "\n".join(f"  - {e}" for e in errors))
 
 
+class SchemaNotFoundError(FileNotFoundError):
+    """The Song schema can't be located: a broken install or a bad `ISAI_SCHEMA_DIR`."""
+
+
 def schema_dir() -> Path:
     """Return the repo's `schema/` directory.
 
@@ -32,13 +36,13 @@ def schema_dir() -> Path:
     if override:
         path = Path(override)
         if not (path / SCHEMA_FILE).is_file():
-            raise FileNotFoundError(f"{SCHEMA_DIR_ENV}={override} has no {SCHEMA_FILE}")
+            raise SchemaNotFoundError(f"{SCHEMA_DIR_ENV}={override} has no {SCHEMA_FILE}")
         return path
     for parent in Path(__file__).resolve().parents:
         candidate = parent / "schema"
         if (candidate / SCHEMA_FILE).is_file():
             return candidate
-    raise FileNotFoundError(f"Could not find schema/{SCHEMA_FILE}; set {SCHEMA_DIR_ENV}")
+    raise SchemaNotFoundError(f"Could not find schema/{SCHEMA_FILE}; set {SCHEMA_DIR_ENV}")
 
 
 def schema_path() -> Path:
@@ -60,6 +64,7 @@ def load_schema() -> dict[str, Any]:
     return schema
 
 
+@cache
 def _validator() -> Draft202012Validator:
     return Draft202012Validator(load_schema(), format_checker=FormatChecker())
 
