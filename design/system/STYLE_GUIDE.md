@@ -160,6 +160,8 @@ Copy these shapes. Change the words, not the classes.
 
 **Filters**: `<button class="filter" aria-pressed="false">Carnatic <span class="t-mono">1</span></button>`.
 
+**Range** (seek bars): `<input type="range" class="range" aria-label="Position">`.
+
 **Field**: `<div class="field"><label class="label" for="x">Email</label><input class="input" id="x" aria-invalid="true" aria-describedby="x-err"><span class="field-error" id="x-err">…</span></div>`.
 
 **Choice card**: `<label class="choice"><input type="radio" name="source"><span class="stack-1"><b>Just piano</b><span class="t-muted">…</span></span></label>`.
@@ -172,7 +174,7 @@ Copy these shapes. Change the words, not the classes.
 
 **Feedback**: `.alert` (inverted, blocking problem in a form), `.alert-quiet` (inline hint); `.toast-success|info|warning|error`; `.state.state-empty|state-error` for whole-panel states with a `.state-icon`.
 
-**Music**: `.stage` (falling notes) with `.note-right`, `.note-left`, `.note-ghost` (hand not being practised); `.piano`, `.piano-key-white`, `.piano-key-black`; `.chord-now`, `.chord-next`. The animation itself runs on canvas/`requestAnimationFrame` (CLAUDE.md rule 5): read the token values once with `getComputedStyle(document.documentElement).getPropertyValue('--hand-left')` and re-read when the theme changes.
+**Music**: `.stage` (falling notes) with `.note-right`, `.note-left`, `.note-ghost` (hand not being practised); `.piano`, `.piano-key-white`, `.piano-key-black`, `.piano-canvas` (a full-width `<canvas>` inside `.piano`); `.chord-now`, `.chord-next`. The animation itself runs on canvas/`requestAnimationFrame` (CLAUDE.md rule 5): read the token values once with `getComputedStyle(document.documentElement).getPropertyValue('--hand-left')` and re-read when the theme changes.
 
 ## 5. Screens and what they use
 
