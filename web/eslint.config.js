@@ -4,6 +4,8 @@ import reactRefresh from 'eslint-plugin-react-refresh';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
+const MIDI_MESSAGE = 'Use the MidiInput interface from src/midi/ (ADR 0003, CLAUDE.md rule 4).';
+
 export default tseslint.config(
   { ignores: ['dist', 'coverage', 'src/generated'] },
   {
@@ -20,23 +22,24 @@ export default tseslint.config(
     },
     rules: {
       // CLAUDE.md rule 4: only web/src/midi/ may touch Web MIDI.
-      'no-restricted-properties': [
+      // Any access to requestMIDIAccess, however the navigator is reached.
+      'no-restricted-syntax': [
         'error',
-        {
-          object: 'navigator',
-          property: 'requestMIDIAccess',
-          message: 'Use the MidiInput interface from src/midi/ (ADR 0003).',
-        },
+        ...[
+          "MemberExpression[property.name='requestMIDIAccess']",
+          "MemberExpression[property.value='requestMIDIAccess']",
+          "ObjectPattern > Property[key.name='requestMIDIAccess']",
+        ].map((selector) => ({ selector, message: MIDI_MESSAGE })),
       ],
       'no-restricted-imports': [
         'error',
-        { paths: [{ name: 'webmidi', message: 'Use the MidiInput interface from src/midi/ (ADR 0003).' }] },
+        { patterns: [{ group: ['webmidi', 'webmidi/*'], message: MIDI_MESSAGE }] },
       ],
     },
   },
   {
     files: ['src/midi/**/*.{ts,tsx}'],
-    rules: { 'no-restricted-properties': 'off', 'no-restricted-imports': 'off' },
+    rules: { 'no-restricted-syntax': 'off', 'no-restricted-imports': 'off' },
   },
   {
     files: ['*.{js,ts}', 'scripts/**/*.mjs'],
