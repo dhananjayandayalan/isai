@@ -57,6 +57,61 @@ def test_created_at_must_be_a_date_time() -> None:
     assert any("date-time" in e for e in song_errors(doc))
 
 
+def test_empty_song_is_valid() -> None:
+    doc = load_json(examples_dir() / "frere-jacques-a-cappella.json")
+    doc["notes"] = []
+    doc["chords"] = []
+    doc["tempo"]["beats"] = []
+    doc["durationSec"] = 0
+    validate_song(doc)
+
+
+def test_single_note_song_is_valid() -> None:
+    doc = load_json(examples_dir() / "frere-jacques-a-cappella.json")
+    doc["notes"] = doc["notes"][:1]
+    validate_song(doc)
+
+
+@pytest.mark.parametrize("field", ["notes", "chords", "sections"])
+@pytest.mark.parametrize(("start", "end"), [(5.0, 0.0), (1.0, 1.0)])
+def test_end_must_be_after_start(field: str, start: float, end: float) -> None:
+    doc = load_json(examples_dir() / "twinkle-g-major.json")
+    doc[field][0]["start"] = start
+    doc[field][0]["end"] = end
+    with pytest.raises(SongValidationError, match=rf"\$\.{field}\[0\]: end .* must be after"):
+        validate_song(doc)
+
+
+@pytest.mark.parametrize("field", ["notes", "chords", "sections"])
+def test_end_must_be_within_duration(field: str) -> None:
+    doc = load_json(examples_dir() / "twinkle-g-major.json")
+    doc[field][0]["end"] = doc["durationSec"] + 0.5
+    with pytest.raises(SongValidationError, match=rf"\$\.{field}\[0\]: .* past durationSec"):
+        validate_song(doc)
+
+
+def test_end_exactly_at_duration_is_valid() -> None:
+    doc = load_json(examples_dir() / "twinkle-g-major.json")
+    doc["notes"][-1]["end"] = doc["durationSec"]
+    validate_song(doc)
+
+
+def test_beats_must_be_within_duration() -> None:
+    doc = load_json(examples_dir() / "twinkle-g-major.json")
+    doc["tempo"]["beats"].append(doc["durationSec"] + 1)
+    with pytest.raises(SongValidationError, match=r"\$\.tempo\.beats\[16\]"):
+        validate_song(doc)
+
+
+def test_time_rules_report_every_problem() -> None:
+    doc = load_json(examples_dir() / "twinkle-g-major.json")
+    doc["notes"][0]["end"] = 0
+    doc["chords"][0]["end"] = 99
+    with pytest.raises(SongValidationError) as exc:
+        validate_song(doc)
+    assert len(exc.value.errors) == 2
+
+
 def test_schema_dir_env_override(monkeypatch: pytest.MonkeyPatch) -> None:
     real = schema_dir()
     monkeypatch.setenv("ISAI_SCHEMA_DIR", str(real))

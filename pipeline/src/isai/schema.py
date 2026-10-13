@@ -71,8 +71,38 @@ def song_errors(doc: Any) -> list[str]:
     return [f"{e.json_path}: {e.message}" for e in errors]
 
 
+TIME_TOLERANCE_SEC = 1e-6
+
+
+def time_errors(doc: dict[str, Any]) -> list[str]:
+    """Check the timing rules JSON Schema can't express (ADR 0002).
+
+    Every note, chord and section ends after it starts and within `durationSec`; every
+    beat lies within `durationSec`. Expects a document that already matches the schema.
+    """
+    duration: float = doc["durationSec"]
+    limit = duration + TIME_TOLERANCE_SEC
+    errors: list[str] = []
+    for field in ("notes", "chords", "sections"):
+        items: list[dict[str, Any]] = doc.get(field) or []
+        for i, item in enumerate(items):
+            start: float = item["start"]
+            end: float = item["end"]
+            if end <= start:
+                errors.append(f"$.{field}[{i}]: end ({end}) must be after start ({start})")
+            if end > limit:
+                errors.append(f"$.{field}[{i}]: end ({end}) is past durationSec ({duration})")
+    beats: list[float] = doc["tempo"]["beats"]
+    for i, beat in enumerate(beats):
+        if beat > limit:
+            errors.append(f"$.tempo.beats[{i}]: {beat} is past durationSec ({duration})")
+    return errors
+
+
 def validate_song(doc: Any) -> None:
-    """Raise `SongValidationError` if `doc` does not match the Song schema."""
+    """Raise `SongValidationError` if `doc` breaks the Song schema or its timing rules."""
     errors = song_errors(doc)
+    if not errors:
+        errors = time_errors(doc)
     if errors:
         raise SongValidationError(errors)
