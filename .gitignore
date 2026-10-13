@@ -1,0 +1,34 @@
+# Song audio never goes in git (CLAUDE.md rule 8)
+*.mp3
+*.wav
+*.flac
+*.m4a
+*.aac
+*.ogg
+*.opus
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Model weights
+*.pt
+*.ckpt
+*.onnx
+*.th
+
+# Caches and build output
+.cache/
+node_modules/
+.venv/
+dist/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+coverage/
+htmlcov/
+*.tsbuildinfo

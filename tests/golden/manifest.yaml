@@ -1,0 +1,59 @@
+# Golden reference songs for /golden-eval. See README.md for how to add one.
+#
+# Audio is never committed (CLAUDE.md rule 8): `audio` is a path on your own machine,
+# absolute or relative to the repo root. Entries whose audio is missing are skipped.
+#
+# Fields
+#   id          unique kebab-case id, also the output folder .cache/golden/<id>
+#   title       song title, for the report
+#   type        piano-solo | full-mix | a-cappella | carnatic  (selects the pipeline path)
+#   audio       local audio path, or TODO until the file is on this machine
+#   expected
+#     key       tonic note name, e.g. "G", "Bb"
+#     mode      major | minor | modal
+#     tonic_hz  optional measured tonic, mainly for a-cappella and carnatic
+#     raga      optional, carnatic only
+#     bpm       reference tempo; half/double are accepted but flagged
+#   chords_lab  optional reference chord file (.lab: start end label), relative to this folder
+#   midi        optional reference MIDI for note F1 (piano-solo), relative to this folder
+#   notes       free text: why this song is in the set, known difficulties
+
+version: 1
+
+songs:
+  - id: piano-solo-01
+    title: TODO
+    type: piano-solo
+    audio: TODO
+    expected:
+      key: TODO
+      mode: TODO
+      bpm: TODO
+    chords_lab: null
+    midi: null
+    notes: Clean solo piano recording; checks transcription accuracy (needs a reference MIDI).
+
+  - id: full-mix-01
+    title: TODO
+    type: full-mix
+    audio: TODO
+    expected:
+      key: TODO
+      mode: TODO
+      bpm: TODO
+    chords_lab: null
+    midi: null
+    notes: Full band/film-song mix; checks separation, tempo and chords.
+
+  - id: a-cappella-01
+    title: TODO
+    type: a-cappella
+    audio: TODO
+    expected:
+      key: TODO
+      mode: TODO
+      tonic_hz: null
+      bpm: TODO
+    chords_lab: null
+    midi: null
+    notes: Unaccompanied voice; checks melody tracking and key without harmony.

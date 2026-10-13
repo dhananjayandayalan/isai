@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "0.1.0",
+  "id": "example-invalid",
+  "title": "Invalid: MIDI out of range, no tonality",
+  "sourceType": "piano-solo",
+  "durationSec": 1,
+  "tempo": {
+    "bpm": 60,
+    "beats": [
+      0
+    ]
+  },
+  "timeSignature": {
+    "num": 4,
+    "den": 4
+  },
+  "chords": [],
+  "notes": [
+    {
+      "start": 0,
+      "end": 0.9,
+      "midi": 130,
+      "velocity": 80,
+      "hand": "right",
+      "source": "arranged"
+    }
+  ],
+  "meta": {
+    "pipelineVersion": "example",
+    "createdAt": "2026-10-13T00:00:00Z",
+    "confidence": {
+      "key": 0,
+      "tempo": 0,
+      "chords": 0
+    }
+  }
+}
