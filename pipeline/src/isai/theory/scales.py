@@ -6,7 +6,7 @@ from typing import Literal, get_args
 
 from isai.theory.pitch import name_to_pitch_class
 
-Mode = Literal[
+ScaleMode = Literal[
     "major",
     "minor",
     "ionian",
@@ -20,12 +20,12 @@ Mode = Literal[
     "melodic-minor",
 ]
 
-MODES: tuple[Mode, ...] = get_args(Mode)
+SCALE_MODES: tuple[ScaleMode, ...] = get_args(ScaleMode)
 
 _MAJOR = (0, 2, 4, 5, 7, 9, 11)
 _NATURAL_MINOR = (0, 2, 3, 5, 7, 8, 10)
 
-INTERVALS: dict[Mode, tuple[int, ...]] = {
+INTERVALS: dict[ScaleMode, tuple[int, ...]] = {
     "major": _MAJOR,
     "minor": _NATURAL_MINOR,
     "ionian": _MAJOR,
@@ -40,7 +40,7 @@ INTERVALS: dict[Mode, tuple[int, ...]] = {
 }
 
 
-def scale(tonic: int | str, mode: Mode) -> list[int]:
+def scale(tonic: int | str, mode: ScaleMode) -> list[int]:
     """Pitch classes of `mode` on `tonic`, in scale order: scale("G", "major") -> [7, 9, 11, ...].
 
     `tonic` is a pitch class (0-11) or a note name such as "F#" or "Bb".
@@ -53,5 +53,5 @@ def scale(tonic: int | str, mode: Mode) -> list[int]:
         tonic_pc = tonic
     intervals = INTERVALS.get(mode)
     if intervals is None:
-        raise ValueError(f"unknown mode {mode!r}; expected one of {', '.join(MODES)}")
+        raise ValueError(f"unknown mode {mode!r}; expected one of {', '.join(SCALE_MODES)}")
     return [(tonic_pc + step) % 12 for step in intervals]

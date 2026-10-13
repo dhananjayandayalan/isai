@@ -2,7 +2,7 @@ from typing import Any
 
 import pytest
 
-from isai.theory.scales import INTERVALS, MODES, Mode, scale
+from isai.theory.scales import INTERVALS, SCALE_MODES, ScaleMode, scale
 
 
 @pytest.mark.parametrize(
@@ -38,7 +38,7 @@ def test_aliases_match() -> None:
 
 def test_modes_of_c_major_share_pitch_classes() -> None:
     c_major = set(scale("C", "major"))
-    rotations: list[tuple[str, Mode]] = [
+    rotations: list[tuple[str, ScaleMode]] = [
         ("D", "dorian"),
         ("E", "phrygian"),
         ("F", "lydian"),
@@ -51,8 +51,8 @@ def test_modes_of_c_major_share_pitch_classes() -> None:
 
 
 def test_every_mode_has_intervals_starting_on_tonic() -> None:
-    assert set(MODES) == set(INTERVALS)
-    for mode in MODES:
+    assert set(SCALE_MODES) == set(INTERVALS)
+    for mode in SCALE_MODES:
         steps = INTERVALS[mode]
         assert steps[0] == 0
         assert len(set(steps)) == len(steps) == 7
