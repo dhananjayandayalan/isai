@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Isai — Practice</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0;background:#141414}
+a{color:#EDEDED}a:hover{color:#FFFFFF}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #141414; color: #EDEDED; font-family: 'Instrument Sans', system-ui, sans-serif; display: flex; flex-direction: column">
+
+  <header style="display: flex; flex-wrap: wrap; gap: 14px 18px; align-items: center; padding: 12px 24px; background: #1A1A1A; border-bottom: 1px solid #262626">
+    <a href="Song.dc.html" aria-label="Back to song" style="display: inline-flex; width: 44px; height: 44px; border-radius: 10px; align-items: center; justify-content: center; color: #D6D6D6; border: 1px solid #333333">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+    </a>
+    <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+      <h1 style="margin: 0; font-size: 17px; font-weight: 600">Twinkle, Twinkle, Little Star</h1>
+      <span style="font-size: 13px; color: #9A9A9A">Verse · bar 2 of 20</span>
+    </div>
+    <div style="display: flex; flex-wrap: wrap; gap: 6px; font-size: 12px; color: #C8C8C8">
+      <span style="padding: 4px 9px; border-radius: 6px; background: #262626; border: 1px solid #353535">G major</span>
+      <span style="padding: 4px 9px; border-radius: 6px; background: #262626; border: 1px solid #353535">4/4</span>
+      <span style="padding: 4px 9px; border-radius: 6px; background: #262626; border: 1px solid #353535; font-family: 'JetBrains Mono', monospace">{{bpm}} BPM</span>
+    </div>
+    <div style="margin-left: auto; display: flex; flex-wrap: wrap; gap: 12px; align-items: center">
+      <div role="group" aria-label="Mode" style="display: inline-flex; padding: 4px; background: #121212; border: 1px solid #333333; border-radius: 10px; gap: 2px">
+        <sc-for list="{{modes}}" as="m" hint-placeholder-count="2">
+          <button type="button" aria-pressed="{{m.pressed}}" onClick="{{m.pick}}" style="height: 36px; padding: 0 16px; border-radius: 7px; border: 0; background: {{m.bg}}; color: {{m.fg}}; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">{{m.label}}</button>
+        </sc-for>
+      </div>
+      <span style="display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid #333333; font-size: 13px; color: #C8C8C8">
+        <span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #E6E6E6; box-shadow: 0 0 0 3px #3A3A3A"></span>
+        Digital piano
+      </span>
+      <a href="Results.dc.html" style="display: inline-flex; align-items: center; height: 44px; padding: 0 18px; border-radius: 10px; background: #E8E8E8; color: #141414; text-decoration: none; font-size: 14px; font-weight: 600">Finish</a>
+    </div>
+  </header>
+
+  <section aria-label="Chords and progress" style="display: flex; flex-wrap: wrap; gap: 16px 24px; align-items: stretch; padding: 16px 24px">
+    <div style="flex: 3 1 420px; min-width: 0; display: flex; gap: 8px; align-items: stretch">
+      <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 64px; border-radius: 10px; background: #1C1C1C; color: #7E7E7E">
+        <span style="font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase">Prev</span>
+        <span style="font-size: 18px; font-weight: 600">{{prevChord}}</span>
+      </div>
+      <div style="display: flex; flex-direction: column; justify-content: center; padding: 10px 22px; min-width: 120px; border-radius: 12px; background: #E8E8E8; color: #141414">
+        <span style="font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #4A4A4A">Now</span>
+        <span style="font-size: 34px; font-weight: 700; line-height: 1.05; letter-spacing: -0.02em">{{nowChord}}</span>
+        <span style="font-size: 12px; color: #3A3A3A">{{nowChordSub}}</span>
+      </div>
+      <sc-for list="{{nextChords}}" as="c" hint-placeholder-count="4">
+        <div style="flex: {{c.beats}}; min-width: 56px; display: flex; flex-direction: column; justify-content: center; padding: 8px 14px; border-radius: 10px; background: #222222; border: 1px solid #303030">
+          <span style="font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: #8F8F8F">{{c.when}}</span>
+          <span style="font-size: 20px; font-weight: 600; color: {{c.fg}}">{{c.label}}</span>
+        </div>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{isTraining}}" hint-placeholder-val="{{true}}">
+      <div style="flex: 2 1 320px; min-width: 0; display: flex; gap: 16px; align-items: center; padding: 12px 18px; border-radius: 12px; background: #1E1E1E; border: 1px solid #303030">
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 8px">
+          <span style="font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #9A9A9A">Waiting for</span>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px">
+            <sc-for list="{{waiting}}" as="w" hint-placeholder-count="3">
+              <span style="display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border-radius: 6px; background: {{w.bg}}; color: {{w.fg}}; border: 1px solid {{w.border}}; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600">{{w.label}} <span style="font-family: 'Instrument Sans', sans-serif; font-weight: 500; font-size: 11px">{{w.hand}}</span></span>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 2px; align-items: flex-end">
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 500">42<span style="color: #8F8F8F">/46</span></span>
+          <span style="font-size: 12px; color: #9A9A9A">notes right first time</span>
+        </div>
+      </div>
+    </sc-if>
+    <sc-if value="{{isPerformance}}" hint-placeholder-val="{{false}}">
+      <div style="flex: 2 1 320px; min-width: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; padding: 12px 18px; border-radius: 12px; background: #1E1E1E; border: 1px solid #303030">
+        <sc-for list="{{perf}}" as="p" hint-placeholder-count="4">
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <span style="font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #9A9A9A">{{p.label}}</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 500">{{p.value}}</span>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+  </section>
+
+  <section aria-label="Falling notes and keyboard" style="padding: 0 24px; display: flex; flex-direction: column">
+    <div style="position: relative; height: 380px; background: #1A1A1A; border-radius: 12px 12px 0 0; overflow: hidden; border: 1px solid #262626; border-bottom: 0">
+      <sc-for list="{{octLines}}" as="o" hint-placeholder-count="4">
+        <div aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: {{o.left}}; width: 1px; background: #2A2A2A"></div>
+      </sc-for>
+      <sc-for list="{{beatLines}}" as="b" hint-placeholder-count="6">
+        <div aria-hidden="true" style="position: absolute; left: 0; right: 0; bottom: {{b.bottom}}; height: 1px; background: {{b.color}}"></div>
+      </sc-for>
+      <sc-for list="{{bars}}" as="n" hint-placeholder-count="11">
+        <div aria-hidden="true" style="position: absolute; left: calc({{n.left}} + 3px); width: calc({{n.width}} - 6px); bottom: {{n.bottom}}; height: {{n.height}}; border-radius: 6px; background: {{n.bg}}; border: 2px solid {{n.border}}; box-sizing: border-box; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 6px; color: {{n.fg}}; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600">{{n.label}}</div>
+      </sc-for>
+      <div aria-hidden="true" style="position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: #E8E8E8"></div>
+
+      <sc-if value="{{isTraining}}" hint-placeholder-val="{{true}}">
+        <div style="position: absolute; top: 14px; right: 14px; display: flex; align-items: center; gap: 10px; padding: 8px 14px; border-radius: 20px; background: #262626; border: 1px solid #3A3A3A; font-size: 13px; color: #E0E0E0">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4h3v16H7zM14 4h3v16h-3z"></path></svg>
+          Held until you play the lit keys
+        </div>
+      </sc-if>
+      <sc-if value="{{isPerformance}}" hint-placeholder-val="{{false}}">
+        <div style="position: absolute; top: 14px; right: 14px; display: flex; flex-direction: column; gap: 8px; padding: 10px 14px; border-radius: 12px; background: #262626; border: 1px solid #3A3A3A; width: 220px">
+          <div style="display: flex; justify-content: space-between; font-size: 13px"><span style="font-weight: 600">On time</span><span style="font-family: 'JetBrains Mono', monospace; color: #C8C8C8">+12 ms</span></div>
+          <div aria-hidden="true" style="position: relative; height: 8px; border-radius: 4px; background: #1A1A1A">
+            <div style="position: absolute; left: 25%; width: 50%; top: 0; bottom: 0; background: #3E3E3E; border-radius: 4px"></div>
+            <div style="position: absolute; left: 50%; top: -3px; bottom: -3px; width: 1px; background: #8F8F8F"></div>
+            <div style="position: absolute; left: 55%; top: -4px; width: 4px; height: 16px; border-radius: 2px; background: #F0F0F0"></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 11px; color: #9A9A9A"><span>early</span><span>late</span></div>
+        </div>
+      </sc-if>
+    </div>
+
+    <div role="img" aria-label="{{kbLabel}}" style="position: relative; height: 170px; background: #0E0E0E; padding-top: 6px; box-sizing: border-box; border-radius: 0 0 12px 12px; overflow: hidden">
+      <div aria-hidden="true" style="position: relative; display: flex; gap: 2px; height: 100%">
+        <sc-for list="{{whites}}" as="k" hint-placeholder-count="22">
+          <div style="flex: 1; height: 100%; background: {{k.bg}}; border-radius: 0 0 6px 6px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 10px; box-sizing: border-box; gap: 6px">
+            <sc-if value="{{k.active}}" hint-placeholder-val="{{false}}">
+              <span style="min-width: 28px; height: 24px; padding: 0 4px; box-sizing: border-box; border-radius: 12px; background: {{k.pillBg}}; color: {{k.pillFg}}; border: 2px solid #141414; display: inline-flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600">{{k.label}}</span>
+            </sc-if>
+            <sc-if value="{{k.showC}}" hint-placeholder-val="{{false}}">
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #5E5E5E">{{k.cName}}</span>
+            </sc-if>
+          </div>
+        </sc-for>
+        <sc-for list="{{blacks}}" as="k" hint-placeholder-count="15">
+          <div style="position: absolute; top: 0; left: {{k.left}}; width: {{k.width}}; height: 62%; background: {{k.bg}}; border-radius: 0 0 5px 5px; border: 1px solid #000000; box-sizing: border-box"></div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <footer style="display: flex; flex-wrap: wrap; gap: 14px 20px; align-items: center; padding: 16px 24px 20px">
+    <div style="display: flex; gap: 8px; align-items: center">
+      <button type="button" aria-label="Back to start of section" style="width: 44px; height: 44px; border-radius: 10px; border: 1px solid #333333; background: transparent; color: #D6D6D6; cursor: pointer; display: inline-flex; align-items: center; justify-content: center">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 5h2.5v14H5zM20 5v14L9 12z"></path></svg>
+      </button>
+      <button type="button" aria-label="{{playLabel}}" onClick="{{togglePlay}}" style="width: 56px; height: 56px; border-radius: 50%; border: 0; background: #E8E8E8; color: #141414; cursor: pointer; display: inline-flex; align-items: center; justify-content: center">
+        <sc-if value="{{playing}}" hint-placeholder-val="{{false}}">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4h3.5v16H7zM13.5 4H17v16h-3.5z"></path></svg>
+        </sc-if>
+        <sc-if value="{{paused}}" hint-placeholder-val="{{true}}">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l14 8-14 8z"></path></svg>
+        </sc-if>
+      </button>
+      <button type="button" aria-pressed="{{loopPressed}}" onClick="{{toggleLoop}}" style="display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 14px; border-radius: 10px; border: 1px solid {{loopBorder}}; background: {{loopBg}}; color: {{loopFg}}; font: inherit; font-size: 14px; font-weight: 500; cursor: pointer">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 2l3 3-3 3M4 11V9a4 4 0 0 1 4-4h12M7 22l-3-3 3-3M20 13v2a4 4 0 0 1-4 4H4"></path></svg>
+        Loop bars 1–4
+      </button>
+    </div>
+
+    <div style="display: flex; gap: 6px; align-items: center">
+      <span style="font-size: 13px; color: #9A9A9A; margin-right: 4px">Tempo</span>
+      <button type="button" aria-label="Slower" onClick="{{slower}}" style="width: 44px; height: 44px; border-radius: 10px; border: 1px solid #333333; background: transparent; color: #E0E0E0; font: inherit; font-size: 20px; cursor: pointer">−</button>
+      <span style="min-width: 56px; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 500">{{tempoLabel}}</span>
+      <button type="button" aria-label="Faster" onClick="{{faster}}" style="width: 44px; height: 44px; border-radius: 10px; border: 1px solid #333333; background: transparent; color: #E0E0E0; font: inherit; font-size: 20px; cursor: pointer">+</button>
+    </div>
+
+    <div role="group" aria-label="Hands" style="display: inline-flex; padding: 4px; background: #121212; border: 1px solid #333333; border-radius: 10px; gap: 2px">
+      <sc-for list="{{handsOpts}}" as="h" hint-placeholder-count="3">
+        <button type="button" aria-pressed="{{h.pressed}}" onClick="{{h.pick}}" style="height: 36px; padding: 0 12px; border-radius: 7px; border: 0; background: {{h.bg}}; color: {{h.fg}}; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer">{{h.label}}</button>
+      </sc-for>
+    </div>
+
+    <div role="group" aria-label="Note names" style="display: inline-flex; padding: 4px; background: #121212; border: 1px solid #333333; border-radius: 10px; gap: 2px">
+      <sc-for list="{{notations}}" as="n" hint-placeholder-count="4">
+        <button type="button" aria-pressed="{{n.pressed}}" onClick="{{n.pick}}" style="height: 36px; padding: 0 12px; border-radius: 7px; border: 0; background: {{n.bg}}; color: {{n.fg}}; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer">{{n.label}}</button>
+      </sc-for>
+    </div>
+
+    <div style="flex: 1 1 260px; min-width: 0; display: flex; flex-direction: column; gap: 6px">
+      <div style="display: flex; gap: 3px; height: 8px">
+        <sc-for list="{{progress}}" as="p" hint-placeholder-count="5">
+          <div style="flex: 1; border-radius: 3px; background: #2E2E2E; overflow: hidden"><div style="height: 100%; width: {{p.fill}}; background: #D6D6D6"></div></div>
+        </sc-for>
+      </div>
+      <div style="display: flex; justify-content: space-between; font-size: 12px; color: #9A9A9A">
+        <span>Verse · Bridge · Verse · Bridge · Verse</span>
+        <span style="font-family: 'JetBrains Mono', monospace">0:02 / 0:48</span>
+      </div>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"startMode":{"editor":"enum","options":["training","performance"],"default":"training"},"showNoteNames":{"editor":"boolean","default":true},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  state = { mode: null, playing: false, hands: 'both', notation: 'letter', tempo: 80, loop: true };
+  renderVals() {
+    const mode = this.state.mode || this.props.startMode || 'training';
+    const showNames = this.props.showNoteNames ?? true;
+    const nt = this.state.notation;
+    const hands = this.state.hands;
+    const NAMES = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
+    const WHITE = [0, 2, 4, 5, 7, 9, 11];
+    const TONIC = 7;
+    const DEG = { 0: 0, 2: 1, 4: 2, 5: 3, 7: 4, 9: 5, 11: 6 };
+    const SOL = ['Do', 'Re', 'Mi', 'Fa', 'Sol', 'La', 'Ti'];
+    const SW = ['Sa', 'Ri', 'Ga', 'Ma', 'Pa', 'Dha', 'Ni'];
+    const ROM = ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°'];
+    const nameFor = (m, withOct) => {
+      const pc = m % 12;
+      const d = DEG[(pc - TONIC + 12) % 12];
+      if (nt === 'letter' || d === undefined) return NAMES[pc] + (withOct ? String(Math.floor(m / 12) - 1) : '');
+      if (nt === 'solfege') return SOL[d];
+      if (nt === 'swaras') return SW[d];
+      return String(d + 1);
+    };
+    const chordName = (pc, seventh) => {
+      const d = DEG[(pc - TONIC + 12) % 12];
+      if (nt === 'roman') return ROM[d] + (seventh ? '7' : '');
+      if (nt === 'solfege') return SOL[d] + (seventh ? '7' : '');
+      if (nt === 'swaras') return SW[d] + (seventh ? '7' : '');
+      return NAMES[pc] + (seventh ? '7' : '');
+    };
+
+    // keyboard C3..C6
+    const LO = 48, HI = 84;
+    const pos = {};
+    let wi = 0;
+    for (let m = LO; m <= HI; m++) {
+      if (WHITE.includes(m % 12)) { pos[m] = { l: wi, w: 1, white: true }; wi++; }
+      else { pos[m] = { l: wi - 0.3, w: 0.6, white: false }; }
+    }
+    const N = wi;
+    const pct = (v) => (v / N * 100).toFixed(4) + '%';
+
+    const now = 4, win = 6, WH = 380, ppb = WH / win;
+    const rh = [[67,0,1],[67,1,1],[74,2,1],[74,3,1],[76,4,1],[76,5,1],[74,6,2],[72,8,1],[72,9,1],[71,10,1],[71,11,1],[69,12,1],[69,13,1],[67,14,2]];
+    const lh = [[55,0,4],[62,0,4],[48,4,2],[55,4,2],[55,6,2],[62,6,2],[48,8,2],[55,8,2],[55,10,2],[62,10,2],[50,12,2],[57,12,2],[55,14,2],[62,14,2]];
+    const practised = (right) => hands === 'both' || (hands === 'right') === right;
+    const mk = (n, right) => {
+      const p = pos[n[0]];
+      const s = Math.max(n[1], now);
+      const on = practised(right);
+      return {
+        left: pct(p.l), width: pct(p.w),
+        bottom: Math.round((s - now) * ppb + 2) + 'px',
+        height: Math.round((n[1] + n[2] - s) * ppb - 4) + 'px',
+        bg: !on ? 'transparent' : right ? '#E6E6E6' : '#7C7C7C',
+        border: !on ? '#4E4E4E' : right ? '#E6E6E6' : '#A8A8A8',
+        fg: !on ? '#8A8A8A' : '#111111',
+        label: showNames ? nameFor(n[0], false) : ''
+      };
+    };
+    const vis = (n) => n[1] + n[2] > now && n[1] < now + win;
+    const bars = rh.filter(vis).map((n) => mk(n, true)).concat(lh.filter(vis).map((n) => mk(n, false)));
+
+    const expected = {};
+    rh.forEach((n) => { if (n[1] <= now && n[1] + n[2] > now) expected[n[0]] = 'R'; });
+    lh.forEach((n) => { if (n[1] <= now && n[1] + n[2] > now) expected[n[0]] = 'L'; });
+
+    const whites = [], blacks = [];
+    for (let m = LO; m <= HI; m++) {
+      const p = pos[m];
+      const h = expected[m];
+      const on = h && practised(h === 'R');
+      if (p.white) {
+        whites.push({
+          bg: on ? '#C9C9C9' : h ? '#DCDCDC' : '#EDEDED',
+          active: !!h,
+          pillBg: h === 'R' ? '#F5F5F5' : '#6E6E6E',
+          pillFg: h === 'R' ? '#141414' : '#F5F5F5',
+          label: nameFor(m, false),
+          showC: m % 12 === 0 && !h,
+          cName: 'C' + String(Math.floor(m / 12) - 1)
+        });
+      } else {
+        blacks.push({ left: pct(p.l), width: pct(p.w), bg: on ? '#6A6A6A' : '#1B1B1B' });
+      }
+    }
+    const octLines = [];
+    for (let m = LO; m <= HI; m += 12) octLines.push({ left: pct(pos[m].l) });
+    const beatLines = [];
+    for (let b = 1; b < win; b++) beatLines.push({ bottom: Math.round(b * ppb) + 'px', color: (now + b) % 4 === 0 ? '#383838' : '#232323' });
+
+    const waiting = Object.keys(expected).map(Number).sort((a, b) => b - a)
+      .filter((m) => practised(expected[m] === 'R'))
+      .map((m) => ({
+        label: nameFor(m, true),
+        hand: expected[m] === 'R' ? 'right' : 'left',
+        bg: expected[m] === 'R' ? '#E6E6E6' : '#6E6E6E',
+        fg: expected[m] === 'R' ? '#141414' : '#F5F5F5',
+        border: expected[m] === 'R' ? '#E6E6E6' : '#9A9A9A'
+      }));
+
+    const chordSeq = [[7, 0, 4], [0, 4, 2], [7, 6, 2], [0, 8, 2], [7, 10, 2], [2, 12, 2, true], [7, 14, 2]];
+    const nextChords = chordSeq.slice(2, 6).map((c, i) => ({
+      label: chordName(c[0], !!c[3]),
+      beats: String(c[2]),
+      when: i === 0 ? 'Next' : 'Bar ' + String(Math.floor(c[1] / 4) + 1),
+      fg: i === 0 ? '#EDEDED' : '#B8B8B8'
+    }));
+
+    const seg = (opts, cur, key) => opts.map((o) => ({
+      ...o,
+      pressed: o.id === cur ? 'true' : 'false',
+      bg: o.id === cur ? '#E8E8E8' : 'transparent',
+      fg: o.id === cur ? '#141414' : '#C8C8C8',
+      pick: () => this.setState({ [key]: o.id })
+    }));
+
+    const tempo = this.state.tempo;
+    const loop = this.state.loop;
+    const playing = this.state.playing;
+    const handsWord = hands === 'both' ? 'both hands' : hands + ' hand';
+    const kbList = waiting.map((w) => w.label + ' ' + w.hand).join(', ');
+
+    return {
+      isTraining: mode === 'training',
+      isPerformance: mode === 'performance',
+      modes: seg([{ id: 'training', label: 'Training' }, { id: 'performance', label: 'Performance' }], mode, 'mode'),
+      handsOpts: seg([{ id: 'left', label: 'Left' }, { id: 'both', label: 'Both' }, { id: 'right', label: 'Right' }], hands, 'hands'),
+      notations: seg([{ id: 'letter', label: 'C D E' }, { id: 'solfege', label: 'Do Re Mi' }, { id: 'swaras', label: 'Sa Ri Ga' }, { id: 'roman', label: '1 2 3' }], nt, 'notation'),
+      prevChord: chordName(7, false),
+      nowChord: chordName(0, false),
+      nowChordSub: nt === 'roman' ? 'C major' : 'IV · subdominant',
+      nextChords,
+      waiting,
+      perf: [
+        { label: 'Score', value: '1,240' },
+        { label: 'Accuracy', value: '93%' },
+        { label: 'Streak', value: '17' },
+        { label: 'Missed', value: '3' }
+      ],
+      bars, whites, blacks, octLines, beatLines,
+      kbLabel: 'Keyboard from C3 to C6, ' + handsWord + '. Play ' + (kbList || 'nothing yet') + '.',
+      playing, paused: !playing,
+      playLabel: playing ? 'Pause' : 'Play',
+      togglePlay: () => this.setState({ playing: !playing }),
+      loopPressed: loop ? 'true' : 'false',
+      loopBg: loop ? '#2E2E2E' : 'transparent',
+      loopBorder: loop ? '#8F8F8F' : '#333333',
+      loopFg: loop ? '#F2F2F2' : '#C8C8C8',
+      toggleLoop: () => this.setState({ loop: !loop }),
+      tempoLabel: tempo + '%',
+      bpm: String(Math.round(100 * tempo / 100)),
+      slower: () => this.setState({ tempo: Math.max(40, tempo - 10) }),
+      faster: () => this.setState({ tempo: Math.min(120, tempo + 10) }),
+      progress: [{ fill: '25%' }, { fill: '0%' }, { fill: '0%' }, { fill: '0%' }, { fill: '0%' }]
+    };
+  }
+}
+</script>
+</body>
+</html>

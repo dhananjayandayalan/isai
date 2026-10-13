@@ -1,0 +1,324 @@
+/*
+ * Isai components — built ONLY from tokens.css. Load tokens.css first.
+ *
+ * Every class here is a recipe used by the screens on the design canvas.
+ * When you build a screen: compose these classes. Do not restyle them
+ * inline, and do not add new colours or radii. If a pattern is missing,
+ * add a class here using tokens, then use it.
+ */
+
+/* ------------------------------------------------------------------ */
+/* Base                                                                */
+/* ------------------------------------------------------------------ */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { margin: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+  line-height: var(--leading-body);
+}
+
+a { color: var(--text); }
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+::placeholder { color: var(--text-4); }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------ */
+/* Typography                                                          */
+/* ------------------------------------------------------------------ */
+.t-page-title   { margin: 0; font-family: var(--font-display); font-size: var(--text-5xl); font-weight: var(--weight-heavy); letter-spacing: var(--tracking-display); line-height: var(--leading-tight); }
+.t-state-title  { margin: 0; font-family: var(--font-display); font-size: var(--text-4xl); font-weight: var(--weight-heavy); letter-spacing: var(--tracking-display); line-height: var(--leading-snug); }
+.t-section      { margin: 0; font-family: var(--font-display); font-size: var(--text-2xl); font-weight: var(--weight-bold); line-height: var(--leading-snug); }
+.t-card-title   { margin: 0; font-family: var(--font-display); font-size: var(--text-xl); font-weight: var(--weight-bold); line-height: var(--leading-snug); }
+.t-stat         { font-family: var(--font-display); font-size: var(--text-3xl); font-weight: var(--weight-heavy); line-height: var(--leading-snug); }
+.t-overline     { font-size: var(--text-xs); font-weight: var(--weight-bold); letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--text-3); }
+.t-body         { font-size: var(--text-md); color: var(--text); }
+.t-secondary    { font-size: var(--text-md); color: var(--text-2); }
+.t-muted        { font-size: var(--text-sm); color: var(--text-3); }
+.t-faint        { font-size: var(--text-xs); color: var(--text-4); }
+.t-mono         { font-family: var(--font-mono); }
+.t-tamil        { font-family: var(--font-tamil); }
+
+/* ------------------------------------------------------------------ */
+/* Layout: app shell (sidebar + content). Stacks on narrow screens.    */
+/* ------------------------------------------------------------------ */
+.app-shell { min-height: 100vh; display: flex; flex-wrap: wrap; background: var(--bg); }
+.app-sidebar {
+  flex: 1 1 var(--sidebar-width);
+  display: flex; flex-direction: column; gap: var(--space-7);
+  padding: var(--space-6) var(--space-4);
+  background: var(--sidebar);
+  border-right: var(--border-width-thin) solid var(--border);
+}
+.app-main { flex: 999 1 560px; min-width: 0; padding: var(--page-pad-y) var(--page-pad-x) var(--space-14); }
+.app-content { max-width: var(--content-max); margin: 0 auto; display: flex; flex-direction: column; gap: var(--space-7); }
+.stack-1 { display: flex; flex-direction: column; gap: var(--space-1); }
+.stack-2 { display: flex; flex-direction: column; gap: var(--space-2); }
+.stack-3 { display: flex; flex-direction: column; gap: var(--space-3); }
+.stack-4 { display: flex; flex-direction: column; gap: var(--space-4); }
+.stack-6 { display: flex; flex-direction: column; gap: var(--space-6); }
+.row     { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
+.row-between { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-4); }
+.grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--space-4); }
+
+/* ------------------------------------------------------------------ */
+/* Brand mark                                                          */
+/* ------------------------------------------------------------------ */
+.brand { display: flex; align-items: center; gap: var(--space-3); padding: 0 var(--space-2); }
+.brand-mark {
+  width: 40px; height: 40px; flex: none;
+  display: inline-flex; align-items: flex-start; justify-content: center; gap: 3px; padding-top: var(--space-2);
+  border-radius: var(--radius-md); background: var(--accent); box-shadow: var(--shadow-press);
+  transform: rotate(-6deg);
+}
+.brand-mark > span { width: 5px; height: 16px; border-radius: 0 0 var(--radius-xs) var(--radius-xs); background: var(--on-accent); }
+.brand-name { font-family: var(--font-display); font-size: 26px; font-weight: var(--weight-heavy); letter-spacing: var(--tracking-display); }
+.brand-tamil { font-family: var(--font-tamil); font-size: 14px; color: var(--text-3); }
+
+/* ------------------------------------------------------------------ */
+/* Sidebar navigation                                                  */
+/* ------------------------------------------------------------------ */
+.nav { display: flex; flex-direction: column; gap: var(--space-1); }
+.nav-item {
+  display: flex; align-items: center; gap: var(--space-3);
+  min-height: var(--control-md); padding: 0 var(--space-4);
+  border-radius: var(--radius-md);
+  color: var(--text-2); text-decoration: none;
+  font-size: var(--text-md); font-weight: var(--weight-semibold);
+  transition: background var(--dur-fast) var(--ease-out);
+}
+.nav-item:hover { background: var(--fill); }
+.nav-item[aria-current="page"] { background: var(--accent); color: var(--on-accent); font-weight: var(--weight-bold); }
+.nav-item svg { width: var(--icon-md); height: var(--icon-md); flex: none; }
+
+/* ------------------------------------------------------------------ */
+/* Buttons. One .btn-primary per area. Links styled as buttons use the */
+/* same classes on <a>.                                                */
+/* ------------------------------------------------------------------ */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  height: var(--control-md); padding: 0 var(--space-5);
+  border: 0; border-radius: var(--radius-md);
+  font: inherit; font-size: var(--text-md); font-weight: var(--weight-bold);
+  text-decoration: none; cursor: pointer; white-space: nowrap;
+  transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+.btn:hover { transform: translateY(-2px); }
+.btn:active { transform: translateY(3px); box-shadow: none; }
+.btn:disabled, .btn[aria-disabled="true"] { cursor: not-allowed; transform: none; }
+.btn svg { width: var(--icon-sm); height: var(--icon-sm); flex: none; }
+
+.btn-primary   { background: var(--accent); color: var(--on-accent); box-shadow: var(--shadow-press); }
+.btn-secondary { background: var(--surface); color: var(--text); border: var(--border-width) solid var(--border-strong); box-shadow: var(--shadow-press-soft); }
+.btn-ghost     { background: transparent; color: var(--text); border: var(--border-width) solid var(--border-strong); }
+.btn-quiet     { background: var(--fill); color: var(--text); }
+.btn-primary:disabled, .btn-primary[aria-disabled="true"] { background: var(--fill-strong); color: var(--text-4); box-shadow: none; }
+
+.btn-lg   { height: var(--control-lg); padding: 0 var(--space-6); font-size: var(--text-md); }
+.btn-icon { width: var(--control-md); padding: 0; }
+.btn-round { border-radius: var(--radius-full); }          /* play/pause and round icon buttons only */
+.btn-play  { width: 60px; height: 60px; padding: 0; border-radius: var(--radius-full); }
+
+/* Busy state: add aria-busy="true" + disabled and put a .spinner first. */
+.btn[aria-busy="true"] { opacity: .85; cursor: progress; }
+
+/* ------------------------------------------------------------------ */
+/* Segmented control (theme switch, mode, hands, note names, filters)  */
+/* <div class="seg" role="group"><button class="seg-btn" aria-pressed> */
+/* ------------------------------------------------------------------ */
+.seg {
+  display: inline-flex; gap: 2px; padding: var(--space-1);
+  background: var(--surface-sunken); border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-md);
+}
+.seg-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  height: var(--control-sm); padding: 0 var(--space-4);
+  border: 0; border-radius: var(--radius-sm);
+  background: transparent; color: var(--text-2);
+  font: inherit; font-size: var(--text-sm); font-weight: var(--weight-bold); cursor: pointer;
+}
+.seg-btn[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+.seg-btn svg { width: var(--icon-sm); height: var(--icon-sm); }
+.seg-fill { display: flex; } .seg-fill .seg-btn { flex: 1; } /* full-width variant, e.g. sidebar theme switch */
+
+/* Filter pills (toggle buttons in a row) */
+.filter {
+  height: 40px; padding: 0 var(--space-4);
+  border: var(--border-width) solid var(--border-strong); border-radius: var(--radius-md);
+  background: transparent; color: var(--text-2);
+  font: inherit; font-size: var(--text-sm); font-weight: var(--weight-bold); cursor: pointer;
+}
+.filter[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+
+/* ------------------------------------------------------------------ */
+/* Forms                                                               */
+/* ------------------------------------------------------------------ */
+.field { display: flex; flex-direction: column; gap: var(--space-2); }
+.label { font-size: var(--text-sm); font-weight: var(--weight-bold); }
+.input, .select {
+  height: var(--control-md); padding: 0 var(--space-4);
+  border: var(--border-width) solid var(--border-strong); border-radius: var(--radius-md);
+  background: var(--surface-sunken); color: var(--text);
+  font: inherit; font-size: var(--text-md);
+}
+.input-lg { height: var(--control-lg); }
+.input:focus { border-color: var(--text); outline: none; }
+.input[aria-invalid="true"] { border-color: var(--text); }
+.field-error { font-size: var(--text-sm); font-weight: var(--weight-semibold); color: var(--text); }
+.help { font-size: var(--text-sm); color: var(--text-3); }
+
+/* Choice cards: <label class="choice"><input type="radio">…</label> */
+.choice {
+  display: flex; gap: var(--space-3); align-items: flex-start; padding: var(--space-4);
+  border: var(--border-width) solid var(--border); border-radius: var(--radius-md);
+  background: var(--surface-sunken); cursor: pointer;
+}
+.choice:has(input:checked) { border-color: var(--text); background: var(--fill); }
+.choice input { accent-color: var(--text); width: 18px; height: 18px; margin: 2px 0 0; }
+
+/* Drop zone */
+.dropzone {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-3);
+  padding: var(--space-8) var(--space-6); text-align: center; cursor: pointer;
+  border: 3px dashed var(--border-strong); border-radius: var(--radius-lg);
+  background: var(--surface-sunken);
+  transition: border-color var(--dur-base) var(--ease-out);
+}
+.dropzone:hover, .dropzone.is-dragover { border-color: var(--text); }
+
+/* ------------------------------------------------------------------ */
+/* Surfaces                                                            */
+/* ------------------------------------------------------------------ */
+.card {
+  background: var(--surface); border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-lg); padding: var(--space-6);
+}
+.card-sunken { background: var(--surface-sunken); border: var(--border-width) dashed var(--border); border-radius: var(--radius-lg); padding: var(--space-6); }
+.card-row    { background: var(--surface-raised); border-radius: var(--radius-md); padding: var(--space-3) var(--space-4); }
+.card-accent { background: var(--accent); color: var(--on-accent); border-radius: var(--radius-lg); padding: var(--space-6); box-shadow: var(--shadow-pop); }
+.card-accent .t-overline, .card-accent .t-muted { color: var(--on-accent-muted); }
+.card-lift { transition: transform var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out); }
+.card-lift:hover { transform: translateY(-4px) rotate(-.4deg); border-color: var(--text-4); }
+
+/* ------------------------------------------------------------------ */
+/* Chips, tags, badges                                                 */
+/* ------------------------------------------------------------------ */
+.chip {
+  display: inline-flex; align-items: center; gap: var(--space-1);
+  padding: var(--space-1) 10px; border-radius: var(--radius-sm);
+  background: var(--fill); color: var(--text-2);
+  font-size: var(--text-xs); font-weight: var(--weight-semibold);
+}
+.chip-mono { font-family: var(--font-mono); font-weight: var(--weight-regular); }
+
+/* State tags used on the loading/error sheets and in admin views */
+.tag { display: inline-flex; padding: var(--space-1) 10px; border-radius: var(--radius-sm); font-size: var(--text-2xs); font-weight: var(--weight-heavy); letter-spacing: .06em; text-transform: uppercase; }
+.tag-loading { background: var(--fill-strong); color: var(--text); }
+.tag-empty   { border: var(--border-width) dashed var(--border-strong); color: var(--text-2); }
+.tag-error   { background: var(--accent); color: var(--on-accent); }
+.tag-warning { border: var(--border-width) solid var(--text-3); color: var(--text); }
+
+/* ------------------------------------------------------------------ */
+/* Progress, loaders                                                   */
+/* ------------------------------------------------------------------ */
+.progress { height: 6px; border-radius: var(--radius-full); background: var(--fill-strong); overflow: hidden; }
+.progress > span { display: block; height: 100%; border-radius: var(--radius-full); background: var(--data-1); transition: width var(--dur-base) linear; }
+.progress-lg { height: 18px; border: var(--border-width) solid var(--border-strong); }
+.progress-striped > span {
+  background-image: repeating-linear-gradient(-45deg, rgba(128,128,128,.35) 0 8px, transparent 8px 16px);
+  background-size: 22px 22px; animation: isai-stripes .8s linear infinite;
+}
+
+/* Skeleton: put on any empty block with a fixed height. */
+.skeleton {
+  background: linear-gradient(90deg, var(--surface-raised) 25%, var(--fill-strong) 50%, var(--surface-raised) 75%);
+  background-size: 200% 100%; border-radius: var(--radius-md);
+  animation: isai-shimmer var(--dur-slow) ease-in-out infinite;
+}
+
+/* Equaliser: <span class="loader-eq" aria-hidden="true"><span></span><span></span><span></span></span> */
+.loader-eq { display: inline-flex; align-items: flex-end; gap: 3px; height: 18px; }
+.loader-eq > span { width: 4px; height: 100%; border-radius: var(--radius-xs); background: currentColor; transform-origin: bottom; animation: isai-eq .9s ease-in-out infinite; }
+.loader-eq > span:nth-child(2) { animation-delay: .15s; }
+.loader-eq > span:nth-child(3) { animation-delay: .3s; }
+.loader-eq > span:nth-child(4) { animation-delay: .45s; }
+.loader-eq > span:nth-child(5) { animation-delay: .6s; }
+
+/* Spinner: <svg class="spinner" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9"/></svg> */
+.spinner { width: var(--icon-sm); height: var(--icon-sm); fill: none; stroke: currentColor; stroke-width: 2.75; stroke-linecap: round; animation: isai-spin 1s linear infinite; }
+
+/* Key wave — the big "opening practice" loader. 8 <span> keys inside. */
+.loader-keys { display: inline-flex; gap: 6px; padding: 10px 12px 0; height: 120px; border-radius: var(--radius-lg); background: var(--piano-frame); }
+.loader-keys > span { width: 34px; height: 100px; border-radius: 0 0 var(--radius-sm) var(--radius-sm); background: var(--piano-white); animation: isai-key 1.2s ease-in-out infinite; }
+.loader-keys > span:nth-child(2) { animation-delay: .12s; } .loader-keys > span:nth-child(3) { animation-delay: .24s; }
+.loader-keys > span:nth-child(4) { animation-delay: .36s; } .loader-keys > span:nth-child(5) { animation-delay: .48s; }
+.loader-keys > span:nth-child(6) { animation-delay: .60s; } .loader-keys > span:nth-child(7) { animation-delay: .72s; }
+.loader-keys > span:nth-child(8) { animation-delay: .84s; }
+
+/* ------------------------------------------------------------------ */
+/* Feedback: alerts, toasts, empty/error states                        */
+/* ------------------------------------------------------------------ */
+.alert { display: flex; gap: var(--space-3); align-items: flex-start; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--accent); color: var(--on-accent); }
+.alert-quiet { background: var(--fill); color: var(--text); }
+
+.toast { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg); font-size: var(--text-sm); font-weight: var(--weight-semibold); }
+.toast-success { background: var(--accent); color: var(--on-accent); box-shadow: var(--shadow-press); }
+.toast-info    { background: var(--surface); color: var(--text); border: var(--border-width) solid var(--border-strong); box-shadow: var(--shadow-press-soft); }
+.toast-warning { background: var(--surface); color: var(--text); border: var(--border-width) solid var(--text-3); box-shadow: var(--shadow-press-soft); }
+.toast-error   { background: var(--bg-deep); color: var(--text); border: var(--border-width) solid var(--text); box-shadow: var(--shadow-press-soft); }
+
+/* Centered state block for loading / empty / error panels */
+.state { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); padding: var(--space-8) var(--space-6); text-align: center; border-radius: var(--radius-lg); background: var(--surface-sunken); }
+.state-empty { border: var(--border-width) dashed var(--border); }
+.state-error { border: var(--border-width) solid var(--border-strong); }
+.state-icon { width: 64px; height: 64px; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--radius-lg); background: var(--accent); color: var(--on-accent); box-shadow: var(--shadow-press); transform: rotate(-8deg); }
+
+/* ------------------------------------------------------------------ */
+/* Music-specific                                                      */
+/* ------------------------------------------------------------------ */
+/* Piano keyboard frame — keys are positioned by the piano renderer (canvas/SVG). */
+.piano { background: var(--piano-frame); border-radius: 0 0 var(--radius-xl) var(--radius-xl); padding: 6px 6px 8px; }
+.piano-key-white { background: var(--piano-white); border-radius: 0 0 var(--radius-sm) var(--radius-sm); }
+.piano-key-black { background: var(--piano-black); border-radius: 0 0 var(--radius-sm) var(--radius-sm); }
+
+/* Falling-notes stage */
+.stage { position: relative; background: var(--surface-sunken); border: var(--border-width) solid var(--border); border-bottom: 0; border-radius: var(--radius-xl) var(--radius-xl) 0 0; overflow: hidden; }
+.note-right { background: var(--hand-right); border: var(--border-width) solid var(--hand-right-border); color: var(--on-hand-right); border-radius: var(--radius-md); }
+.note-left  { background: var(--hand-left);  border: var(--border-width) solid var(--hand-left-border);  color: var(--on-hand-left);  border-radius: var(--radius-md); }
+.note-ghost { background: transparent;        border: var(--border-width) solid var(--border-strong);    color: var(--text-4);        border-radius: var(--radius-md); }
+
+/* Chord tiles */
+.chord-now { background: var(--accent); color: var(--on-accent); border-radius: var(--radius-lg); box-shadow: var(--shadow-pop); transform: rotate(-2deg); font-family: var(--font-display); }
+.chord-next { background: var(--surface); border: var(--border-width) solid var(--border); border-radius: var(--radius-lg); font-family: var(--font-display); }
+
+/* ------------------------------------------------------------------ */
+/* Motion                                                              */
+/* ------------------------------------------------------------------ */
+.pop { transition: transform var(--dur-fast) var(--ease-out); }
+.pop:hover { transform: translateY(-2px); }
+.bob { animation: isai-bob 3.6s ease-in-out infinite; }
+
+@keyframes isai-shimmer { from { background-position: 150% 0; } to { background-position: -50% 0; } }
+@keyframes isai-eq { 0%, 100% { transform: scaleY(.35); } 50% { transform: scaleY(1); } }
+@keyframes isai-spin { to { transform: rotate(360deg); } }
+@keyframes isai-key { 0%, 55%, 100% { transform: translateY(0); } 25% { transform: translateY(8px); } }
+@keyframes isai-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@keyframes isai-stripes { to { background-position: 22px 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

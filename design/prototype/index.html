@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Isai prototype</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&amp;family=Noto+Sans+Tamil:wght@500&amp;display=swap">
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #181818; color: #EDEDED; font-family: 'Instrument Sans', system-ui, sans-serif; }
+  main { max-width: 880px; margin: 0 auto; padding: 56px 16px; }
+  h1 { margin: 0 0 6px; font-size: 34px; letter-spacing: -0.02em; }
+  h1 span { font-family: 'Noto Sans Tamil', sans-serif; font-size: 18px; color: #9A9A9A; font-weight: 500; margin-left: 10px; }
+  p { margin: 0 0 32px; color: #A3A3A3; }
+  ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+  a { display: flex; flex-direction: column; gap: 4px; padding: 18px 20px; border-radius: 12px; background: #1F1F1F; border: 1px solid #2E2E2E; color: #EDEDED; text-decoration: none; min-height: 44px; }
+  a:hover, a:focus-visible { border-color: #8F8F8F; background: #242424; }
+  a b { font-size: 16px; }
+  a small { font-size: 13px; color: #9A9A9A; }
+  .start { background: #E8E8E8; color: #141414; border-color: #E8E8E8; }
+  .start small { color: #3A3A3A; }
+  .start:hover, .start:focus-visible { background: #FFFFFF; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Isai prototype<span lang="ta">இசை</span></h1>
+  <p>Clickable screens. Start at the Library and follow the links, or jump to any screen.</p>
+  <ol>
+    <li><a class="start" href="Main.dc.html"><b>Library</b><small>Start here</small></a></li>
+    <li><a href="Upload.dc.html"><b>Analyse a song</b><small>Upload and pipeline progress</small></a></li>
+    <li><a href="Song.dc.html"><b>Song overview</b><small>Key, tempo, chords, arrangement</small></a></li>
+    <li><a href="Practice.dc.html"><b>Practice — training</b><small>Waits for the right notes</small></a></li>
+    <li><a href="Practice.dc.html?startMode=performance"><b>Practice — performance</b><small>No waiting, scored by timing</small></a></li>
+    <li><a href="Results.dc.html"><b>Performance results</b><small>Score, timing, trouble spots</small></a></li>
+    <li><a href="Devices.dc.html"><b>MIDI &amp; keyboard</b><small>Device, size, latency</small></a></li>
+  </ol>
+</main>
+</body>
+</html>
