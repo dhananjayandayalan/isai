@@ -1,6 +1,6 @@
 // Draws one keyboard frame onto a 2D canvas context. Plain TypeScript, no React: the
-// controller calls it from requestAnimationFrame (rule 5). Colours come from the design
-// tokens (STYLE_GUIDE §4 Music), read once and re-read when the theme changes.
+// controller calls it from requestAnimationFrame (rule 5). Colours come from the fixed
+// --piano-* tokens (STYLE_GUIDE rule 6: piano keys never theme), read once.
 
 import type { ActiveNote, Hand } from '../engine/activeNotes';
 import { midiToName } from '../theory/pitch';
@@ -33,17 +33,17 @@ export interface PianoColors {
   black: string;
   blackActive: string;
   label: string;
-  right: string;
-  rightBorder: string;
-  left: string;
-  leftBorder: string;
+  /** Song-note pills on the keys (and the off-keyboard markers), per hand. */
+  pillRight: string;
+  pillLeft: string;
+  pillEdge: string;
   /** CSS font shorthand for the C labels. */
   labelFont: string;
   /** Key corner radius in CSS pixels. */
   radius: number;
 }
 
-/** Read the piano and hand tokens from computed style (the document root). */
+/** Read the piano tokens from computed style (the document root). */
 export function readPianoColors(style: Pick<CSSStyleDeclaration, 'getPropertyValue'>): PianoColors {
   const v = (name: string) => style.getPropertyValue(name).trim();
   return {
@@ -53,10 +53,9 @@ export function readPianoColors(style: Pick<CSSStyleDeclaration, 'getPropertyVal
     black: v('--piano-black'),
     blackActive: v('--piano-black-active'),
     label: v('--piano-label'),
-    right: v('--hand-right'),
-    rightBorder: v('--hand-right-border'),
-    left: v('--hand-left'),
-    leftBorder: v('--hand-left-border'),
+    pillRight: v('--piano-pill-right'),
+    pillLeft: v('--piano-pill-left'),
+    pillEdge: v('--piano-pill-edge'),
     labelFont: `${v('--weight-medium')} ${v('--text-2xs')} ${v('--font-mono')}`.trim(),
     radius: Number.parseFloat(v('--radius-sm')) || 0,
   };
@@ -130,7 +129,7 @@ function drawKey(ctx: Ctx2D, key: KeyRect, gap: number, height: number, fill: st
   ctx.fill();
 }
 
-/** The song's note on a key: a bar in the hand's colour near the front of the key. */
+/** The song's note on a key: a pill in the hand's colour near the front of the key. */
 function drawPill(
   ctx: Ctx2D,
   key: KeyRect,
@@ -141,9 +140,10 @@ function drawPill(
   colors: PianoColors,
 ) {
   const inset = gap + key.width * 0.12;
-  ctx.fillStyle = hand === 'right' ? colors.right : colors.left;
-  ctx.strokeStyle = hand === 'right' ? colors.rightBorder : colors.leftBorder;
-  ctx.lineWidth = 1;
+  ctx.fillStyle = hand === 'right' ? colors.pillRight : colors.pillLeft;
+  // The edge keeps a light right-hand pill visible on a white key (as in the prototype).
+  ctx.strokeStyle = colors.pillEdge;
+  ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.roundRect(key.x + inset, y, key.width - inset * 2, size, colors.radius);
   ctx.fill();
@@ -164,7 +164,7 @@ function drawMarker(
   const y = height * 0.2;
   const tip = side === 'below' ? 0 : width;
   const base = side === 'below' ? size : width - size;
-  ctx.fillStyle = hand === 'right' ? colors.right : colors.left;
+  ctx.fillStyle = hand === 'right' ? colors.pillRight : colors.pillLeft;
   ctx.beginPath();
   ctx.moveTo(base, y - size / 2);
   ctx.lineTo(tip, y);

@@ -125,6 +125,13 @@ describe('drawKeyboard', () => {
     expect((right?.x ?? 0) + (right?.w ?? 0)).toBeLessThan((e4?.x ?? 0) + (e4?.width ?? 0));
   });
 
+  it('outlines every pill with the pill edge, so a light pill shows on a white key', () => {
+    const ops = draw([], [{ midi: 72, hand: 'right' }]).ops;
+    const pill = ops.findIndex((o) => o.op === 'roundRect' && o.y > 0);
+    expect(ops[pill]).toMatchObject({ fill: 'right' });
+    expect(ops[pill + 1]).toEqual({ op: 'stroke', stroke: 'edge', width: 2 });
+  });
+
   it('shows both your note and the song note on the same key', () => {
     const rects = draw([64], [{ midi: 64, hand: 'right' }]).rects();
     expect(rects.some((r) => r.y === 0 && r.fill === 'white-active')).toBe(true);
@@ -152,7 +159,8 @@ describe('readPianoColors', () => {
   it('reads tokens from computed style', () => {
     const values: Record<string, string> = {
       '--piano-white': ' ivory ',
-      '--hand-left': 'grey',
+      '--piano-pill-left': 'grey',
+      '--piano-pill-edge': 'ink',
       '--text-2xs': '11px',
       '--font-mono': "'JetBrains Mono', monospace",
       '--weight-medium': '500',
@@ -160,7 +168,8 @@ describe('readPianoColors', () => {
     };
     const colors = readPianoColors({ getPropertyValue: (name: string) => values[name] ?? '' });
     expect(colors.white).toBe('ivory');
-    expect(colors.left).toBe('grey');
+    expect(colors.pillLeft).toBe('grey');
+    expect(colors.pillEdge).toBe('ink');
     expect(colors.labelFont).toBe("500 11px 'JetBrains Mono', monospace");
     expect(colors.radius).toBe(4);
     expect(readPianoColors({ getPropertyValue: () => '' }).radius).toBe(0);

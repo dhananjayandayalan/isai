@@ -9,6 +9,7 @@ export type DrawOp =
   | { op: 'text'; text: string; x: number; y: number; fill: string; font: string }
   | { op: 'path'; points: [number, number][]; fill: string }
   | { op: 'clear' }
+  | { op: 'stroke'; stroke: string; width: number }
   | { op: 'transform'; scale: number };
 
 /** Records what was drawn, with the fill colour in effect, instead of drawing. */
@@ -54,7 +55,9 @@ export class RecordingContext implements Ctx2D, Pick<CanvasRenderingContext2D, '
     if (this.shape?.op === 'roundRect') this.ops.push({ ...this.shape, fill: this.colour });
     else if (this.points.length) this.ops.push({ op: 'path', points: this.points, fill: this.colour });
   }
-  stroke(): void {}
+  stroke(): void {
+    this.ops.push({ op: 'stroke', stroke: String(this.strokeStyle), width: this.lineWidth });
+  }
   setTransform(a?: number | DOMMatrix2DInit): void {
     this.ops.push({ op: 'transform', scale: typeof a === 'number' ? a : (a?.a ?? 1) });
   }
@@ -122,10 +125,9 @@ export const TEST_COLORS: PianoColors = {
   black: 'black',
   blackActive: 'black-active',
   label: 'label',
-  right: 'right',
-  rightBorder: 'right-border',
-  left: 'left',
-  leftBorder: 'left-border',
+  pillRight: 'right',
+  pillLeft: 'left',
+  pillEdge: 'edge',
   labelFont: '500 11px mono',
   radius: 4,
 };

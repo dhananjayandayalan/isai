@@ -16,6 +16,7 @@ export interface KeyboardProps {
   frames?: FrameScheduler;
 }
 
+/** Piano tokens never theme (STYLE_GUIDE rule 6), so reading them once is enough. */
 function rootColors() {
   return readPianoColors(getComputedStyle(document.documentElement));
 }
@@ -55,20 +56,8 @@ export function Keyboard({ index, source, range, midi, onFrame, frames }: Keyboa
     };
     document.addEventListener('visibilitychange', onVisibility);
 
-    // Hand colours follow the theme (STYLE_GUIDE §4 Music): re-read on a theme change.
-    const recolour = () => controller.setColors(rootColors());
-    const themeObserver = new MutationObserver(recolour);
-    themeObserver.observe(document.documentElement, { attributeFilter: ['data-theme'] });
-    const scheme =
-      typeof window.matchMedia === 'function'
-        ? window.matchMedia('(prefers-color-scheme: dark)')
-        : null;
-    scheme?.addEventListener('change', recolour);
-
     return () => {
       document.removeEventListener('visibilitychange', onVisibility);
-      themeObserver.disconnect();
-      scheme?.removeEventListener('change', recolour);
       controller.dispose();
       controllerRef.current = null;
     };
