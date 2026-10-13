@@ -9,5 +9,13 @@ export default defineConfig({
   },
   test: {
     include: ['src/**/*.test.{ts,tsx}'],
+    coverage: {
+      provider: 'v8',
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: ['src/**/*.test.{ts,tsx}', 'src/generated/**', 'src/main.tsx'],
+      reporter: [['text', { skipFull: false }], 'json-summary'],
+      // CLAUDE.md: theory/ (and arrange/, when the web gets one) needs 90%+ line coverage.
+      thresholds: { 'src/theory/**': { lines: 90 } },
+    },
   },
 });

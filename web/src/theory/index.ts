@@ -1,2 +1,2 @@
-// Notation rendering (letter, staff, solfege, swaras, Roman). Empty until the theory phase.
-export {};
+// Note names now; notation rendering (staff, solfege, swaras, Roman) comes in a later phase.
+export * from './pitch';
