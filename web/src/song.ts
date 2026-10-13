@@ -1,8 +1,8 @@
 import type { ErrorObject } from 'ajv';
+import type { Song } from './generated/song';
 import validate from './generated/song.validate.js';
 
-export type { Song } from './generated/song';
-import type { Song } from './generated/song';
+export type { Note, Song } from './generated/song';
 
 export class SongParseError extends Error {
   readonly errors: string[];

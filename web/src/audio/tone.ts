@@ -65,7 +65,8 @@ function toneTransport(Tone: ToneModule, context: AudioContext): Transport {
       return Math.max(0, transport.getSecondsAtTime(context.currentTime));
     },
     start: () => {
-      transport.start();
+      // Pass the position explicitly: after stop() + seek(), Tone would otherwise start at 0.
+      transport.start(undefined, transport.seconds);
     },
     pause: () => {
       transport.pause();
