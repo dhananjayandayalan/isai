@@ -6,8 +6,9 @@ playable two-hand arrangement, shown on an animated piano that follows your MIDI
 - **Training mode:** playback waits until you play the right notes.
 - **Performance mode:** same engine, no waiting, scored on timing.
 
-The project is in phase P0 (foundation): the Song contract, tooling and skeletons are in
-place, and the audio pipeline and piano come in later phases. See `docs/spec/`.
+The project is in phase P1 (playback): the web app plays a Song on a sampled piano with an
+animated keyboard and shows your MIDI keyboard's notes. The audio pipeline, training and
+performance modes come in later phases. See `docs/spec/`.
 
 ## Layout
 
@@ -45,6 +46,17 @@ pnpm dev                           # http://localhost:5173
 pnpm test --run
 pnpm lint && pnpm typecheck && pnpm build
 ```
+
+MIDI keyboards work in Chrome, Edge and Firefox (Web MIDI). Safari has no Web MIDI; the
+page still plays songs there.
+
+### Piano sound
+
+The piano uses the [Salamander Grand Piano](https://archive.org/details/SalamanderGrandPianoV3)
+samples by Alexander Holm (CC-BY 3.0), loaded at runtime from the copy Tone.js hosts at
+`https://tonejs.github.io/audio/salamander/`. To use another copy, set
+`VITE_PIANO_SAMPLES_URL` (a folder URL ending in `/`, with the same file names) in
+`web/.env.local`. If the samples can't be loaded, Isai plays a simple synth instead.
 
 ## Changing the Song contract
 
