@@ -54,3 +54,56 @@ describe('parseSong', () => {
     expect(() => parseSong('song')).toThrow(SongParseError);
   });
 });
+
+describe('precompiled validator', () => {
+  const sources = import.meta.glob<string>(['./song.ts', './generated/song.validate.js'], {
+    query: '?raw',
+    import: 'default',
+    eager: true,
+  });
+
+  it('is what song.ts uses, with no runtime ajv compiler', () => {
+    const songTs = sources['./song.ts'] ?? '';
+    expect(songTs).toContain("from './generated/song.validate.js'");
+    // Only a type import from ajv is allowed; it is erased at build time.
+    const ajvImports = songTs.match(/^import .*from 'ajv[^']*';$/gm) ?? [];
+    expect(ajvImports.every((line) => line.startsWith('import type '))).toBe(true);
+  });
+
+  it('contains no eval or new Function and no leftover require()', () => {
+    const code = sources['./generated/song.validate.js'] ?? '';
+    expect(code.length).toBeGreaterThan(1000);
+    expect(code).not.toMatch(/new Function|\beval\(|require\(/);
+  });
+
+  it('agrees with a runtime-compiled validator', async () => {
+    const { default: Ajv2020 } = await import('ajv/dist/2020');
+    const { default: addFormats } = await import('ajv-formats');
+    const { default: schema } = await import('../../schema/song.schema.json');
+    const ajv = new Ajv2020({ allErrors: true });
+    addFormats(ajv);
+    const reference = ajv.compile(schema);
+
+    const surrogateTitle = { ...twinkle, title: '𝄞' };
+    const docs: unknown[] = [
+      twinkle,
+      frere,
+      invalid,
+      { ...twinkle, title: '' },
+      surrogateTitle,
+      { ...twinkle, meta: { ...twinkle.meta, createdAt: '2026-02-30T00:00:00Z' } },
+      { ...twinkle, tonality: { ...twinkle.tonality, scale: [7, 7] } },
+    ];
+    for (const doc of docs) {
+      const ours = (() => {
+        try {
+          parseSong(doc);
+          return true;
+        } catch {
+          return false;
+        }
+      })();
+      expect(ours).toBe(reference(doc));
+    }
+  });
+});
