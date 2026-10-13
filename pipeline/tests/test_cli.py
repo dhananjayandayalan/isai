@@ -1,11 +1,13 @@
+import shutil
 import subprocess
 import sys
 from pathlib import Path
 
 import pytest
 
+import isai.cli
 from isai.cli import analyse, main
-from isai.schema import load_json, validate_song
+from isai.schema import SongValidationError, load_json, validate_song
 
 
 @pytest.fixture
@@ -49,9 +51,39 @@ def test_main_requires_out(source: Path) -> None:
     assert exc.value.code == 2
 
 
+def test_main_schema_not_found(
+    source: Path,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    monkeypatch.setenv("ISAI_SCHEMA_DIR", str(tmp_path / "empty"))
+    assert main(["analyse", str(source), "--out", str(tmp_path / "out")]) == 3
+    err = capsys.readouterr().err
+    assert "ISAI_SCHEMA_DIR" in err
+    assert "input file not found" not in err
+
+
+def test_main_invalid_song(
+    source: Path,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    def reject(_doc: object) -> None:
+        raise SongValidationError(["$.notes[0]: broken on purpose"])
+
+    monkeypatch.setattr(isai.cli, "validate_song", reject)
+    assert main(["analyse", str(source), "--out", str(tmp_path / "out")]) == 1
+    assert "broken on purpose" in capsys.readouterr().err
+
+
 def test_console_script_runs(source: Path, tmp_path: Path) -> None:
+    # The `isai` entry point installed next to this interpreter, not `python -m`.
+    script = shutil.which("isai", path=str(Path(sys.executable).parent))
+    assert script is not None, "isai console script is not installed in this environment"
     result = subprocess.run(
-        [sys.executable, "-m", "isai.cli", "analyse", str(source), "--out", str(tmp_path)],
+        [script, "analyse", str(source), "--out", str(tmp_path)],
         capture_output=True,
         text=True,
         check=False,
