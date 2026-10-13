@@ -1,0 +1,10 @@
+# Normalise to LF everywhere so generated files are byte-identical on every OS.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.mid binary
+*.midi binary
