@@ -6,9 +6,9 @@ packages:
 catalog:
   typescript: ^5.9.3
   vitest: ^4.1.0
-  wrangler: ^4.140.0
-  "@cloudflare/vitest-pool-workers": ^0.22.0
-  "@cloudflare/workers-types": ^5.20260901.0
+  wrangler: ^4.150.0
+  "@cloudflare/vitest-pool-workers": ^0.23.0
+  "@cloudflare/workers-types": ^5.20261013.1
 
 # Native binaries that must run their install scripts
 allowBuilds:
