@@ -90,18 +90,28 @@ export class FakeTransport implements Transport {
    */
   advanceTo(seconds: number): void {
     if (this.current !== 'started') return;
-    const from = this.position;
     const epoch = this.epoch;
-    const due = [...this.events.values()]
-      .filter((e) => e.at >= from && e.at < seconds)
-      .sort((a, b) => a.at - b.at || a.id - b.id);
-    for (const event of due) {
+    const fired = new Set<number>();
+    for (;;) {
+      // Look again after every callback: it may have scheduled or cleared events.
+      let next: ScheduledEvent | undefined;
+      for (const event of this.events.values()) {
+        if (fired.has(event.id) || event.at < this.position || event.at >= seconds) continue;
+        if (!next || event.at < next.at || (event.at === next.at && event.id < next.id)) next = event;
+      }
+      if (!next) break;
+      fired.add(next.id);
+      this.moveTo(next.at);
+      const firstNewId = this.nextId;
+      next.callback(this.audioNow);
       if (this.current !== 'started' || this.epoch !== epoch) return;
-      if (!this.events.has(event.id)) continue; // cleared by an earlier callback
-      this.moveTo(event.at);
-      event.callback(this.audioNow);
+      // Like the real transport, an event added for a time that is already being
+      // processed has missed its moment.
+      for (const event of this.events.values()) {
+        if (event.id >= firstNewId && event.at <= this.position) fired.add(event.id);
+      }
     }
-    if (this.current === 'started' && this.epoch === epoch) this.moveTo(seconds);
+    this.moveTo(seconds);
   }
 
   advanceBy(seconds: number): void {

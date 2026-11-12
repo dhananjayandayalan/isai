@@ -88,6 +88,11 @@ export class StepMatcher {
     return (this.down[key] ?? 0) > 0;
   }
 
+  /** A key went down while nothing is being judged (stopped, paused, listening). */
+  keyDown(key: number): void {
+    if (key >= 0 && key <= 127) this.down[key] = 1;
+  }
+
   /** Forget which keys are down (the keyboard was disconnected). */
   releaseKeys(): void {
     this.down.fill(0);

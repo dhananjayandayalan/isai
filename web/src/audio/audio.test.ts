@@ -216,6 +216,32 @@ describe('FakeTransport clocks', () => {
   });
 });
 
+describe('FakeTransport and events scheduled from a callback', () => {
+  it('fires an event a callback schedules for later in the same advance', () => {
+    const transport = new FakeTransport();
+    const fired: number[] = [];
+    transport.schedule(1, () => {
+      fired.push(1);
+      transport.schedule(2, () => fired.push(2));
+      transport.schedule(0.5, () => fired.push(0.5)); // already passed
+      transport.schedule(1, () => fired.push(1.1)); // this moment is already being processed
+    });
+    transport.start();
+    transport.advanceTo(3);
+    expect(fired).toEqual([1, 2]);
+  });
+
+  it('does not fire an event a callback clears', () => {
+    const transport = new FakeTransport();
+    const fired: number[] = [];
+    const later = transport.schedule(2, () => fired.push(2));
+    transport.schedule(1, () => transport.clear(later));
+    transport.start();
+    transport.advanceTo(3);
+    expect(fired).toEqual([]);
+  });
+});
+
 describe('FakeInstrument', () => {
   it('tracks what is sounding', async () => {
     const piano = new FakeInstrument('synth');

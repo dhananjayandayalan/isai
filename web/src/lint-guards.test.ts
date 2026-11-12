@@ -1,5 +1,5 @@
 import { ESLint } from 'eslint';
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 
 // Probes for the lint guards behind CLAUDE.md rules 4 (MIDI only through src/midi/) and
 // 6 (no wall clock or timers). Each probe is linted as if it lived at the given path,
@@ -44,6 +44,12 @@ const CLOCK_PROBES = [
   'const { now } = window.performance; export const t = now();',
   'export const t = Date.parse("2026-01-01");',
 ];
+
+// The first lint loads ESLint, the TypeScript parser and the config, which takes seconds
+// (longer under coverage). Pay for it here so no single probe runs into its own timeout.
+beforeAll(async () => {
+  await guardHits('export {};', 'src/engine/probe.ts');
+}, 60_000);
 
 describe('rule 4 guard: Web MIDI only in src/midi/', () => {
   it.each(MIDI_PROBES)('flags %s outside src/midi/', async (code) => {
