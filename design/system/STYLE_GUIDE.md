@@ -107,7 +107,9 @@ The theme switch appears in three places: the sidebar (icons only, `.seg.seg-fil
 
 ### Fixed (same in every theme)
 
-`--piano-frame`, `--piano-white`, `--piano-white-hint`, `--piano-white-active`, `--piano-black`, `--piano-black-active`, `--piano-label`, `--piano-pill-right`, `--piano-pill-left`, `--piano-pill-edge`.
+`--piano-frame`, `--piano-white`, `--piano-white-hint`, `--piano-white-active`, `--piano-black`, `--piano-black-active`, `--piano-label`, `--piano-pill-right`, `--piano-pill-left`, `--piano-pill-edge`, `--piano-correct`, `--piano-wrong`.
+
+On the practice keyboard: a key to press now is `--piano-white-active` / `--piano-black-active` with a pill in its hand's colour; the step after is the same pill outlined; the hand you aren't practising is `--piano-white-hint` with a faint pill; a key you played right gets a `--piano-correct` disc and one that isn't in the step a `--piano-wrong` disc with a cross. Right and wrong differ by shape, not hue (rule 3).
 
 ### Type
 

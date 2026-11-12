@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import type { NoteIndex } from '../engine/activeNotes';
+import type { PracticeView } from '../engine/practice/engine';
 import type { MidiInput } from '../midi/MidiInput';
 import { readPianoColors } from './KeyboardRenderer';
 import type { KeyRange } from './layout';
@@ -10,6 +11,8 @@ export interface KeyboardProps {
   source: PositionSource | null;
   range: KeyRange;
   midi: MidiInput | null;
+  /** The practice engine's per-key arrays, read every frame; null when there is none. */
+  practice?: PracticeView | null;
   /** Called every frame with the song position; update readouts through refs. */
   onFrame?: (seconds: number) => void;
   /** For tests; defaults to requestAnimationFrame. */
@@ -26,7 +29,7 @@ function rootColors() {
  * (rule 5). Props change only when the song, size or MIDI input changes, never per note.
  */
 export function Keyboard(props: KeyboardProps) {
-  const { index, source, range, midi, onFrame, frames } = props;
+  const { index, source, range, midi, practice = null, onFrame, frames } = props;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const controllerRef = useRef<PianoController | null>(null);
   // The latest props, so a controller created later (a new `frames`) starts from all of
@@ -49,6 +52,7 @@ export function Keyboard(props: KeyboardProps) {
     };
     const controller = new PianoController(frames ? { ...options, frames } : options);
     controller.setSong(now.index, now.source);
+    controller.setPractice(now.practice ?? null);
     controller.attachMidi(now.midi);
     controllerRef.current = controller;
     if (!document.hidden) controller.start();
@@ -70,6 +74,10 @@ export function Keyboard(props: KeyboardProps) {
   useEffect(() => {
     controllerRef.current?.setSong(index, source);
   }, [index, source]);
+
+  useEffect(() => {
+    controllerRef.current?.setPractice(practice);
+  }, [practice]);
 
   useEffect(() => {
     controllerRef.current?.setRange(range);

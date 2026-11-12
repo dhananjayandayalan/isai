@@ -4,7 +4,9 @@ import type { Ctx2D, PianoColors } from './KeyboardRenderer';
 import type { CanvasLike, FrameScheduler } from './PianoController';
 
 export type DrawOp =
-  | { op: 'roundRect'; x: number; y: number; w: number; h: number; fill: string }
+  | { op: 'roundRect'; x: number; y: number; w: number; h: number; fill: string; alpha?: number }
+  | { op: 'outline'; x: number; y: number; w: number; h: number; stroke: string }
+  | { op: 'circle'; x: number; y: number; r: number; fill: string }
   | { op: 'fillRect'; x: number; y: number; w: number; h: number; fill: string }
   | { op: 'text'; text: string; x: number; y: number; fill: string; font: string }
   | { op: 'path'; points: [number, number][]; fill: string }
@@ -17,11 +19,13 @@ export class RecordingContext implements Ctx2D, Pick<CanvasRenderingContext2D, '
   fillStyle: CanvasRenderingContext2D['fillStyle'] = '';
   strokeStyle: CanvasRenderingContext2D['strokeStyle'] = '';
   lineWidth = 1;
+  globalAlpha = 1;
   font = '';
   textAlign: CanvasTextAlign = 'start';
   textBaseline: CanvasTextBaseline = 'alphabetic';
   readonly ops: DrawOp[] = [];
-  private shape: DrawOp | null = null;
+  private shape: Extract<DrawOp, { op: 'roundRect' | 'circle' }> | null = null;
+  private filled = false;
   private points: [number, number][] = [];
 
   private get colour(): string {
@@ -39,10 +43,14 @@ export class RecordingContext implements Ctx2D, Pick<CanvasRenderingContext2D, '
   }
   beginPath(): void {
     this.shape = null;
+    this.filled = false;
     this.points = [];
   }
   roundRect(x: number, y: number, w: number, h: number): void {
     this.shape = { op: 'roundRect', x, y, w, h, fill: '' };
+  }
+  arc(x: number, y: number, r: number): void {
+    this.shape = { op: 'circle', x, y, r, fill: '' };
   }
   moveTo(x: number, y: number): void {
     this.points.push([x, y]);
@@ -52,10 +60,19 @@ export class RecordingContext implements Ctx2D, Pick<CanvasRenderingContext2D, '
   }
   closePath(): void {}
   fill(): void {
-    if (this.shape?.op === 'roundRect') this.ops.push({ ...this.shape, fill: this.colour });
+    this.filled = true;
+    if (this.shape?.op === 'roundRect') {
+      const alpha = this.globalAlpha === 1 ? {} : { alpha: this.globalAlpha };
+      this.ops.push({ ...this.shape, fill: this.colour, ...alpha });
+    } else if (this.shape) this.ops.push({ ...this.shape, fill: this.colour });
     else if (this.points.length) this.ops.push({ op: 'path', points: this.points, fill: this.colour });
   }
   stroke(): void {
+    // A shape that was stroked but never filled is an outline.
+    if (this.shape?.op === 'roundRect' && !this.filled) {
+      const { x, y, w, h } = this.shape;
+      this.ops.push({ op: 'outline', x, y, w, h, stroke: String(this.strokeStyle) });
+    }
     this.ops.push({ op: 'stroke', stroke: String(this.strokeStyle), width: this.lineWidth });
   }
   setTransform(a?: number | DOMMatrix2DInit): void {
@@ -69,6 +86,16 @@ export class RecordingContext implements Ctx2D, Pick<CanvasRenderingContext2D, '
   /** Filled key-shaped rects (y = 0) and pills (y > 0), in draw order. */
   rects(): Extract<DrawOp, { op: 'roundRect' }>[] {
     return this.ops.filter((o): o is Extract<DrawOp, { op: 'roundRect' }> => o.op === 'roundRect');
+  }
+
+  /** Outlined (not filled) pills: the step after this one. */
+  outlines(): Extract<DrawOp, { op: 'outline' }>[] {
+    return this.ops.filter((o): o is Extract<DrawOp, { op: 'outline' }> => o.op === 'outline');
+  }
+
+  /** Correct and wrong marks. */
+  circles(): Extract<DrawOp, { op: 'circle' }>[] {
+    return this.ops.filter((o): o is Extract<DrawOp, { op: 'circle' }> => o.op === 'circle');
   }
 }
 
@@ -121,6 +148,7 @@ export class ManualFrames implements FrameScheduler {
 export const TEST_COLORS: PianoColors = {
   frame: 'frame',
   white: 'white',
+  whiteHint: 'white-hint',
   whiteActive: 'white-active',
   black: 'black',
   blackActive: 'black-active',
@@ -128,6 +156,8 @@ export const TEST_COLORS: PianoColors = {
   pillRight: 'right',
   pillLeft: 'left',
   pillEdge: 'edge',
+  correct: 'correct',
+  wrong: 'wrong',
   labelFont: '500 11px mono',
   radius: 4,
 };

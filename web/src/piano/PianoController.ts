@@ -3,8 +3,9 @@
 // redraws the canvas. Your MIDI notes go into a typed array, never into React state.
 
 import { activeNotesAt, type ActiveNote, type NoteIndex } from '../engine/activeNotes';
+import type { PracticeView } from '../engine/practice/engine';
 import type { MidiInput, Unsubscribe } from '../midi/MidiInput';
-import { drawKeyboard, type Ctx2D, type PianoColors } from './KeyboardRenderer';
+import { countFlashes, drawKeyboard, type Ctx2D, type PianoColors } from './KeyboardRenderer';
 import { layoutKeys, type KeyLayout, type KeyRange } from './layout';
 
 export interface FrameScheduler {
@@ -57,6 +58,9 @@ export class PianoController {
   private ctx: ReturnType<CanvasLike['getContext']> = null;
   private index: NoteIndex | null = null;
   private source: PositionSource | null = null;
+  private practice: PracticeView | null = null;
+  private lastRevision = -1;
+  private lastFlashes = 0;
   private readonly held = new Uint8Array(128);
   private readonly active: ActiveNote[] = [];
   private midiUnsubscribe: Unsubscribe | null = null;
@@ -78,6 +82,16 @@ export class PianoController {
   setSong(index: NoteIndex | null, source: PositionSource | null): void {
     this.index = index;
     this.source = source;
+    this.dirty = true;
+  }
+
+  /**
+   * What practice adds: the keys to play now and next, and the correct / wrong marks. The
+   * controller reads the view's typed arrays every frame; nothing goes through React.
+   */
+  setPractice(practice: PracticeView | null): void {
+    this.practice = practice;
+    this.lastRevision = -1;
     this.dirty = true;
   }
 
@@ -147,6 +161,7 @@ export class PianoController {
     this.stop();
     this.attachMidi(null);
     this.setSong(null, null);
+    this.setPractice(null);
   }
 
   /** Draw one frame if anything changed. Returns whether it drew. */
@@ -157,6 +172,17 @@ export class PianoController {
     const width = this.canvas.clientWidth;
     if (width <= 0) return false;
     if (!this.layout || this.layout.width !== width) this.relayout(width);
+
+    // Practice changes with the learner's notes, not with the song position: redraw when
+    // the engine says its arrays changed, or when a correct / wrong mark appears or fades.
+    const practice = this.practice;
+    const now = practice ? practice.now() : 0;
+    if (practice) {
+      const flashes = countFlashes(practice, now);
+      if (practice.revision !== this.lastRevision || flashes !== this.lastFlashes) this.dirty = true;
+      this.lastRevision = practice.revision;
+      this.lastFlashes = flashes;
+    }
     if (!this.dirty && seconds === this.lastSeconds) return false;
 
     this.ctx ??= this.canvas.getContext('2d');
@@ -173,6 +199,15 @@ export class PianoController {
       held: this.held,
       song,
       labels: this.labels,
+      practice: practice
+        ? {
+            keys: practice.keys,
+            flashKind: practice.flashKind,
+            flashUntil: practice.flashUntil,
+            now,
+            dimHand: practice.dimHand,
+          }
+        : null,
     });
     this.dirty = false;
     this.lastSeconds = seconds;
