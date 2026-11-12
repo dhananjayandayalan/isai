@@ -237,6 +237,8 @@ export class PracticeEngine implements PracticeView {
   private rate = 1;
   private passes: Pass[] = [];
   private passCount = 0;
+  /** Id of the latest pass whose song (not its count-in) the engine has started on. */
+  private begun = -1;
   /** Events on the transport now, done or not. */
   private scheduled: TimelineEvent[] = [];
   private hold: Hold | null = null;
@@ -310,9 +312,12 @@ export class PracticeEngine implements PracticeView {
   get phase(): PracticePhase {
     if (this.current !== 'playing') return 'idle';
     if (this.hold) return 'waiting';
+    // The transport's position runs behind the engine by its lookahead, and a hold on the
+    // first beat sits just inside the count-in. Once the engine has performed something of
+    // the pass's song (a hold, a note), the count-in is over whatever the position says.
     const pass = this.passAt(this.transport.seconds);
-    if (pass && this.transport.seconds < pass.from + pass.lead - EPSILON) return 'count-in';
-    return 'running';
+    if (!pass || pass.id === this.begun) return 'running';
+    return this.transport.seconds < pass.from + pass.lead - EPSILON ? 'count-in' : 'running';
   }
 
   /** The keys still needed for the step to play now (empty when nothing is tracked). */
@@ -532,6 +537,7 @@ export class PracticeEngine implements PracticeView {
     this.anchoredAt = this.clock.now() + this.transport.lookahead;
     this.position = songPosition;
     this.passCount = 0;
+    this.begun = -1;
     this.passes = [this.planPass(0, songPosition, countIn)];
     this.moveCursor(firstStepAt(this.steps, songPosition));
     this.feed(WINDOW);
@@ -656,6 +662,7 @@ export class PracticeEngine implements PracticeView {
   }
 
   private perform(event: TimelineEvent, time: number): void {
+    if (event.pass && event.kind !== 'click' && event.kind !== 'boundary') this.begun = event.pass.id;
     switch (event.kind) {
       case 'on': {
         const note = this.index.notes[event.a];

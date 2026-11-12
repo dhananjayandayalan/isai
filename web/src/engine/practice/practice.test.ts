@@ -1037,8 +1037,59 @@ describe('metronome and count-in', () => {
     expect(engine.phase).toBe('waiting');
     expect(transport.seconds).toBeCloseTo(2 - HOLD_LEAD);
     press(60);
+    // Carrying on from the hold is playing, not counting in, even before the transport moves.
+    expect(engine.phase).toBe('running');
     transport.advanceBy(5);
     expect(engine.expected).toEqual([{ midi: 62, hand: 'right' }]);
+  });
+
+  it('stops saying count-in once a step is played, even if the transport position lags', () => {
+    // A real transport hands out events ahead of the audio clock, so its position can
+    // still be inside the count-in when the learner has already played the first step.
+    class LaggingTransport extends FakeTransport {
+      override get seconds(): number {
+        return Math.max(0, super.seconds - 0.05);
+      }
+    }
+    const transport = new LaggingTransport();
+    const midi = new FakeMidiInput();
+    void midi.connect('fake-keyboard');
+    const engine = new PracticeEngine({
+      song: songWith([note(0, 1, 60), note(1, 2, 62)], {}),
+      transport,
+      piano: new FakeInstrument(),
+      metronome: new FakeInstrument(),
+      clock: transport.clock,
+      midi,
+      settings: training({ countIn: true }),
+    });
+    engine.play();
+    transport.advanceTo(1);
+    expect(engine.phase).toBe('count-in');
+    transport.advanceTo(3);
+    expect(engine.phase).toBe('waiting');
+    midi.emitNoteOn(60, { time: transport.audioTime });
+    expect(engine.phase).toBe('running');
+    transport.advanceBy(0.01);
+    expect(engine.phase).toBe('running');
+  });
+
+  it('is counting in right up to the hold, in every loop pass', () => {
+    const { transport, engine, press } = setup([note(0, 1, 60)], {
+      settings: training({ countIn: true, loop: { start: 0, end: 2 } }),
+      durationSec: 4,
+    });
+    engine.play();
+    for (let pass = 0; pass < 3; pass++) {
+      transport.advanceBy(1.9);
+      expect(engine.phase).toBe('count-in');
+      transport.advanceBy(0.5);
+      expect(engine.phase).toBe('waiting');
+      press(60);
+      expect(engine.phase).toBe('running');
+      transport.advanceBy(2.01); // the rest of the pass, and just into the next
+    }
+    expect(engine.loopPasses).toBe(3);
   });
 });
 
