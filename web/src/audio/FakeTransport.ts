@@ -1,3 +1,4 @@
+import type { AudioClock } from '../midi/AudioClock';
 import type { Transport, TransportState } from './types';
 
 interface ScheduledEvent {
@@ -7,20 +8,31 @@ interface ScheduledEvent {
 }
 
 /**
- * In-memory `Transport` for tests. Time only moves when the test calls `advanceTo` /
- * `advanceBy`, which fire due events in time order, like Tone's transport would.
+ * In-memory `Transport` for tests. Time only moves when the test calls `advanceTo`,
+ * `advanceBy` or `wait`. Like the real one it has two clocks: the position, which only
+ * moves while started, and the audio clock, which never stops.
  */
 export class FakeTransport implements Transport {
-  /** Audio-clock time of song position 0, so tests can tell song and audio time apart. */
+  /** Audio-clock time when the transport was created, so the two clocks differ. */
   readonly audioOffset: number;
+  /** See `Transport.lookahead`. Here `start()` simply takes this long. */
+  lookahead = 0;
   private current: TransportState = 'stopped';
   private position = 0;
+  private audioNow: number;
   private nextId = 1;
   private epoch = 0;
   private readonly events = new Map<number, ScheduledEvent>();
 
+  /** The audio clock of this transport, for code that needs an `AudioClock`. */
+  readonly clock: AudioClock = {
+    now: () => this.audioNow,
+    fromDomTimestamp: () => this.audioNow,
+  };
+
   constructor(audioOffset = 100) {
     this.audioOffset = audioOffset;
+    this.audioNow = audioOffset;
   }
 
   get state(): TransportState {
@@ -31,11 +43,18 @@ export class FakeTransport implements Transport {
     return this.position;
   }
 
+  /** Audio-clock time now. */
+  get audioTime(): number {
+    return this.audioNow;
+  }
+
   get scheduledCount(): number {
     return this.events.size;
   }
 
   start(): void {
+    if (this.current === 'started') return;
+    this.audioNow += this.lookahead;
     this.current = 'started';
   }
 
@@ -66,7 +85,8 @@ export class FakeTransport implements Transport {
 
   /**
    * While started, move to `seconds` and fire events in [position, seconds) in time order.
-   * A callback that seeks, pauses or stops ends the advance there.
+   * A callback that seeks, pauses or stops ends the advance there. An event at the
+   * position itself fires (again), as it does when a real transport starts on it.
    */
   advanceTo(seconds: number): void {
     if (this.current !== 'started') return;
@@ -78,13 +98,27 @@ export class FakeTransport implements Transport {
     for (const event of due) {
       if (this.current !== 'started' || this.epoch !== epoch) return;
       if (!this.events.has(event.id)) continue; // cleared by an earlier callback
-      this.position = event.at;
-      event.callback(event.at + this.audioOffset);
+      this.moveTo(event.at);
+      event.callback(this.audioNow);
     }
-    if (this.current === 'started' && this.epoch === epoch) this.position = seconds;
+    if (this.current === 'started' && this.epoch === epoch) this.moveTo(seconds);
   }
 
   advanceBy(seconds: number): void {
     this.advanceTo(this.position + seconds);
+  }
+
+  /**
+   * Let `seconds` of real time pass. While started that advances the position too; while
+   * paused or stopped only the audio clock moves (a learner thinking about the next note).
+   */
+  wait(seconds: number): void {
+    if (this.current === 'started') this.advanceBy(seconds);
+    else this.audioNow += seconds;
+  }
+
+  private moveTo(position: number): void {
+    this.audioNow += position - this.position;
+    this.position = position;
   }
 }

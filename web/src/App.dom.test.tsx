@@ -46,6 +46,7 @@ interface HarnessOptions {
 function harness(options: HarnessOptions = {}) {
   const transport = new FakeTransport();
   const piano = new FakeInstrument(options.sound ?? 'sampled');
+  const metronome = new FakeInstrument('synth');
   const frames = new ManualFrames();
   const fakeMidi = new FakeMidiInput();
   const resume = vi.fn(() => Promise.resolve());
@@ -62,7 +63,7 @@ function harness(options: HarnessOptions = {}) {
       attempts++;
       if (options.failAudio && attempts === 1) throw new Error('no output');
       await gate;
-      return { transport, piano, clock: { now: () => 0, fromDomTimestamp: () => 0 } };
+      return { transport, piano, metronome, clock: transport.clock };
     },
   });
   const deps: AppDeps = { audio, midi: options.midi ?? fakeMidi, frames };

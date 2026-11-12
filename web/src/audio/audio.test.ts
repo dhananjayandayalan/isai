@@ -9,6 +9,7 @@ function fakeAudio(): LoadedAudio {
   return {
     transport: new FakeTransport(),
     piano: new FakeInstrument(),
+    metronome: new FakeInstrument('synth'),
     clock: { now: () => 42, fromDomTimestamp: (ms) => ms / 1000 + 1 },
   };
 }
@@ -167,6 +168,51 @@ describe('FakeTransport', () => {
     transport.advanceTo(5);
     expect(fired).toEqual([4]);
     expect(transport.scheduledCount).toBe(2);
+  });
+});
+
+describe('FakeTransport clocks', () => {
+  it('keeps the audio clock running while paused, and through a seek', () => {
+    const transport = new FakeTransport(100);
+    const times: number[] = [];
+    transport.schedule(1, (t) => times.push(t));
+    transport.schedule(5, (t) => times.push(t));
+    transport.start();
+    transport.advanceTo(2);
+    expect(transport.audioTime).toBe(102);
+    transport.pause();
+    transport.wait(3); // paused: the position stays, real time passes
+    expect(transport.seconds).toBe(2);
+    expect(transport.clock.now()).toBe(105);
+    transport.seek(4.5);
+    transport.start();
+    transport.wait(1); // started: both move
+    expect(transport.seconds).toBe(5.5);
+    expect(times).toEqual([101, 105.5]);
+  });
+
+  it('takes its lookahead to start, once', () => {
+    const transport = new FakeTransport(100);
+    transport.lookahead = 0.1;
+    transport.start();
+    transport.start();
+    expect(transport.audioTime).toBeCloseTo(100.1);
+    expect(transport.clock.fromDomTimestamp(123)).toBeCloseTo(100.1);
+  });
+
+  it('fires an event again when it starts on that event', () => {
+    const transport = new FakeTransport();
+    let fired = 0;
+    transport.schedule(1, () => {
+      fired++;
+      transport.pause();
+    });
+    transport.start();
+    transport.advanceTo(3);
+    expect(transport.seconds).toBe(1);
+    transport.start();
+    transport.advanceTo(3);
+    expect(fired).toBe(2);
   });
 });
 

@@ -40,6 +40,7 @@ export async function createToneAudio(
     clock: audioClock(context),
     transport: toneTransport(Tone, context),
     piano: tonePiano(Tone, samplesUrl),
+    metronome: toneClick(Tone),
   };
 }
 
@@ -67,15 +68,18 @@ function toneTransport(Tone: ToneModule, context: AudioContext): Transport {
       // Position at the audio clock's "now", not Tone's now() (which adds the lookahead).
       return Math.max(0, transport.getSecondsAtTime(context.currentTime));
     },
+    get lookahead() {
+      return Tone.getContext().lookAhead;
+    },
     start: () => {
       // Pass the position explicitly: after stop() + seek(), Tone would otherwise start at 0.
       transport.start(undefined, transport.seconds);
     },
-    pause: () => {
-      transport.pause();
+    pause: (time) => {
+      transport.pause(time);
     },
-    stop: () => {
-      transport.stop();
+    stop: (time) => {
+      transport.stop(time);
     },
     seek: (seconds) => {
       transport.seconds = seconds;
@@ -126,6 +130,29 @@ function tonePiano(Tone: ToneModule, samplesUrl: string): Instrument {
     },
     releaseAll(time) {
       voice?.releaseAll(time ?? Tone.immediate());
+    },
+  };
+}
+
+/**
+ * The metronome click: a very short synth blip. `noteOn` plays one whole click (the pitch
+ * tells an accented beat from a plain one), so `noteOff` has nothing to do.
+ */
+function toneClick(Tone: ToneModule): Instrument {
+  const synth = new Tone.Synth({
+    oscillator: { type: 'triangle' },
+    envelope: { attack: 0.001, decay: 0.05, sustain: 0, release: 0.02 },
+    volume: -6,
+  }).toDestination();
+  return {
+    loaded: Promise.resolve('synth'),
+    noteOn(midi, velocity, time) {
+      const hz = Tone.Frequency(midi, 'midi').toFrequency();
+      synth.triggerAttackRelease(hz, 0.04, time ?? Tone.immediate(), velocity / 127);
+    },
+    noteOff() {},
+    releaseAll(time) {
+      synth.triggerRelease(time ?? Tone.immediate());
     },
   };
 }
