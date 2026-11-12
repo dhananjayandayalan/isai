@@ -7,6 +7,11 @@ export type {
   Transport,
   TransportState,
 } from './types';
-export { AudioEngine, type AudioLoader } from './engine';
+export {
+  AudioEngine,
+  type AudioContextLike,
+  type AudioEngineOptions,
+  type AudioSource,
+} from './engine';
 export { FakeTransport } from './FakeTransport';
 export { FakeInstrument, type InstrumentCall } from './FakeInstrument';

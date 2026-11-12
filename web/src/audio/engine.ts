@@ -5,10 +5,31 @@
 import type { AudioClock } from '../midi/AudioClock';
 import type { LoadedAudio } from './types';
 
-export type AudioLoader = () => Promise<LoadedAudio>;
+/** The part of an `AudioContext` the engine uses; tests pass a fake. */
+export interface AudioContextLike {
+  resume(): Promise<void>;
+}
 
-export class AudioEngine {
-  private readonly loader: AudioLoader;
+export interface AudioEngineOptions<C extends AudioContextLike> {
+  /**
+   * Create the audio context. Called synchronously inside the first `load()`, which must
+   * itself be called from a click: WebKit only starts audio that begins inside the gesture.
+   */
+  createContext: () => C;
+  /** Load everything else (Tone.js, samples) onto that context. May take a while. */
+  load: (context: C) => Promise<LoadedAudio>;
+}
+
+/** What the app needs from the audio engine. */
+export interface AudioSource {
+  readonly clock: AudioClock;
+  readonly loaded: LoadedAudio | null;
+  load(): Promise<LoadedAudio>;
+}
+
+export class AudioEngine<C extends AudioContextLike = AudioContextLike> implements AudioSource {
+  private readonly options: AudioEngineOptions<C>;
+  private context: C | null = null;
   private audio: LoadedAudio | null = null;
   private pending: Promise<LoadedAudio> | null = null;
 
@@ -21,18 +42,31 @@ export class AudioEngine {
     fromDomTimestamp: (ms) => this.audio?.clock.fromDomTimestamp(ms) ?? 0,
   };
 
-  constructor(loader: AudioLoader) {
-    this.loader = loader;
+  constructor(options: AudioEngineOptions<C>) {
+    this.options = options;
   }
 
   get loaded(): LoadedAudio | null {
     return this.audio;
   }
 
-  /** Load once; concurrent calls share the load. A failed load can be retried. */
+  /**
+   * Call from a click. Before anything is awaited, this creates the audio context (first
+   * call) and resumes it (every call), so the browser ties audio to the gesture. A later
+   * click therefore also wakes a context the browser left suspended. Loading happens
+   * once; concurrent calls share it, and a failed load can be retried.
+   */
   load(): Promise<LoadedAudio> {
+    let context: C;
+    try {
+      context = this.context ??= this.options.createContext();
+      // A rejected resume is not fatal: the next click tries again.
+      context.resume().catch(() => undefined);
+    } catch (error) {
+      return Promise.reject(error instanceof Error ? error : new Error(String(error)));
+    }
     if (!this.pending) {
-      this.pending = this.loader().then(
+      this.pending = this.options.load(context).then(
         (audio) => {
           this.audio = audio;
           return audio;

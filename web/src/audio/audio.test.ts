@@ -13,9 +13,83 @@ function fakeAudio(): LoadedAudio {
   };
 }
 
+/** A fake AudioContext that records when it was created and resumed. */
+function fakeContext(log: string[] = []) {
+  return {
+    log,
+    resume: vi.fn(() => {
+      log.push('resume');
+      return Promise.resolve();
+    }),
+  };
+}
+
+function engineWith(load: () => Promise<LoadedAudio>, log: string[] = []) {
+  const context = fakeContext(log);
+  const createContext = vi.fn(() => {
+    log.push('create');
+    return context;
+  });
+  return { engine: new AudioEngine({ createContext, load }), context, createContext, log };
+}
+
 describe('AudioEngine', () => {
+  it('creates and resumes the audio context synchronously inside load()', async () => {
+    // WebKit only starts audio begun inside the click, so nothing may be awaited first.
+    const log: string[] = [];
+    const { engine, context } = engineWith(() => {
+      log.push('load');
+      return Promise.resolve(fakeAudio());
+    }, log);
+    const pending = engine.load();
+    expect(log).toEqual(['create', 'resume', 'load']); // all before load() returned
+    expect(context.resume).toHaveBeenCalledTimes(1);
+    await pending;
+  });
+
+  it('passes the context it created to the loader', async () => {
+    const context = fakeContext();
+    const load = vi.fn((given: typeof context) => {
+      expect(given).toBe(context);
+      return Promise.resolve(fakeAudio());
+    });
+    await new AudioEngine({ createContext: () => context, load }).load();
+    expect(load).toHaveBeenCalledTimes(1);
+  });
+
+  it('resumes the same context again on every later call, so a second click wakes it', async () => {
+    const { engine, context, createContext } = engineWith(() => Promise.resolve(fakeAudio()));
+    await engine.load();
+    void engine.load();
+    void engine.load();
+    expect(createContext).toHaveBeenCalledTimes(1);
+    expect(context.resume).toHaveBeenCalledTimes(3);
+  });
+
+  it('keeps loading when the browser refuses to resume yet', async () => {
+    const context = { resume: vi.fn(() => Promise.reject(new Error('not allowed'))) };
+    const engine = new AudioEngine({
+      createContext: () => context,
+      load: () => Promise.resolve(fakeAudio()),
+    });
+    await expect(engine.load()).resolves.toBeDefined();
+  });
+
+  it('rejects, and can retry, when no audio context can be created', async () => {
+    const createContext = vi
+      .fn<() => ReturnType<typeof fakeContext>>()
+      .mockImplementationOnce(() => {
+        throw new Error('no audio device');
+      })
+      .mockImplementation(() => fakeContext());
+    const engine = new AudioEngine({ createContext, load: () => Promise.resolve(fakeAudio()) });
+    await expect(engine.load()).rejects.toThrow('no audio device');
+    await expect(engine.load()).resolves.toBeDefined();
+    expect(createContext).toHaveBeenCalledTimes(2);
+  });
+
   it('has a clock that reads 0 until audio loads, then delegates', async () => {
-    const engine = new AudioEngine(() => Promise.resolve(fakeAudio()));
+    const { engine } = engineWith(() => Promise.resolve(fakeAudio()));
     expect(engine.clock.now()).toBe(0);
     expect(engine.clock.fromDomTimestamp(5000)).toBe(0);
     expect(engine.loaded).toBeNull();
@@ -27,7 +101,7 @@ describe('AudioEngine', () => {
 
   it('loads once for concurrent and later calls', async () => {
     const loader = vi.fn(() => Promise.resolve(fakeAudio()));
-    const engine = new AudioEngine(loader);
+    const { engine } = engineWith(loader);
     const [a, b] = await Promise.all([engine.load(), engine.load()]);
     expect(a).toBe(b);
     expect(await engine.load()).toBe(a);
@@ -39,7 +113,7 @@ describe('AudioEngine', () => {
       .fn<() => Promise<LoadedAudio>>()
       .mockRejectedValueOnce(new Error('no audio device'))
       .mockResolvedValue(fakeAudio());
-    const engine = new AudioEngine(loader);
+    const { engine } = engineWith(loader);
     await expect(engine.load()).rejects.toThrow('no audio device');
     expect(engine.loaded).toBeNull();
     await expect(engine.load()).resolves.toBeDefined();

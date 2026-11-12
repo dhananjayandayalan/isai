@@ -1,7 +1,8 @@
 // The only file that imports Tone.js (ADR 0004). `tone` is loaded with a dynamic import on
-// the first Play or Connect click, which is also the user gesture browsers need to start
-// audio. Not unit-tested (it needs a real AudioContext); the interfaces it implements are
-// exercised through FakeTransport / FakeInstrument.
+// the first Play or Connect click. The AudioContext is created and resumed in that click
+// by AudioEngine, before this file has even loaded, because WebKit only starts audio that
+// begins inside the gesture. Not unit-tested (it needs a real AudioContext); the
+// interfaces it implements are exercised through FakeTransport / FakeInstrument.
 
 import type { AudioClock } from '../midi/AudioClock';
 import type { Instrument, InstrumentSound, LoadedAudio, Transport, TransportState } from './types';
@@ -24,15 +25,17 @@ export function salamanderUrls(): Record<string, string> {
   return urls;
 }
 
+/**
+ * Build the transport and piano on `context`, which the caller created and resumed inside
+ * a click. Nothing here waits for the context to run: if the browser left it suspended,
+ * the next click resumes it (AudioEngine.load) and the song starts then.
+ */
 export async function createToneAudio(
+  context: AudioContext,
   samplesUrl: string = DEFAULT_SAMPLES_URL,
 ): Promise<LoadedAudio> {
   const Tone = await import('tone');
-  // A native AudioContext (Tone's default wrapper has no getOutputTimestamp, which the
-  // MIDI time mapping needs).
-  const context = new AudioContext({ latencyHint: 'interactive' });
   Tone.setContext(context);
-  await Tone.start();
   return {
     clock: audioClock(context),
     transport: toneTransport(Tone, context),
@@ -99,9 +102,11 @@ function tonePiano(Tone: ToneModule, samplesUrl: string): Instrument {
         voice = sampler;
         resolve('sampled');
       },
-      onerror: () => {
+      onerror: (error) => {
         if (settled) return;
         settled = true;
+        // Kept in the console for whoever checks why the piano fell back to a synth.
+        console.error('Isai: piano samples failed to load; using a synth.', error);
         sampler.dispose();
         voice = new Tone.PolySynth(Tone.Synth).toDestination();
         resolve('synth');
