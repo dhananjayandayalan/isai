@@ -32,3 +32,6 @@ __pycache__/
 coverage/
 htmlcov/
 *.tsbuildinfo
+
+# IDE settings (personal)
+.idea/
