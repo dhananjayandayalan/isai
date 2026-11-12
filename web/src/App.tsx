@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import frere from '../../schema/examples/frere-jacques-a-cappella.json';
 import twinkle from '../../schema/examples/twinkle-g-major.json';
-import type { AudioEngine } from './audio/engine';
+import type { AudioSource } from './audio/engine';
 import type { InstrumentSound, LoadedAudio } from './audio/types';
 import { buildNoteIndex } from './engine/activeNotes';
 import { monitorMidi } from './engine/monitor';
@@ -22,7 +22,7 @@ import { formatTime } from './time';
 
 /** Everything with side effects, injected so tests can pass fakes (main.tsx wires the real ones). */
 export interface AppDeps {
-  audio: AudioEngine;
+  audio: AudioSource;
   midi: MidiInput;
   frames?: FrameScheduler;
 }
@@ -38,16 +38,22 @@ const EXAMPLES = [
   { id: 'frere', label: 'Frère Jacques', json: frere as unknown },
 ];
 
-type Choice = { id: string; json: unknown };
-type Loaded = { song: Song } | { error: string };
+/** `notJson` is set when an opened file couldn't be parsed as JSON at all. */
+type Choice = { id: string; json: unknown; notJson?: string };
+type Loaded = { song: Song } | { error: 'not-json' | 'invalid'; detail: string };
 type AudioStatus = 'idle' | 'loading' | InstrumentSound | 'failed';
 
-function load(source: unknown): Loaded {
+function load(choice: Choice): Loaded {
+  if (choice.notJson !== undefined) return { error: 'not-json', detail: choice.notJson };
   try {
-    return { song: parseSong(source) };
+    return { song: parseSong(choice.json) };
   } catch (e) {
-    return { error: e instanceof SongParseError ? e.errors.join('\n') : String(e) };
+    return { error: 'invalid', detail: e instanceof SongParseError ? e.errors.join('\n') : String(e) };
   }
+}
+
+function message(e: unknown): string {
+  return e instanceof Error ? e.message : String(e);
 }
 
 export default function App({ source, deps }: AppProps) {
@@ -56,9 +62,10 @@ export default function App({ source, deps }: AppProps) {
   );
   const [fileName, setFileName] = useState<string | null>(null);
   const [opens, setOpens] = useState(0);
-  const loaded = useMemo(() => load(choice.json), [choice]);
+  const loaded = useMemo(() => load(choice), [choice]);
 
   const [audioStatus, setAudioStatus] = useState<AudioStatus>('idle');
+  const [audioError, setAudioError] = useState<string | null>(null);
   const [monitor, setMonitor] = useState(true);
   const monitorRef = useRef(monitor);
   useEffect(() => {
@@ -74,15 +81,21 @@ export default function App({ source, deps }: AppProps) {
     });
   }, [deps]);
 
-  /** Load Tone.js and the piano on first use (a click, as browsers require for audio). */
+  /**
+   * Load Tone.js and the piano on first use. Call it from a click and don't await anything
+   * first: `audio.load()` starts the audio context synchronously, inside the gesture.
+   */
   const ensureAudio = useCallback(async (): Promise<LoadedAudio | null> => {
     if (!deps) return null;
     if (!deps.audio.loaded) setAudioStatus('loading');
     try {
       const audio = await deps.audio.load();
       setAudioStatus(await audio.piano.loaded);
+      setAudioError(null);
       return audio;
-    } catch {
+    } catch (e) {
+      console.error('Isai: sound could not start.', e);
+      setAudioError(message(e));
       setAudioStatus('failed');
       return null;
     }
@@ -92,15 +105,15 @@ export default function App({ source, deps }: AppProps) {
     const file = event.target.files?.[0];
     event.target.value = '';
     if (!file) return;
-    let json: unknown;
+    let next: Choice;
     try {
-      json = JSON.parse(await file.text());
-    } catch {
-      json = { notJson: file.name };
+      next = { id: 'file', json: JSON.parse(await file.text()) as unknown };
+    } catch (e) {
+      next = { id: 'file', json: null, notJson: message(e) };
     }
     setFileName(file.name);
     setOpens((n) => n + 1);
-    setChoice({ id: 'file', json });
+    setChoice(next);
   }
 
   return (
@@ -139,11 +152,12 @@ export default function App({ source, deps }: AppProps) {
               song={loaded.song}
               deps={deps}
               audioStatus={audioStatus}
+              audioError={audioError}
               ensureAudio={ensureAudio}
             />
           </>
         ) : (
-          <SongError detail={loaded.error} />
+          <SongError kind={loaded.error} detail={loaded.detail} fileName={fileName} />
         )}
 
         {deps && (
@@ -191,13 +205,22 @@ function SongSummary({ song, fromFile }: { song: Song; fromFile: string | null }
   );
 }
 
-function SongError({ detail }: { detail: string }) {
+interface SongErrorProps {
+  kind: 'not-json' | 'invalid';
+  detail: string;
+  fileName: string | null;
+}
+
+function SongError({ kind, detail, fileName }: SongErrorProps) {
   return (
     <div className="state state-error" role="alert">
       <h1 className="t-state-title">We couldn't read this song</h1>
       <p className="t-secondary">
-        The song file doesn't match the format Isai expects. Pick an example song above, or
-        open a different .song.json file.
+        {kind === 'not-json'
+          ? `${fileName ?? 'That file'} isn't a song file. Isai opens the .song.json files ` +
+            'its own analysis writes. Pick an example song above, or open a different file.'
+          : "The song file doesn't match the format Isai expects. Pick an example song " +
+            'above, or open a different .song.json file.'}
       </p>
       <p className="t-faint t-mono">{detail}</p>
     </div>
@@ -208,6 +231,7 @@ interface PlaybackProps {
   song: Song;
   deps: AppDeps | undefined;
   audioStatus: AudioStatus;
+  audioError: string | null;
   ensureAudio: () => Promise<LoadedAudio | null>;
 }
 
@@ -216,7 +240,7 @@ interface PlaybackProps {
  * unmounts it and disposes its player. React state changes on play / pause / stop only;
  * the position readout and seek bar are updated from the keyboard's frame loop via refs.
  */
-function Playback({ song, deps, audioStatus, ensureAudio }: PlaybackProps) {
+function Playback({ song, deps, audioStatus, audioError, ensureAudio }: PlaybackProps) {
   const index = useMemo(() => buildNoteIndex(song.notes), [song]);
   const [player, setPlayer] = useState<Player | null>(null);
   const [state, setState] = useState<PlayerState>('stopped');
@@ -276,6 +300,11 @@ function Playback({ song, deps, audioStatus, ensureAudio }: PlaybackProps) {
     [song],
   );
 
+  // A drag can end without pointerup (touch scroll, alt-tab), so every exit clears the flag.
+  const endSeek = () => {
+    seeking.current = false;
+  };
+
   const playing = state === 'playing';
   const loading = audioStatus === 'loading';
   return (
@@ -285,7 +314,7 @@ function Playback({ song, deps, audioStatus, ensureAudio }: PlaybackProps) {
           type="button"
           className="btn btn-primary btn-play"
           aria-label={playing ? 'Pause' : 'Play'}
-          disabled={!deps || loading}
+          disabled={!deps}
           aria-busy={loading}
           onClick={() => void playPause()}
         >
@@ -313,9 +342,10 @@ function Playback({ song, deps, audioStatus, ensureAudio }: PlaybackProps) {
           onPointerDown={() => {
             seeking.current = true;
           }}
-          onPointerUp={() => {
-            seeking.current = false;
-          }}
+          onPointerUp={endSeek}
+          onPointerCancel={endSeek}
+          onLostPointerCapture={endSeek}
+          onBlur={endSeek}
           onChange={(e) => player?.seek(Number(e.target.value))}
         />
         <span className="t-mono" ref={timeRef} aria-live="off">
@@ -323,7 +353,7 @@ function Playback({ song, deps, audioStatus, ensureAudio }: PlaybackProps) {
         </span>
       </div>
 
-      <SoundState status={audioStatus} onRetry={() => void ensureAudio()} />
+      <SoundState status={audioStatus} detail={audioError} onRetry={() => void ensureAudio()} />
 
       <div className="row-between">
         <div className="seg" role="group" aria-label="Keyboard size">
@@ -363,7 +393,13 @@ function Playback({ song, deps, audioStatus, ensureAudio }: PlaybackProps) {
   );
 }
 
-function SoundState({ status, onRetry }: { status: AudioStatus; onRetry: () => void }) {
+interface SoundStateProps {
+  status: AudioStatus;
+  detail: string | null;
+  onRetry: () => void;
+}
+
+function SoundState({ status, detail, onRetry }: SoundStateProps) {
   if (status === 'loading') {
     return (
       <div className="row" role="status">
@@ -372,7 +408,7 @@ function SoundState({ status, onRetry }: { status: AudioStatus; onRetry: () => v
             <span key={i} />
           ))}
         </span>
-        <span className="t-secondary">Tuning the piano…</span>
+        <span className="t-secondary">Tuning the piano… If nothing happens, press Play again.</span>
       </div>
     );
   }
@@ -392,6 +428,7 @@ function SoundState({ status, onRetry }: { status: AudioStatus; onRetry: () => v
         <button type="button" className="btn btn-secondary" onClick={onRetry}>
           Try again
         </button>
+        {detail && <p className="t-faint t-mono">{detail}</p>}
       </div>
     );
   }

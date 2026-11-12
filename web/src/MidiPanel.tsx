@@ -67,9 +67,10 @@ export function MidiPanel({ midi, onConnect, monitor, onMonitorChange }: MidiPan
       setDevices(list);
       setScanned(true);
       if (connected && !list.some((d) => d.id === connected)) {
-        // Unplugged since we connected: drop the stale connection.
-        await midi.disconnect();
+        // Unplugged since we connected: drop the stale connection. Closing a port that
+        // is already gone can fail; the connection is dropped either way.
         setConnected(null);
+        await midi.disconnect().catch(() => undefined);
       }
       setStatus({ kind: 'ready' });
     } catch (e) {
@@ -90,8 +91,14 @@ export function MidiPanel({ midi, onConnect, monitor, onMonitorChange }: MidiPan
   }
 
   async function disconnect() {
-    await midi.disconnect();
-    setConnected(null);
+    try {
+      await midi.disconnect();
+      setConnected(null);
+    } catch (e) {
+      // The port didn't close cleanly. Either way we are no longer listening to it.
+      setConnected(null);
+      setStatus({ kind: 'error', error: errorKind(e) });
+    }
   }
 
   return (

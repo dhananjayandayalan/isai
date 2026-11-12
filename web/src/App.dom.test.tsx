@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { act, Profiler } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import frere from '../../schema/examples/frere-jacques-a-cappella.json';
 import App, { type AppDeps } from './App';
 import { AudioEngine } from './audio/engine';
@@ -35,19 +35,42 @@ interface Harness {
   frames: ManualFrames;
 }
 
-function harness(options: { midi?: MidiInput; sound?: InstrumentSound; failAudio?: boolean } = {}) {
+interface HarnessOptions {
+  midi?: MidiInput;
+  sound?: InstrumentSound;
+  failAudio?: boolean;
+  /** Hold the audio load until the test calls `finishLoading()`. */
+  slowAudio?: boolean;
+}
+
+function harness(options: HarnessOptions = {}) {
   const transport = new FakeTransport();
   const piano = new FakeInstrument(options.sound ?? 'sampled');
   const frames = new ManualFrames();
   const fakeMidi = new FakeMidiInput();
+  const resume = vi.fn(() => Promise.resolve());
   let attempts = 0;
-  const audio = new AudioEngine(() => {
-    attempts++;
-    if (options.failAudio && attempts === 1) return Promise.reject(new Error('no output'));
-    return Promise.resolve({ transport, piano, clock: { now: () => 0, fromDomTimestamp: () => 0 } });
+  let finishLoading = () => undefined as void;
+  const gate = options.slowAudio
+    ? new Promise<void>((resolve) => {
+        finishLoading = resolve;
+      })
+    : Promise.resolve();
+  const audio = new AudioEngine({
+    createContext: () => ({ resume }),
+    load: async () => {
+      attempts++;
+      if (options.failAudio && attempts === 1) throw new Error('no output');
+      await gate;
+      return { transport, piano, clock: { now: () => 0, fromDomTimestamp: () => 0 } };
+    },
   });
   const deps: AppDeps = { audio, midi: options.midi ?? fakeMidi, frames };
-  return { deps, midi: fakeMidi, transport, piano, frames } satisfies Harness;
+  return {
+    ...({ deps, midi: fakeMidi, transport, piano, frames } satisfies Harness),
+    resume,
+    finishLoading: () => finishLoading(),
+  };
 }
 
 let container: HTMLDivElement;
@@ -174,13 +197,66 @@ describe('playback', () => {
     expect(h.transport.state).toBe('started');
   });
 
-  it('offers to try again when sound cannot start', async () => {
+  it('offers to try again when sound cannot start, and keeps the technical detail', async () => {
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => undefined);
     const h = harness({ failAudio: true });
     await render(h.deps);
     await click('Play');
     expect(text()).toContain("Isai couldn't start sound");
+    expect(container.querySelector('.t-faint.t-mono')?.textContent).toBe('no output');
+    expect(logged).toHaveBeenCalled();
     await click('Try again');
     expect(text()).not.toContain("Isai couldn't start sound");
+    logged.mockRestore();
+  });
+
+  it('starts audio inside the click, and Play stays usable while the piano loads', async () => {
+    const h = harness({ slowAudio: true });
+    await render(h.deps);
+    const play = button('Play');
+    // The context must be resumed before the click handler returns, not after a load.
+    act(() => play.click());
+    expect(h.resume).toHaveBeenCalledTimes(1);
+    await act(async () => undefined);
+    expect(text()).toContain('Tuning the piano');
+    expect(play.disabled).toBe(false);
+    // A second click (a browser that ignored the first) resumes the same context again.
+    await click('Play');
+    expect(h.resume).toHaveBeenCalledTimes(2);
+    await act(async () => h.finishLoading());
+    expect(h.transport.state).toBe('started');
+    expect(text()).not.toContain('Tuning the piano');
+  });
+
+  it('stops following the slider only while it is dragged, however the drag ends', async () => {
+    const h = harness();
+    await render(h.deps);
+    await click('Play');
+    const slider = container.querySelector<HTMLInputElement>('input[type=range]');
+    if (!slider) throw new Error('no slider');
+    const frame = (seconds: number) =>
+      act(() => {
+        h.transport.advanceTo(seconds);
+        h.frames.step();
+      });
+    frame(1);
+    expect(Number(slider.value)).toBe(1);
+    for (const end of ['pointerup', 'pointercancel', 'lostpointercapture', 'blur'] as const) {
+      act(() => {
+        slider.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+      });
+      const during = slider.value;
+      frame(h.transport.seconds + 0.5);
+      expect(slider.value).toBe(during); // not dragged around under your finger
+      act(() => {
+        if (end === 'blur') {
+          slider.focus();
+          slider.blur();
+        } else slider.dispatchEvent(new Event(end, { bubbles: true }));
+      });
+      frame(h.transport.seconds + 0.5);
+      expect(Number(slider.value)).toBeCloseTo(h.transport.seconds, 2);
+    }
   });
 
   it('changes the keyboard size and warns about notes that do not fit', async () => {
@@ -207,7 +283,31 @@ describe('playback', () => {
     expect(text()).toContain('From frere.song.json');
     expect(text()).toContain(frere.title);
     await open(new File(['not json'], 'notes.txt'));
-    expect(container.querySelector('[role=alert]')?.textContent).toContain("couldn't read this song");
+    const alert = container.querySelector('[role=alert]')?.textContent ?? '';
+    expect(alert).toContain("couldn't read this song");
+    // Its own message, not a list of schema errors about a made-up document.
+    expect(alert).toContain("notes.txt isn't a song file");
+    expect(alert).not.toContain('schemaVersion');
+    await open(new File([JSON.stringify({ title: 'half a song' })], 'half.json'));
+    const invalid = container.querySelector('[role=alert]')?.textContent ?? '';
+    expect(invalid).toContain("doesn't match the format");
+    expect(invalid).toContain('must have required property');
+  });
+
+  it('pauses the keyboard while the tab is hidden and picks up again after', async () => {
+    const h = harness();
+    await render(h.deps);
+    expect(h.frames.waiting).toBe(1);
+    const setHidden = (hidden: boolean) =>
+      act(() => {
+        Object.defineProperty(document, 'hidden', { value: hidden, configurable: true });
+        document.dispatchEvent(new Event('visibilitychange'));
+      });
+    setHidden(true);
+    expect(h.frames.waiting).toBe(0);
+    setHidden(false);
+    expect(h.frames.waiting).toBe(1);
+    Reflect.deleteProperty(document, 'hidden');
   });
 });
 
@@ -274,6 +374,22 @@ describe('MIDI panel', () => {
     });
     expect(text()).toContain('Fake keyboard is in use by another app');
     expect(button('Scan again')).toBeDefined();
+  });
+
+  it('says so when a keyboard will not disconnect cleanly, and lets go of it anyway', async () => {
+    const midi = new FakeMidiInput();
+    const h = harness({ midi });
+    await render(h.deps);
+    await click('Find my keyboard');
+    await act(async () => {
+      container.querySelector<HTMLInputElement>('input[type=radio]')?.click();
+    });
+    expect(text()).toContain('Connected');
+    midi.disconnect = () => Promise.reject(new Error('port would not close'));
+    await click('Disconnect');
+    expect(container.querySelector('[role=alert]')?.textContent).toContain("We couldn't start MIDI");
+    expect(text()).not.toContain('Connected ·');
+    expect(button('Try again')).toBeDefined();
   });
 
   it('drops a keyboard that was unplugged when you scan again', async () => {

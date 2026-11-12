@@ -25,29 +25,33 @@ function rootColors() {
  * The on-screen piano. React renders the canvas once; a PianoController draws every frame
  * (rule 5). Props change only when the song, size or MIDI input changes, never per note.
  */
-export function Keyboard({ index, source, range, midi, onFrame, frames }: KeyboardProps) {
+export function Keyboard(props: KeyboardProps) {
+  const { index, source, range, midi, onFrame, frames } = props;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const controllerRef = useRef<PianoController | null>(null);
-  const onFrameRef = useRef(onFrame);
-  const rangeRef = useRef(range);
-
+  // The latest props, so a controller created later (a new `frames`) starts from all of
+  // them, not only the ones whose own effect happens to run again.
+  const latest = useRef(props);
   useEffect(() => {
-    onFrameRef.current = onFrame;
-  }, [onFrame]);
+    latest.current = props;
+  });
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    const now = latest.current;
     const options = {
       canvas,
       colors: rootColors(),
-      range: rangeRef.current,
+      range: now.range,
       pixelRatio: window.devicePixelRatio || 1,
-      onFrame: (seconds: number) => onFrameRef.current?.(seconds),
+      onFrame: (seconds: number) => latest.current.onFrame?.(seconds),
     };
     const controller = new PianoController(frames ? { ...options, frames } : options);
+    controller.setSong(now.index, now.source);
+    controller.attachMidi(now.midi);
     controllerRef.current = controller;
-    controller.start();
+    if (!document.hidden) controller.start();
 
     // Pause drawing while the tab is hidden.
     const onVisibility = () => {
@@ -68,13 +72,15 @@ export function Keyboard({ index, source, range, midi, onFrame, frames }: Keyboa
   }, [index, source]);
 
   useEffect(() => {
-    rangeRef.current = range;
     controllerRef.current?.setRange(range);
   }, [range]);
 
   useEffect(() => {
     controllerRef.current?.attachMidi(midi);
   }, [midi]);
+
+  // `onFrame` is read through `latest` every frame, so it needs no effect of its own.
+  void onFrame;
 
   return (
     <div className="piano">
