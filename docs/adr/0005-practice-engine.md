@@ -65,5 +65,12 @@ Option 2. The engine lives in `web/src/engine/practice/` and replaces the P1 pla
   ignores them while holding.
 - Bars come from beats with the first beat as a downbeat, so a song with a pickup bar
   loops one beat off until P3 adds downbeats.
-- The feel of a hold (how late Isai's other hand sounds after your note) depends on real
-  audio latency and can only be judged by hand with a keyboard.
+- A hold is announced (keys lit, "Waiting for …") one lookahead, about 100 ms, before the
+  sound stops, because the transport hands out events ahead of the audio clock. A key
+  pressed in that window counts as on time and nothing pauses audibly.
+- State the learner sees (holding, counting in) comes from what the engine has performed,
+  not from the transport position, which runs behind the engine by that lookahead.
+- Measured in Chrome with the real transport: after a hold, Isai's other-hand note is
+  scheduled at the audio time of the learner's key, so it sounds as soon as the browser
+  can play it. How that feels through real speakers and a real keyboard's latency can
+  only be judged by hand.

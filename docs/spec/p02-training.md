@@ -2,7 +2,7 @@
 id: spec-p02-training
 phase: P2
 title: Training mode — playback waits for the right notes
-status: in-progress
+status: in-review
 track: web
 depends_on: [spec-p01-playback]
 ---
@@ -103,10 +103,10 @@ saved settings (P6–P7). Falling notes, staff and notation choices (P7). Sustai
 
 - [ ] P1 blocking fix merged; P1 marked `done`
 - [ ] Practice-engine ADR accepted
-- [ ] `steps`, `matcher`, `engine` and the bar helper have unit tests for every case above; `engine/` ≥ 90% lines
-- [ ] Training runs end to end on both example songs with `FakeMidiInput`: every step holds, resumes on the right notes, and ignores wrong ones
-- [ ] Speed 40% and 120%, a loop of bars 1–4, the metronome and count-in all work in a DOM test with `FakeTransport`
-- [ ] The extended rule 5 test passes
-- [ ] The rule 6 guard catches the three P1 review bypass forms
+- [x] `steps`, `matcher`, `engine` and the bar helper have unit tests for every case above; `engine/` ≥ 90% lines
+- [x] Training runs end to end on both example songs with `FakeMidiInput`: every step holds, resumes on the right notes, and ignores wrong ones
+- [x] Speed 40% and 120%, a loop of bars 1–4, the metronome and count-in all work in a DOM test with `FakeTransport`
+- [x] The extended rule 5 test passes
+- [x] The rule 6 guard catches the three P1 review bypass forms
 - [ ] By hand in Chrome with a real keyboard (owner): practise each example song right hand, left hand and both at 60%, with a loop
-- [ ] Web lint, typecheck, tests and build pass; `check-tokens.mjs` passes; `/schema-sync` shows no diff
+- [x] Web lint, typecheck, tests and build pass; `check-tokens.mjs` passes; `/schema-sync` shows no diff

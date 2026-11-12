@@ -15,7 +15,7 @@ Nothing in them is built until a phase spec asks for it (CLAUDE.md rule 2).
 | ARCH | [00-architecture.md](00-architecture.md) | all | System architecture: components, data flow, timing, storage, environments | — | draft |
 | P0 | [p00-foundation.md](p00-foundation.md) | both | Repo, Song contract, tooling, skeletons | — | done |
 | P1 | [p01-playback.md](p01-playback.md) | web | Hear and see a Song on a sampled piano; MIDI input | P0 | in-review |
-| P2 | [p02-training.md](p02-training.md) | web | Training mode: playback waits for the right notes | P1 | in-progress |
+| P2 | [p02-training.md](p02-training.md) | web | Training mode: playback waits for the right notes | P1 | in-review |
 | P3 | [p03-analysis-core.md](p03-analysis-core.md) | pipeline | Ingest, tempo and beats, key and scale from real audio | P0 | draft |
 | P4 | [p04-transcription.md](p04-transcription.md) | pipeline | Stem separation, piano transcription, melody tracking | P3 | draft |
 | P5 | [p05-harmony-arranger.md](p05-harmony-arranger.md) | pipeline | Chords and the rule-based two-hand arranger | P4 | draft |
