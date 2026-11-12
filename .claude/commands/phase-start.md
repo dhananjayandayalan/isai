@@ -5,8 +5,10 @@ argument-hint: <phase-id, e.g. P2> [track: pipeline|web|both]
 
 Build phase **$ARGUMENTS** of Isai.
 
-1. **Load context.** Read `CLAUDE.md`, the spec chunks for this phase in `docs/spec/`
-   (match on the `phase:` frontmatter), and every accepted ADR in `docs/adr/`. Read
+1. **Load context.** Read `CLAUDE.md`, `docs/spec/00-architecture.md`, the spec chunks for
+   this phase in `docs/spec/` (match on the `phase:` frontmatter; the spec's `status` must
+   be `ready` or later, otherwise stop and say so), and every accepted ADR in
+   `docs/adr/`. Read
    `schema/song.schema.json` if the phase touches the contract.
 2. **Plan.** Write a short plan to `docs/spec/plans/<phase-id>.md`: goals, files to create
    or change, tests to add, and the exit criteria copied from the spec. Then present it and

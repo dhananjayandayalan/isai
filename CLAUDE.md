@@ -32,7 +32,8 @@ web/                      # React + TypeScript + Vite, pnpm
     engine/               # playback engine, training/performance modes
     theory/               # notation rendering (letter, staff, solfege, swaras, Roman)
     generated/            # types generated from the schema. Never hand-edit.
-docs/spec/                # phased spec, chunked markdown with frontmatter
+docs/spec/                # phased spec P0–P10 + 00-architecture.md, markdown with frontmatter
+docs/reference/           # scaling reference (tiers, capacity, security, ops, launch). Not a spec.
 docs/adr/                 # architecture decision records, NNNN-title.md
 tests/golden/             # manifest of reference songs + expected results
 reports/                  # golden-eval reports (committed)
@@ -62,6 +63,7 @@ reports/                  # golden-eval reports (committed)
 ## Commands
 
 Pipeline (run from `pipeline/`):
+
 - `uv sync` install
 - `uv run pytest` tests; `uv run pytest -m "not slow"` skips GPU/model tests
 - `uv run ruff check . && uv run ruff format --check .` lint
@@ -69,10 +71,12 @@ Pipeline (run from `pipeline/`):
 - `uv run isai analyse <file> --out <dir>` run the full pipeline on one song
 
 Web (run from `web/`):
+
 - `pnpm install`, `pnpm dev`
 - `pnpm test` (Vitest), `pnpm lint`, `pnpm typecheck`
 
 Schema:
+
 - `pnpm --dir web gen:types` and `uv run --directory pipeline gen-models`, or just `/schema-sync`
 
 ## Definition of done (every change)

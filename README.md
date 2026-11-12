@@ -18,7 +18,8 @@ performance modes come in later phases. See `docs/spec/`.
 | `pipeline/` | Python: audio in, Song JSON + MIDI out. |
 | `web/` | React + TypeScript app: piano, playback, training and performance modes. |
 | `design/` | Design tokens, components and the clickable prototype. |
-| `docs/spec/`, `docs/adr/` | Phased spec and architecture decision records. |
+| `docs/spec/`, `docs/adr/` | Phased spec (architecture, P0–P10) and architecture decision records. |
+| `docs/reference/` | Reference for scaling beyond the friends group: tiers, capacity, security, operations, launch. |
 | `tests/golden/` | Reference songs and expected results for `/golden-eval`. |
 
 ## Prerequisites
