@@ -18,11 +18,24 @@ const MIDI_SYNTAX = [
 ].map((selector) => ({ selector, message: MIDI_MESSAGE }));
 
 // CLAUDE.md rule 6: no wall clock or timers in app code, however they are reached
-// (`Date.now`, `performance.now`, `window.performance.now`, `globalThis.setTimeout`, ...).
+// (`Date.now`, `Date['now']`, `new Date()`, `performance.now`, `const { now } = performance`,
+// `window.performance.now`, `globalThis.setTimeout`, ...).
 const CLOCK_SYNTAX = [
-  "MemberExpression[object.name='Date'][property.name='now']",
+  // Any use of the Date object: Date.now, Date['now'], new Date(), Date(), const { now } = Date.
+  "MemberExpression[object.name='Date']",
+  "MemberExpression[object.property.name='Date']",
+  "NewExpression[callee.name='Date']",
+  "NewExpression[callee.property.name='Date']",
+  "CallExpression[callee.name='Date']",
+  "VariableDeclarator[init.name='Date'] > ObjectPattern",
+  // performance.now, however `performance` is reached and however `now` is spelled.
   "MemberExpression[object.name='performance'][property.name='now']",
+  "MemberExpression[object.name='performance'][property.value='now']",
   "MemberExpression[object.property.name='performance'][property.name='now']",
+  "MemberExpression[object.property.name='performance'][property.value='now']",
+  "VariableDeclarator[init.name='performance'] > ObjectPattern > Property[key.name='now']",
+  "VariableDeclarator[init.property.name='performance'] > ObjectPattern > Property[key.name='now']",
+  // Timers.
   "MemberExpression[property.name=/^(setTimeout|setInterval)$/]",
   "MemberExpression[property.value=/^(setTimeout|setInterval)$/]",
   "ObjectPattern > Property[key.name=/^(setTimeout|setInterval)$/]",

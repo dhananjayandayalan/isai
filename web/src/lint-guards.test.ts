@@ -33,6 +33,16 @@ const CLOCK_PROBES = [
   'globalThis.setInterval(() => undefined, 10);',
   "window['setTimeout'](() => undefined, 10);",
   'export const { setTimeout: later } = window;',
+  // The three forms the P1 review found slipping through, and their close relatives.
+  'export const t = new Date().getTime();',
+  "export const t = Date['now']();",
+  'const { now } = performance; export const t = now();',
+  'export const t = new window.Date();',
+  'export const t = Date();',
+  'const { now } = Date; export const t = now();',
+  "export const t = performance['now']();",
+  'const { now } = window.performance; export const t = now();',
+  'export const t = Date.parse("2026-01-01");',
 ];
 
 describe('rule 4 guard: Web MIDI only in src/midi/', () => {
@@ -60,5 +70,13 @@ describe('rule 6 guard: no wall clock or timers in app code', () => {
 
   it('allows requestAnimationFrame, which rule 5 requires', async () => {
     expect(await guardHits('requestAnimationFrame(() => undefined);', 'src/piano/probe.ts')).toBe(0);
+  });
+
+  it.each([
+    'export const t = context.currentTime;',
+    'export const update = (candidate: { now(): number }) => candidate.now();',
+    'export const marks = performance.getEntries();',
+  ])('allows %s, which is not the wall clock', async (code) => {
+    expect(await guardHits(code, 'src/piano/probe.ts')).toBe(0);
   });
 });
