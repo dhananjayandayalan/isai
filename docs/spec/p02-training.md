@@ -2,7 +2,7 @@
 id: spec-p02-training
 phase: P2
 title: Training mode — playback waits for the right notes
-status: draft
+status: in-progress
 track: web
 depends_on: [spec-p01-playback]
 ---
