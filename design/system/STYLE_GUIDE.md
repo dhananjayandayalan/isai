@@ -158,7 +158,7 @@ Copy these shapes. Change the words, not the classes.
 
 **Buttons**: `<button class="btn btn-primary">`, `.btn-secondary`, `.btn-ghost`, `.btn-quiet`; add `.btn-lg` for the main action on a page; `.btn-icon` + `aria-label` for icon-only; `.btn-play` for play/pause. Busy: `disabled aria-busy="true"` and a `.spinner` before the label, and change the label ("Saving…").
 
-**Segmented control**: `<div class="seg" role="group" aria-label="Hands"><button class="seg-btn" aria-pressed="true">Both</button>…</div>`.
+**Segmented control**: `<div class="seg" role="group" aria-label="Hands"><button class="seg-btn" aria-pressed="true">Both</button>…</div>`. A choice that isn't built yet is a `disabled` `.seg-btn` with a `.chip` saying "Coming soon".
 
 **Filters**: `<button class="filter" aria-pressed="false">Carnatic <span class="t-mono">1</span></button>`.
 

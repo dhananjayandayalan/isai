@@ -14,6 +14,8 @@ export interface MidiPanelProps {
   midi: MidiInput;
   /** Called when you pick a keyboard, so audio can start in the same click. */
   onConnect: () => void;
+  /** Called with the connected device's id, or null once nothing is connected. */
+  onConnectionChange?: (deviceId: string | null) => void;
   monitor: boolean;
   onMonitorChange: (monitor: boolean) => void;
 }
@@ -54,11 +56,17 @@ function errorKind(e: unknown): ErrorKind {
  * Find and connect a MIDI keyboard. React state holds only the device list and status;
  * notes never pass through here (rule 5).
  */
-export function MidiPanel({ midi, onConnect, monitor, onMonitorChange }: MidiPanelProps) {
+export function MidiPanel(props: MidiPanelProps) {
+  const { midi, onConnect, onConnectionChange, monitor, onMonitorChange } = props;
   const [status, setStatus] = useState<Status>({ kind: 'idle' });
   const [devices, setDevices] = useState<MidiDevice[]>([]);
-  const [connected, setConnected] = useState<string | null>(null);
+  const [connected, setConnectedId] = useState<string | null>(null);
   const [scanned, setScanned] = useState(false);
+
+  const setConnected = (deviceId: string | null) => {
+    setConnectedId(deviceId);
+    onConnectionChange?.(deviceId);
+  };
 
   async function scan() {
     setStatus({ kind: 'scanning', firstTime: !scanned });

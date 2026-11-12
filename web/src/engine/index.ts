@@ -1,4 +1,4 @@
-// Playback engine. Training and performance modes build on this in a later phase.
+// Engine: what is sounding when, your notes through Isai's piano, and practice.
 export { activeNotesAt, buildNoteIndex, type ActiveNote, type Hand, type NoteIndex } from './activeNotes';
-export { createPlayer, type Player, type PlayerState } from './player';
 export { monitorMidi, type MonitorOptions } from './monitor';
+export * from './practice';

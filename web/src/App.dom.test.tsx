@@ -3,6 +3,7 @@ import { act, Profiler } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import frere from '../../schema/examples/frere-jacques-a-cappella.json';
+import twinkle from '../../schema/examples/twinkle-g-major.json';
 import App, { type AppDeps } from './App';
 import { AudioEngine } from './audio/engine';
 import { FakeInstrument } from './audio/FakeInstrument';
@@ -12,6 +13,7 @@ import { FakeMidiInput } from './midi/FakeMidiInput';
 import type { MidiInput } from './midi/MidiInput';
 import { MidiError } from './midi/WebMidiInput';
 import { ManualFrames, RecordingContext } from './piano/testing';
+import { midiToName } from './theory/pitch';
 
 declare global {
   var IS_REACT_ACT_ENVIRONMENT: boolean;
@@ -32,6 +34,7 @@ interface Harness {
   midi: FakeMidiInput;
   transport: FakeTransport;
   piano: FakeInstrument;
+  metronome: FakeInstrument;
   frames: ManualFrames;
 }
 
@@ -68,7 +71,7 @@ function harness(options: HarnessOptions = {}) {
   });
   const deps: AppDeps = { audio, midi: options.midi ?? fakeMidi, frames };
   return {
-    ...({ deps, midi: fakeMidi, transport, piano, frames } satisfies Harness),
+    ...({ deps, midi: fakeMidi, transport, piano, metronome, frames } satisfies Harness),
     resume,
     finishLoading: () => finishLoading(),
   };
@@ -117,6 +120,38 @@ async function click(name: string) {
 
 const text = () => container.textContent ?? '';
 
+/** A line the frame loop writes through a ref: time, waiting, steps or speed. */
+const readout = (name: string) => container.querySelector(`[data-readout=${name}]`)?.textContent ?? '';
+
+const pressed = (name: string) => button(name).getAttribute('aria-pressed') === 'true';
+
+function group(label: string): HTMLElement | null {
+  return container.querySelector<HTMLElement>(`[role=group][aria-label="${label}"]`);
+}
+
+async function choose(label: string, value: number) {
+  const select = container.querySelector<HTMLSelectElement>(`select[aria-label="${label}"]`);
+  if (!select) throw new Error(`No select "${label}"`);
+  await act(async () => {
+    select.value = String(value);
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+}
+
+const NAME_TO_MIDI = new Map(Array.from({ length: 128 }, (_, midi) => [midiToName(midi), midi]));
+
+/** The keys named on the "Waiting for G4 B4" line, or none when it says something else. */
+function waitingFor(): number[] {
+  const line = readout('waiting');
+  if (!line.startsWith('Waiting for ')) return [];
+  return line
+    .slice('Waiting for '.length)
+    .split(' ')
+    .map((name) => NAME_TO_MIDI.get(name) ?? -1);
+}
+
+const onsOf = (instrument: FakeInstrument) => instrument.calls.filter((c) => c.type === 'on');
+
 describe('rule 5: no React render per note', () => {
   it('200 MIDI notes and 100 playing frames cause no React commits', async () => {
     const h = harness();
@@ -127,7 +162,7 @@ describe('rule 5: no React render per note', () => {
     act(() => h.frames.step()); // settle the first frame after mounting
 
     const before = commits;
-    const readout = container.querySelector('.t-mono')?.textContent;
+    const shown = readout('time');
     act(() => {
       for (let i = 0; i < 200; i++) {
         h.midi.emitNoteOn(40 + (i % 48), { velocity: 90 });
@@ -144,8 +179,69 @@ describe('rule 5: no React render per note', () => {
     const ctx = contexts.at(-1);
     expect(ctx?.ops.length).toBeGreaterThan(0);
     expect(h.piano.calls.filter((c) => c.type === 'on').length).toBeGreaterThan(100);
-    expect(container.querySelector('.t-mono')?.textContent).not.toBe(readout);
-    expect(container.querySelector('.t-mono')?.textContent).toBe('0:03 / 0:09');
+    expect(readout('time')).not.toBe(shown);
+    expect(readout('time')).toBe('0:03 / 0:09');
+  });
+
+  it('a whole training run (every hold and resume, 200+ MIDI events) renders React once, at the end', async () => {
+    const h = harness();
+    await h.midi.connect('fake-keyboard');
+    await render(h.deps);
+    await click('Training');
+    await click('Right hand');
+    await click('Play');
+    act(() => h.frames.step());
+
+    const before = commits;
+    const lines = new Set<string>();
+    let events = 0;
+    let holds = 0;
+    const stopped = () => h.transport.state === 'stopped';
+    for (let guard = 0; guard < 2000 && !stopped(); guard++) {
+      // One act per slice of time, so a stray state update would commit here and be seen.
+      act(() => {
+        h.transport.advanceBy(0.2);
+        h.frames.step();
+        const want = waitingFor();
+        if (want.length === 0) return;
+        holds++;
+        lines.add(readout('waiting'));
+        const time = () => ({ time: h.transport.audioTime });
+        for (let wrong = 100; wrong < 107; wrong++) {
+          h.midi.emitNoteOn(wrong, time());
+          h.midi.emitNoteOff(wrong, time());
+          events += 2;
+        }
+        h.frames.step();
+        expect(h.transport.state).toBe('paused'); // wrong notes never move it on
+        h.transport.wait(0.4);
+        for (const key of want) h.midi.emitNoteOn(key, time());
+        expect(h.transport.state).toBe('started');
+        for (const key of want) h.midi.emitNoteOff(key, time());
+        events += want.length * 2;
+        h.frames.step();
+      });
+      if (!stopped()) expect(commits).toBe(before);
+    }
+
+    // The song ended: the one render, for the Play button and Stop.
+    expect(stopped()).toBe(true);
+    expect(commits).toBe(before + 1);
+    expect(button('Play')).toBeDefined();
+    expect(holds).toBe(14); // every right-hand note of Twinkle
+    expect(events).toBeGreaterThan(200);
+    expect(lines.size).toBeGreaterThan(3); // G4, D5, E5, C5, B4, A4
+
+    act(() => h.frames.step());
+    expect(readout('waiting')).toBe('Press Play to go again.');
+    expect(readout('steps')).toBe('0 of 14 right first time');
+    // Isai played the left hand, and the canvas showed the marks and the step after.
+    const left = twinkle.notes.filter((n) => n.hand === 'left');
+    for (const note of left) expect(onsOf(h.piano).some((c) => c.midi === note.midi)).toBe(true);
+    const ctx = contexts.at(-1);
+    expect(ctx?.circles().length).toBeGreaterThan(14);
+    expect(ctx?.outlines().length).toBeGreaterThan(0);
+    expect(h.piano.sounding.size).toBe(0);
   });
 });
 
@@ -176,10 +272,17 @@ describe('playback', () => {
       setValue?.call(slider, '4.5');
       slider?.dispatchEvent(new Event('input', { bubbles: true }));
     });
-    expect(h.transport.seconds).toBe(4.5);
+    expect(h.transport.state).toBe('started'); // seeking keeps playing
+    act(() => h.frames.step());
+    expect(readout('time')).toBe('0:04 / 0:09');
+    act(() => {
+      h.transport.advanceBy(1);
+      h.frames.step();
+    });
+    expect(readout('time')).toBe('0:05 / 0:09');
   });
 
-  it('switching songs disposes the old player', async () => {
+  it('switching songs disposes the old engine', async () => {
     const h = harness();
     await render(h.deps);
     await click('Play');
@@ -309,6 +412,278 @@ describe('playback', () => {
     setHidden(false);
     expect(h.frames.waiting).toBe(1);
     Reflect.deleteProperty(document, 'hidden');
+  });
+});
+
+describe('practice screen', () => {
+  const frame = (h: { transport: FakeTransport; frames: ManualFrames }, seconds = 0) =>
+    act(() => {
+      if (seconds > 0) h.transport.advanceBy(seconds);
+      h.frames.step();
+    });
+
+  it('starts in Listen, with Performance still to come', async () => {
+    const h = harness();
+    await render(h.deps);
+    expect(pressed('Listen')).toBe(true);
+    expect(pressed('Training')).toBe(false);
+    expect(button('Performance Coming soon').disabled).toBe(true);
+    expect(group('Hands')).toBeNull();
+    expect(container.querySelector('[data-readout=waiting]')?.closest('[hidden]')).not.toBeNull();
+    expect(text()).not.toContain('Connect your MIDI keyboard');
+  });
+
+  it('training offers the hands, what the other hand does, and asks for a keyboard', async () => {
+    const h = harness();
+    await render(h.deps);
+    await click('Training');
+    expect(pressed('Both hands')).toBe(true);
+    expect(group('The other hand')).toBeNull(); // both hands: there is no other hand
+    expect(container.querySelector('[data-readout=waiting]')?.closest('[hidden]')).toBeNull();
+    expect(readout('waiting')).toBe('Press Play, then play the lit keys.');
+    await click('Left hand');
+    expect(pressed('Isai plays it')).toBe(true);
+    await click('Muted');
+    expect(pressed('Muted')).toBe(true);
+
+    expect(text()).toContain('Connect your MIDI keyboard below');
+    await click('Find my keyboard');
+    await act(async () => {
+      container.querySelector<HTMLInputElement>('input[type=radio]')?.click();
+    });
+    expect(text()).not.toContain('Connect your MIDI keyboard below');
+    await click('Disconnect');
+    expect(text()).toContain('Connect your MIDI keyboard below');
+  });
+
+  it('holds at a step, says what it waits for, and carries on when you play it', async () => {
+    const h = harness();
+    await h.midi.connect('fake-keyboard');
+    await render(h.deps);
+    await click('Training');
+    await click('Right hand');
+    await click('Play');
+    frame(h, 0.1);
+    expect(h.transport.state).toBe('paused');
+    expect(readout('waiting')).toBe('Waiting for G4');
+    expect(readout('steps')).toBe('Step 1 of 14 · 0 of 0 right first time');
+    expect(h.piano.sounding.size).toBe(0); // nothing sounds while it waits
+
+    act(() => h.midi.emitNoteOn(60, { time: h.transport.audioTime })); // not in the step
+    act(() => h.midi.emitNoteOff(60));
+    expect(h.transport.state).toBe('paused');
+
+    act(() => h.midi.emitNoteOn(67, { time: h.transport.audioTime }));
+    expect(h.transport.state).toBe('started');
+    act(() => h.midi.emitNoteOff(67));
+    frame(h, 0.05);
+    expect(h.piano.sounding.has(43)).toBe(true); // Isai's left hand comes in with you
+    expect(readout('waiting')).toBe('Next: G4');
+    expect(readout('steps')).toBe('Step 2 of 14 · 0 of 1 right first time');
+
+    // The next one, played cleanly while it waits.
+    frame(h, 1);
+    expect(readout('waiting')).toBe('Waiting for G4');
+    act(() => h.midi.emitNoteOn(67, { time: h.transport.audioTime }));
+    frame(h);
+    expect(readout('steps')).toBe('Step 3 of 14 · 1 of 2 right first time');
+
+    await click('Pause');
+    frame(h);
+    expect(readout('waiting')).toBe('Paused');
+    await click('Stop');
+    frame(h);
+    expect(readout('waiting')).toBe('Press Play to go again.');
+    expect(readout('steps')).toBe('1 of 2 right first time');
+    expect(readout('time')).toBe('0:00 / 0:09');
+  });
+
+  it('mutes the other hand when asked', async () => {
+    const h = harness();
+    await h.midi.connect('fake-keyboard');
+    await render(h.deps);
+    await click('Training');
+    await click('Right hand');
+    await click('Muted');
+    await click("My keyboard's sound"); // so only Isai's own notes reach the piano
+    await click('Play');
+    frame(h, 0.1);
+    act(() => h.midi.emitNoteOn(67, { time: h.transport.audioTime }));
+    frame(h, 0.3);
+    expect(h.transport.state).toBe('started');
+    expect(onsOf(h.piano)).toHaveLength(0);
+  });
+
+  it('listening needs no keyboard and plays both hands', async () => {
+    const h = harness();
+    await render(h.deps);
+    await click('Play');
+    frame(h, 9.7);
+    expect(h.transport.state).toBe('stopped');
+    expect(onsOf(h.piano)).toHaveLength(twinkle.notes.length);
+    expect(button('Play')).toBeDefined();
+  });
+
+  it('plays at 40% and at 120%, with the notes rescheduled when the speed changes', async () => {
+    const h = harness();
+    await render(h.deps);
+    expect(readout('speed')).toBe('100%');
+    for (let i = 0; i < 12; i++) await click('Slower');
+    expect(readout('speed')).toBe('40%');
+    expect(text()).toContain('40 BPM');
+    expect(button('Slower').disabled).toBe(true);
+
+    await click('Play');
+    frame(h, 12); // 12 s at 40% is 4.8 s of the song
+    expect(readout('time')).toBe('0:04 / 0:09');
+    // The second melody note (0.6 s into the song) sounded 1.5 s after Play.
+    const second = onsOf(h.piano).filter((c) => c.midi === 67)[1];
+    expect(second?.time).toBeCloseTo(h.transport.audioOffset + 1.5, 6);
+
+    for (let i = 0; i < 16; i++) await click('Faster');
+    expect(readout('speed')).toBe('120%');
+    expect(text()).toContain('120 BPM');
+    expect(button('Faster').disabled).toBe(true);
+    expect(h.transport.state).toBe('started');
+    frame(h, 1); // 1 s at 120% is 1.2 s of the song: 4.8 -> 6.0
+    expect(readout('time')).toBe('0:06 / 0:09');
+    const sounded = onsOf(h.piano).length;
+    frame(h, 3.1); // the remaining 3.6 s of song take 3 s
+    expect(h.transport.state).toBe('stopped');
+    expect(onsOf(h.piano).length).toBeGreaterThan(sounded);
+    // Every note sounded once, plus those still held when the speed changed (re-sounded).
+    expect(onsOf(h.piano).length).toBeGreaterThanOrEqual(twinkle.notes.length);
+  });
+
+  it('loops bars 1–4, and the bar pickers move the loop', async () => {
+    const h = harness();
+    await render(h.deps);
+    expect(pressed('Loop bars 1–4')).toBe(false);
+    expect(container.querySelector('select')).toBeNull();
+    await click('Loop bars 1–4');
+    expect(pressed('Loop bars 1–4')).toBe(true);
+    expect(container.querySelectorAll('select[aria-label="Loop from"] option')).toHaveLength(4);
+
+    await click('Play');
+    frame(h, 9.6 + 1.5); // once round the four bars, then 1.5 s into the next pass
+    expect(h.transport.state).toBe('started');
+    expect(readout('time')).toBe('0:01 / 0:09');
+    // The opening bass note sounded at the start of each pass, 9.6 s apart: no gap, no stop.
+    const wrapAt = h.transport.audioOffset + 9.6;
+    const bass = onsOf(h.piano).filter((c) => c.midi === 43 && c.time !== undefined);
+    expect(bass[0]?.time).toBeCloseTo(h.transport.audioOffset, 6);
+    expect(bass.some((c) => Math.abs((c.time ?? 0) - wrapAt) < 1e-6)).toBe(true);
+
+    await choose('Loop to', 2);
+    expect(pressed('Loop bars 1–2')).toBe(true);
+    frame(h, 4.8); // bars 1–2 are 4.8 s: round once, back where we were
+    expect(readout('time')).toBe('0:01 / 0:09');
+    frame(h, 2);
+    expect(readout('time')).toBe('0:03 / 0:09');
+
+    await choose('Loop from', 2);
+    expect(pressed('Loop bar 2')).toBe(true);
+    frame(h, 2.4); // bar 2 alone is 2.4 s
+    expect(readout('time')).toBe('0:03 / 0:09');
+
+    // "From" past "To" moves "To" along with it.
+    await choose('Loop from', 3);
+    expect(pressed('Loop bar 3')).toBe(true);
+    await choose('Loop to', 4);
+    await choose('Loop to', 1);
+    expect(pressed('Loop bar 1')).toBe(true);
+
+    await click('Loop bar 1');
+    expect(pressed('Loop bar 1')).toBe(false);
+    frame(h, 10); // no loop: the song runs out
+    expect(h.transport.state).toBe('stopped');
+  });
+
+  it('loops by time when the song has no beats', async () => {
+    const h = harness();
+    await render(h.deps, { ...twinkle, tempo: { ...twinkle.tempo, beats: [] } });
+    await click('Loop 0:00–0:08');
+    const options = [...container.querySelectorAll('select[aria-label="Loop to"] option')];
+    expect(options.map((o) => o.textContent)).toEqual(['0:02', '0:04', '0:06', '0:08', '0:09']);
+    await choose('Loop from', 2);
+    expect(pressed('Loop 0:02–0:08')).toBe(true);
+    await click('Play');
+    frame(h, 6.5);
+    expect(readout('time')).toBe('0:02 / 0:09');
+  });
+
+  it('clicks the metronome on each beat while it is switched on', async () => {
+    const h = harness();
+    await render(h.deps);
+    await click('Play');
+    frame(h, 1);
+    expect(h.metronome.calls).toHaveLength(0);
+    await click('Metronome');
+    expect(pressed('Metronome')).toBe(true);
+    frame(h, 2); // beats at 1.2, 1.8, 2.4 (a downbeat)
+    expect(onsOf(h.metronome).map((c) => c.midi)).toEqual([84, 84, 91]);
+    await click('Metronome');
+    frame(h, 2);
+    expect(onsOf(h.metronome)).toHaveLength(3);
+  });
+
+  it('counts in one bar before the song starts', async () => {
+    const h = harness();
+    await h.midi.connect('fake-keyboard');
+    await render(h.deps);
+    await click('Training');
+    await click('Count-in');
+    expect(pressed('Count-in')).toBe(true);
+    await click('Play');
+    frame(h, 2.3); // a bar of Twinkle is 2.4 s
+    expect(readout('waiting')).toBe('Count-in…');
+    expect(readout('time')).toBe('0:00 / 0:09');
+    expect(onsOf(h.metronome).map((c) => c.midi)).toEqual([91, 84, 84, 84]);
+    expect(onsOf(h.piano)).toHaveLength(0);
+    frame(h, 0.2);
+    expect(readout('waiting')).toBe('Waiting for G2 G4');
+    expect(onsOf(h.metronome)).toHaveLength(4); // the metronome itself is off
+  });
+
+  it('does not ask for notes that are off your keyboard', async () => {
+    const h = harness();
+    await h.midi.connect('fake-keyboard');
+    const low = { ...frere, notes: [{ ...frere.notes[0], midi: 30 }, ...frere.notes.slice(1)] };
+    await render(h.deps, low);
+    await click('Training');
+    await click('Play');
+    frame(h, 0.1);
+    expect(readout('waiting')).toBe('Waiting for F#1'); // it fits on 88 keys
+    await click('49 keys');
+    expect(text()).toContain('and training skips them');
+    frame(h, 0.6);
+    expect(readout('waiting')).toBe('Waiting for G4');
+    expect(readout('steps')).toBe('Step 1 of 7 · 0 of 0 right first time');
+  });
+
+  it('says so when the hand you picked has nothing to play', async () => {
+    const h = harness();
+    await render(h.deps, frere);
+    await click('Training');
+    await click('Left hand');
+    await click('Play');
+    frame(h, 0.5);
+    expect(h.transport.state).toBe('started');
+    expect(readout('waiting')).toBe('There are no notes for this hand here.');
+    expect(readout('steps')).toBe('');
+  });
+
+  it('keeps the choices made before the first Play', async () => {
+    const h = harness();
+    await h.midi.connect('fake-keyboard');
+    await render(h.deps);
+    await click('Training');
+    await click('Left hand');
+    await click('Slower');
+    await click('Play');
+    frame(h, 0.1);
+    expect(readout('waiting')).toBe('Waiting for G2');
+    expect(readout('speed')).toBe('95%');
   });
 });
 
