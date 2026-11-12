@@ -70,7 +70,9 @@ The pipeline is unchanged except for the open P0 review tidy-ups. Songs still co
 - `Keyboard.ts`: a canvas renderer driven by `requestAnimationFrame`. On each frame it
   reads `activeNotes(transport.seconds)` plus a held-keys buffer filled by `MidiInput`
   listeners (refs and typed arrays, no React state). Drawing follows the design tokens:
-  keys use `--piano-*`, song notes use `--hand-right` / `--hand-left`, and your notes use
+  keys use `--piano-*`, song notes use `--piano-pill-right` / `--piano-pill-left` with a
+  `--piano-pill-edge` outline (the `--hand-*` tokens were invisible on white keys in the
+  dark theme; see the plan), and your notes use
   `--piano-white-active` / `--piano-black-active`. Song notes outside the range show as a
   marker at that end of the keyboard. It stops its rAF loop when unmounted or when the
   tab is hidden.

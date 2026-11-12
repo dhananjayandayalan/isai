@@ -60,11 +60,12 @@ ADR 0004 accepted. `tone` and `jsdom` approved; `@testing-library/react` wasn't 
 ## Open before `done`
 
 Blocking (from `reports/review-P1.md`):
-- [ ] **Start audio inside the click.** Create the `AudioContext` and call `resume()`
+- [x] **Start audio inside the click.** Create the `AudioContext` and call `resume()`
   synchronously at the start of `AudioEngine.load()`, before any `await`. Inject the
   context factory. Keep Play clickable while loading. Test that the factory runs
   synchronously. Without this, WebKit (Safari, iOS, a future Tauri shell) never starts
-  audio.
+  audio. *(Done on `p2-training`: `AudioEngine` takes `createContext` and `load(context)`;
+  tested in `audio.test.ts` and `App.dom.test.tsx`.)*
 
 Owner:
 - [ ] By-hand check in Chrome with a real MIDI keyboard, with DevTools open (the headless

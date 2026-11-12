@@ -51,6 +51,18 @@ Use option 2.
   (rule 8 tooling blocks audio files); self-hosting comes with deployment.
 - **Deferred.** Output latency compensation and calibration, and a second instrument.
 
+### Notes added after P1 (2026-11-12; no change to the decision)
+
+- **Tone runs on a native `AudioContext`.** The `standardized-audio-context` wrapper Tone
+  creates by default has no `getOutputTimestamp()`, which the MIDI time mapping above
+  needs. So the app creates a native `AudioContext` and hands it to `Tone.setContext`.
+  Anyone changing `web/src/audio/tone.ts` should keep that.
+- **The context starts inside the click.** "Loaded on the first user gesture" means the
+  `AudioContext` is created and `resume()` is called synchronously in the click handler
+  (`AudioEngine.load()`), before the `tone` chunk is fetched. WebKit (Safari, iOS, a Tauri
+  shell on macOS) only starts audio that begins inside the gesture. Every later click
+  resumes the context again, so a suspended context always has a way out.
+
 ## Consequences
 
 - Swapping Tone.js later means rewriting one file plus its fakes, not the engine.

@@ -155,13 +155,41 @@
         <div class="note-left" style="position: absolute; left: 40%; bottom: 0; width: 44px; height: 110px"></div>
         <div class="note-ghost" style="position: absolute; left: 60%; bottom: 0; width: 44px; height: 80px"></div>
       </div>
+      <div class="stack-2">
+        <span class="t-muted">Range (seek bar), enabled and disabled</span>
+        <input type="range" class="range" aria-label="Position" min="0" max="100" value="35">
+        <input type="range" class="range" aria-label="Position (disabled)" min="0" max="100" value="35" disabled>
+      </div>
+      <span class="t-muted">Piano frame with static keys</span>
       <div class="piano row" style="gap: 3px; flex-wrap: nowrap; height: 90px">
         <span class="piano-key-white" style="flex: 1; height: 100%"></span><span class="piano-key-white" style="flex: 1; height: 100%"></span><span class="piano-key-white" style="flex: 1; height: 100%"></span><span class="piano-key-white" style="flex: 1; height: 100%"></span><span class="piano-key-white" style="flex: 1; height: 100%"></span><span class="piano-key-white" style="flex: 1; height: 100%"></span><span class="piano-key-white" style="flex: 1; height: 100%"></span>
       </div>
+      <span class="t-muted">Piano frame with <code>.piano-canvas</code> (drawn here from the fixed piano tokens)</span>
+      <div class="piano"><canvas class="piano-canvas" id="piano-canvas" role="img" aria-label="Piano canvas sample"></canvas></div>
     </div>
   </section>
 </div>
 <script>
+  // .piano-canvas sample: seven white keys and five black keys, one song-note pill per hand.
+  (function () {
+    const canvas = document.getElementById('piano-canvas');
+    const token = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+    const width = canvas.clientWidth, height = 90, ratio = window.devicePixelRatio || 1;
+    canvas.style.height = height + 'px';
+    canvas.width = width * ratio; canvas.height = height * ratio;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(ratio, ratio);
+    ctx.fillStyle = token('--piano-frame'); ctx.fillRect(0, 0, width, height);
+    const w = width / 7;
+    for (let i = 0; i < 7; i++) { ctx.fillStyle = token('--piano-white'); ctx.fillRect(i * w + 1, 0, w - 2, height); }
+    for (const i of [1, 2, 4, 5, 6]) { ctx.fillStyle = token('--piano-black'); ctx.fillRect(i * w - w * 0.29, 0, w * 0.58, height * 0.62); }
+    const pill = (i, fill) => {
+      ctx.fillStyle = token(fill); ctx.strokeStyle = token('--piano-pill-edge'); ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.rect(i * w + w * 0.2, height - 22, w * 0.6, 14); ctx.fill(); ctx.stroke();
+    };
+    pill(0, '--piano-pill-left'); pill(4, '--piano-pill-right');
+  })();
+
   // Colour swatches, read from the live tokens.
   const names = ['bg','bg-deep','sidebar','surface','surface-sunken','surface-raised','fill','fill-strong','border','border-strong','text','text-2','text-3','text-4','accent','on-accent','data-1','data-2','data-3','data-4','hand-left','inverse'];
   const box = document.getElementById('swatches');
