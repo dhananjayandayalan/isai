@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { AudioEngine } from './engine';
 import { FakeInstrument } from './FakeInstrument';
 import { FakeTransport } from './FakeTransport';
+import { instrumentPart } from './parts';
 import { DEFAULT_SAMPLES_URL, salamanderUrls } from './tone';
 import type { LoadedAudio } from './types';
 
@@ -253,6 +254,88 @@ describe('FakeInstrument', () => {
     piano.releaseAll();
     expect(piano.sounding.size).toBe(0);
     expect(piano.calls.map((c) => c.type)).toEqual(['on', 'on', 'off', 'releaseAll']);
+  });
+});
+
+describe('instrumentPart', () => {
+  const offs = (piano: FakeInstrument) => piano.calls.filter((c) => c.type === 'off');
+
+  it('hands back the same part for the same instrument and owner', () => {
+    const piano = new FakeInstrument();
+    expect(instrumentPart(piano, 'isai')).toBe(instrumentPart(piano, 'isai'));
+    expect(instrumentPart(piano, 'isai')).not.toBe(instrumentPart(piano, 'learner'));
+    expect(instrumentPart(new FakeInstrument(), 'isai')).not.toBe(instrumentPart(piano, 'isai'));
+    expect(instrumentPart(piano, 'isai').loaded).toBe(piano.loaded);
+  });
+
+  it('plays and releases a note like the instrument itself', () => {
+    const piano = new FakeInstrument();
+    const isai = instrumentPart(piano, 'isai');
+    isai.noteOn(60, 90, 1);
+    isai.noteOff(60, 2);
+    expect(piano.calls).toEqual([
+      { type: 'on', midi: 60, velocity: 90, time: 1 },
+      { type: 'off', midi: 60, time: 2 },
+    ]);
+  });
+
+  it('keeps a key sounding until every part has let go of it', () => {
+    const piano = new FakeInstrument();
+    const isai = instrumentPart(piano, 'isai');
+    const learner = instrumentPart(piano, 'learner');
+    isai.noteOn(60, 80, 1);
+    learner.noteOn(60, 100);
+    isai.noteOff(60, 2); // the learner still holds the key
+    expect(offs(piano)).toEqual([]);
+    expect(piano.sounding.has(60)).toBe(true);
+    learner.noteOff(60);
+    expect(offs(piano)).toEqual([{ type: 'off', midi: 60, time: undefined }]);
+    // ...and the other way round.
+    learner.noteOn(62, 100);
+    isai.noteOn(62, 80, 3);
+    learner.noteOff(62);
+    expect(piano.sounding.has(62)).toBe(true);
+    isai.noteOff(62, 4);
+    expect(piano.sounding.has(62)).toBe(false);
+  });
+
+  it('ignores a note-off for a key the part is not holding', () => {
+    const piano = new FakeInstrument();
+    const isai = instrumentPart(piano, 'isai');
+    const learner = instrumentPart(piano, 'learner');
+    learner.noteOn(60, 100);
+    isai.noteOff(60, 1);
+    isai.noteOff(200, 1);
+    expect(offs(piano)).toEqual([]);
+    learner.noteOff(60);
+    learner.noteOff(60);
+    expect(offs(piano)).toHaveLength(1);
+  });
+
+  it('counts a key struck twice by one part once', () => {
+    const piano = new FakeInstrument();
+    const isai = instrumentPart(piano, 'isai');
+    isai.noteOn(60, 80, 1);
+    isai.noteOn(60, 80, 2);
+    isai.noteOff(60, 3);
+    expect(piano.sounding.has(60)).toBe(false);
+    expect(piano.calls.filter((c) => c.type === 'on')).toHaveLength(2);
+  });
+
+  it('releaseAll only stops what the part started', () => {
+    const piano = new FakeInstrument();
+    const isai = instrumentPart(piano, 'isai');
+    const learner = instrumentPart(piano, 'learner');
+    isai.noteOn(48, 80, 1);
+    isai.noteOn(60, 80, 1);
+    learner.noteOn(60, 100);
+    learner.noteOn(72, 100);
+    isai.releaseAll(5);
+    expect(offs(piano)).toEqual([{ type: 'off', midi: 48, time: 5 }]);
+    expect([...piano.sounding].sort()).toEqual([60, 72]);
+    expect(piano.calls.some((c) => c.type === 'releaseAll')).toBe(false);
+    learner.releaseAll();
+    expect(piano.sounding.size).toBe(0);
   });
 });
 

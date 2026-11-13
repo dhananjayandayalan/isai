@@ -15,3 +15,4 @@ export {
 } from './engine';
 export { FakeTransport } from './FakeTransport';
 export { FakeInstrument, type InstrumentCall } from './FakeInstrument';
+export { instrumentPart } from './parts';

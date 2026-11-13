@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent } f
 import frere from '../../schema/examples/frere-jacques-a-cappella.json';
 import twinkle from '../../schema/examples/twinkle-g-major.json';
 import type { AudioSource } from './audio/engine';
+import { instrumentPart } from './audio/parts';
 import type { LoadedAudio } from './audio/types';
 import { monitorMidi } from './engine/monitor';
 import type { MidiInput } from './midi/MidiInput';
@@ -66,7 +67,11 @@ export default function App({ source, deps }: AppProps) {
   useEffect(() => {
     if (!deps) return undefined;
     return monitorMidi(deps.midi, {
-      instrument: () => deps.audio.loaded?.piano ?? null,
+      // The learner's part of the piano: Isai's notes on the same keys are left alone.
+      instrument: () => {
+        const piano = deps.audio.loaded?.piano;
+        return piano ? instrumentPart(piano, 'learner') : null;
+      },
       enabled: () => monitorRef.current,
     });
   }, [deps]);

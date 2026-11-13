@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { instrumentPart } from './audio/parts';
 import type { InstrumentSound, LoadedAudio } from './audio/types';
 import { buildNoteIndex } from './engine/activeNotes';
 import { barRange, barsOfSong } from './engine/practice/bars';
@@ -160,7 +161,7 @@ export function Practice(props: PracticeProps) {
     const created = new PracticeEngine({
       song,
       transport: audio.transport,
-      piano: audio.piano,
+      piano: instrumentPart(audio.piano, 'isai'),
       metronome: audio.metronome,
       clock: audio.clock,
       midi,

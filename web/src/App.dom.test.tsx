@@ -524,6 +524,25 @@ describe('practice screen', () => {
     expect(button('Play')).toBeDefined();
   });
 
+  it("keeps your notes and Isai's apart on the one piano", async () => {
+    const h = harness();
+    await h.midi.connect('fake-keyboard');
+    await render(h.deps);
+    await click('Play'); // Listen: Isai plays both hands
+    frame(h, 0.1);
+    expect(h.piano.sounding.has(67)).toBe(true); // Isai's first melody note
+    // Playing along on the same key and letting go doesn't cut Isai's note...
+    act(() => h.midi.emitNoteOn(67, { velocity: 90 }));
+    act(() => h.midi.emitNoteOff(67));
+    expect(h.piano.sounding.has(67)).toBe(true);
+    // ...and stopping Isai doesn't cut a key you are still holding.
+    act(() => h.midi.emitNoteOn(84, { velocity: 90 }));
+    await click('Stop');
+    expect([...h.piano.sounding]).toEqual([84]);
+    act(() => h.midi.emitNoteOff(84));
+    expect(h.piano.sounding.size).toBe(0);
+  });
+
   it('plays at 40% and at 120%, with the notes rescheduled when the speed changes', async () => {
     const h = harness();
     await render(h.deps);
