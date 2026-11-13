@@ -96,6 +96,62 @@ const training = (extra: Partial<PracticeSettings> = {}): Partial<PracticeSettin
   ...extra,
 });
 
+// The learner's keys sound through the same piano ("Play my notes through Isai"). The
+// engine may only stop the notes it started.
+describe('a note the engine did not start', () => {
+  const LEARNER = 72;
+  /** A song with a long note, so the engine always has something of its own to cut. */
+  const playing = (settings: Partial<PracticeSettings> = {}) => {
+    const made = setup([note(0, 8, 48, 'left'), note(0, 1, 60), note(1, 2, 62), note(2, 3, 64)], { settings });
+    made.engine.play();
+    made.transport.advanceTo(1.2);
+    made.piano.noteOn(LEARNER, 90); // as `monitorMidi` does for a key the learner holds
+    return made;
+  };
+  const stillRinging = (piano: FakeInstrument) => {
+    expect(piano.sounding.has(LEARNER)).toBe(true);
+    expect(piano.calls.some((c) => c.type === 'releaseAll')).toBe(false);
+  };
+
+  it('rings on through a seek, which cuts the engine notes', () => {
+    const { piano, engine } = playing();
+    engine.seek(9);
+    expect(piano.sounding.has(48)).toBe(false);
+    stillRinging(piano);
+  });
+
+  it('rings on through a change of speed', () => {
+    const { piano, engine, transport } = playing();
+    engine.configure({ speed: 0.5 });
+    transport.advanceBy(0.5);
+    stillRinging(piano);
+  });
+
+  it('rings on through pause and stop', () => {
+    const { piano, engine } = playing();
+    engine.pause();
+    expect(piano.sounding.has(48)).toBe(false);
+    stillRinging(piano);
+    engine.stop();
+    stillRinging(piano);
+  });
+
+  it('rings on through a loop wrap', () => {
+    const { piano, engine, transport } = playing({ loop: { start: 1, end: 3 } });
+    transport.advanceBy(4);
+    expect(engine.loopPasses).toBeGreaterThan(1);
+    stillRinging(piano);
+  });
+
+  it('rings on past the end of the song', () => {
+    const { piano, engine, transport } = playing();
+    transport.advanceBy(20);
+    expect(engine.state).toBe('stopped');
+    expect(piano.sounding.has(48)).toBe(false);
+    stillRinging(piano);
+  });
+});
+
 describe('listening (the P1 player, on the practice engine)', () => {
   it('sounds note-on and note-off on the audio clock with velocity', () => {
     const { transport, piano, engine } = setup([note(1, 2, 60, 'right', 90), note(0, 1.5, 48, 'left', 50)]);
@@ -162,7 +218,10 @@ describe('listening (the P1 player, on the practice engine)', () => {
       [60, 106],
     ]);
     transport.advanceBy(2);
-    expect(offs(piano)).toEqual([[60, 108]]);
+    expect(offs(piano)).toEqual([
+      [60, undefined], // the pause, at once
+      [60, 108],
+    ]);
     expect(piano.sounding.size).toBe(0);
   });
 
@@ -176,7 +235,8 @@ describe('listening (the P1 player, on the practice engine)', () => {
     transport.advanceBy(4);
     // 60 is still held at 2, so it sounds again there; 59 ended before 2 and does not.
     expect(ons(piano).map(([midi]) => midi)).toEqual([59, 60, 60, 62]);
-    expect(offs(piano).map(([midi]) => midi)).toEqual([60, 62]);
+    // The seek cuts 59 and 60; then 60 and 62 end in the song.
+    expect(offs(piano).map(([midi]) => midi)).toEqual([59, 60, 60, 62]);
     expect(piano.sounding.size).toBe(0);
   });
 
@@ -216,13 +276,15 @@ describe('listening (the P1 player, on the practice engine)', () => {
   });
 
   it('stops at the end of the song, releasing at the scheduled time', () => {
-    const { transport, engine, states, piano } = setup([note(0, 1, 60)], { durationSec: 2 });
+    // The note runs past the end of the song.
+    const { transport, engine, states, piano } = setup([note(0, 2.5, 60)], { durationSec: 2 });
     engine.play();
     transport.advanceTo(10);
     expect(engine.state).toBe('stopped');
     expect(engine.seconds).toBe(0);
     expect(states).toEqual(['playing', 'stopped']);
-    expect(piano.calls.at(-1)).toEqual({ type: 'releaseAll', time: 102 });
+    expect(piano.calls.at(-1)).toEqual({ type: 'off', midi: 60, time: 102 });
+    expect(piano.sounding.size).toBe(0);
     expect(transport.state).toBe('stopped');
     expect(transport.scheduledCount).toBe(0);
     // ...and it can be played again from the top.
@@ -662,7 +724,7 @@ describe('training: seek, pause and stop while holding', () => {
     const { transport, piano, press } = held();
     press(60);
     transport.advanceBy(5); // holding at D4; C3 has been sounding since the first step
-    expect(piano.calls.filter((c) => c.type === 'releaseAll')).toHaveLength(1); // only the one from Play
+    expect(offs(piano)).toEqual([]);
     expect(piano.sounding.has(48)).toBe(true);
     press(62);
     transport.advanceBy(0.5);
@@ -782,11 +844,10 @@ describe('loop', () => {
     });
     engine.play();
     transport.advanceTo(2.5);
-    const c3 = piano.calls.filter((c) => c.type === 'releaseAll' || (c.type === 'on' && c.midi === 48));
+    const c3 = piano.calls.filter((c) => c.type !== 'releaseAll' && c.midi === 48);
     expect(c3).toEqual([
-      { type: 'releaseAll', time: undefined }, // Play
       { type: 'on', midi: 48, velocity: 80, time: 100 },
-      { type: 'releaseAll', time: 102 }, // the wrap
+      { type: 'off', midi: 48, time: 102 }, // the wrap
       { type: 'on', midi: 48, velocity: 80, time: 102 },
     ]);
     expect(piano.sounding.has(48)).toBe(true);

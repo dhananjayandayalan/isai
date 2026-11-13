@@ -694,9 +694,7 @@ export class PracticeEngine implements PracticeView {
         // A new loop pass: cut what the last one left sounding, and start its steps again.
         const pass = event.pass;
         if (!pass) return;
-        this.piano.releaseAll(time);
-        this.sounding.fill(0);
-        this.active.fill(0);
+        this.silence(time);
         this.passes = this.passes.filter((p) => p.id >= pass.id - 1);
         this.wraps++;
         // Keep the matcher's memory: the first step has been its target since the last
@@ -706,12 +704,10 @@ export class PracticeEngine implements PracticeView {
       }
       case 'end':
         // Release at the scheduled time, not "now": the transport works ahead of the sound.
-        this.piano.releaseAll(time);
+        this.silence(time);
         this.transport.stop(time);
         this.running = false;
         this.cancelAll();
-        this.sounding.fill(0);
-        this.active.fill(0);
         this.position = this.startPosition();
         this.moveCursor(firstStepAt(this.steps, this.position));
         this.setState('stopped');
@@ -742,8 +738,14 @@ export class PracticeEngine implements PracticeView {
     this.passes = [];
   }
 
-  private silence(): void {
-    this.piano.releaseAll();
+  /**
+   * Stop the notes the engine started, at `time` (now if omitted). Not `releaseAll`: the
+   * learner's own notes sound through the same piano and must ring on.
+   */
+  private silence(time?: number): void {
+    for (let key = 0; key < this.sounding.length; key++) {
+      if ((this.sounding[key] ?? 0) > 0) this.piano.noteOff(key, time);
+    }
     this.sounding.fill(0);
     this.active.fill(0);
   }
