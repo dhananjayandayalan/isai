@@ -74,6 +74,26 @@ describe('rule 6 guard: no wall clock or timers in app code', () => {
     expect(await guardHits(code, 'src/piano/probe.test.ts')).toBe(0);
   });
 
+  // ADR 0006: one file may use Date, for the calendar date of a saved session.
+  const DATE_PROBES = CLOCK_PROBES.filter((code) => code.includes('Date'));
+  const TIMER_PROBES = CLOCK_PROBES.filter((code) => !code.includes('Date'));
+
+  it('splits the probes into dates and timers', () => {
+    expect(DATE_PROBES.length).toBeGreaterThan(4);
+    expect(TIMER_PROBES.length).toBeGreaterThan(4);
+  });
+
+  it.each(DATE_PROBES)('allows %s in src/sessions/wallClock.ts only', async (code) => {
+    expect(await guardHits(code, 'src/sessions/wallClock.ts')).toBe(0);
+    expect(await guardHits(code, 'src/sessions/store.ts')).toBeGreaterThan(0);
+    expect(await guardHits(code, 'src/sessions/wallClock2.ts')).toBeGreaterThan(0);
+    expect(await guardHits(code, 'src/settings/wallClock.ts')).toBeGreaterThan(0);
+  });
+
+  it.each(TIMER_PROBES)('still flags %s in src/sessions/wallClock.ts', async (code) => {
+    expect(await guardHits(code, 'src/sessions/wallClock.ts')).toBeGreaterThan(0);
+  });
+
   it('allows requestAnimationFrame, which rule 5 requires', async () => {
     expect(await guardHits('requestAnimationFrame(() => undefined);', 'src/piano/probe.ts')).toBe(0);
   });

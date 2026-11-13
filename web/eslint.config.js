@@ -20,14 +20,17 @@ const MIDI_SYNTAX = [
 // CLAUDE.md rule 6: no wall clock or timers in app code, however they are reached
 // (`Date.now`, `Date['now']`, `new Date()`, `performance.now`, `const { now } = performance`,
 // `window.performance.now`, `globalThis.setTimeout`, ...).
-const CLOCK_SYNTAX = [
-  // Any use of the Date object: Date.now, Date['now'], new Date(), Date(), const { now } = Date.
+// Any use of the Date object: Date.now, Date['now'], new Date(), Date(), const { now } = Date.
+const DATE_SYNTAX = [
   "MemberExpression[object.name='Date']",
   "MemberExpression[object.property.name='Date']",
   "NewExpression[callee.name='Date']",
   "NewExpression[callee.property.name='Date']",
   "CallExpression[callee.name='Date']",
   "VariableDeclarator[init.name='Date'] > ObjectPattern",
+].map((selector) => ({ selector, message: CLOCK_MESSAGE }));
+
+const TIMER_SYNTAX = [
   // performance.now, however `performance` is reached and however `now` is spelled.
   "MemberExpression[object.name='performance'][property.name='now']",
   "MemberExpression[object.name='performance'][property.value='now']",
@@ -40,6 +43,8 @@ const CLOCK_SYNTAX = [
   "MemberExpression[property.value=/^(setTimeout|setInterval)$/]",
   "ObjectPattern > Property[key.name=/^(setTimeout|setInterval)$/]",
 ].map((selector) => ({ selector, message: CLOCK_MESSAGE }));
+
+const CLOCK_SYNTAX = [...DATE_SYNTAX, ...TIMER_SYNTAX];
 
 const CLOCK_GLOBALS = ['setTimeout', 'setInterval'].map((name) => ({ name, message: CLOCK_MESSAGE }));
 
@@ -80,6 +85,14 @@ export default tseslint.config(
     rules: {
       'no-restricted-syntax': ['error', ...CLOCK_SYNTAX],
       'no-restricted-imports': 'off',
+    },
+  },
+  {
+    // The one exception to rule 6 (ADR 0006): calendar dates for saved sessions. `Date` is
+    // allowed in this file only, and still no timers or performance.now.
+    files: ['src/sessions/wallClock.ts'],
+    rules: {
+      'no-restricted-syntax': ['error', ...MIDI_SYNTAX, ...TIMER_SYNTAX],
     },
   },
   {
