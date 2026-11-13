@@ -74,3 +74,9 @@ Option 2. The engine lives in `web/src/engine/practice/` and replaces the P1 pla
   scheduled at the audio time of the learner's key, so it sounds as soon as the browser
   can play it. How that feels through real speakers and a real keyboard's latency can
   only be judged by hand.
+- A resume skips at most 0.3 s of the transport to catch up with the learner's note. An
+  output with more latency than that (some Bluetooth speakers) hears Isai come back in a
+  little late after each hold.
+- The learner's keys and Isai's notes sound through one piano. The engine only stops the
+  notes it started, and each of the two plays through its own part of the instrument
+  (`audio/parts.ts`), so neither can cut the other's note, even on the same key.

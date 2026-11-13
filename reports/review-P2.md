@@ -153,3 +153,21 @@ not merged or `done`. The by-hand keyboard check is **pending**, not failed.
   Suggestion 3 is a slightly larger change in the instrument wrapper.
 - **Docs only:** suggestion 7 (a line in ADR 0005).
 - **Owner:** everything under Pending, and suggestions 4 and 10 need a decision.
+
+## Follow-up (2026-11-13, same branch)
+
+The owner asked to carry on, so the fixes that need no decision are in:
+
+| Item | Commit | Result |
+|---|---|---|
+| Blocking 1 | `fix(engine): only stop the notes the engine started` | Five new engine tests: a note the engine didn't start rings on through a seek, a speed change, pause and stop, a loop wrap and the end of the song. |
+| Suggestion 3 | `fix(audio): the learner and Isai each hold their own part of the piano` | `web/src/audio/parts.ts`, 100% lines; six unit tests and one DOM test. |
+| Suggestions 1, 2, 5 | `refactor(web): P2 review suggestions 1, 2 and 5` | No behaviour change apart from the wording. |
+| Suggestion 7 | `docs` | A line in ADR 0005. |
+
+Checks after the fixes: lint and typecheck pass; 375 tests in 15 files pass, 96.4% lines;
+build passes (main 317.4 kB, 92.0 kB gzip); `check-tokens.mjs` passes.
+
+**Verdict now: ready, once the owner's items are done** (accept ADR 0005, merge P1, the
+by-hand check, and a yes or no on the two differences from the spec). Suggestions 4, 6, 8,
+9, 10 and 11 are open.
