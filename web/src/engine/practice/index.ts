@@ -20,14 +20,7 @@ export {
 } from './matcher';
 export {
   DEFAULT_SETTINGS,
-  FLASH_CORRECT,
-  FLASH_SECONDS,
-  FLASH_WRONG,
   HOLD_LEAD,
-  KEY_EXPECT_LEFT,
-  KEY_EXPECT_RIGHT,
-  KEY_NEXT_LEFT,
-  KEY_NEXT_RIGHT,
   MAX_SPEED,
   MIN_SPEED,
   POLICIES,
@@ -40,6 +33,15 @@ export {
   type PracticePolicy,
   type PracticeSettings,
   type PracticeState,
-  type PracticeView,
   type StepEvent,
 } from './engine';
+export {
+  FLASH_CORRECT,
+  FLASH_SECONDS,
+  FLASH_WRONG,
+  KEY_EXPECT_LEFT,
+  KEY_EXPECT_RIGHT,
+  KEY_NEXT_LEFT,
+  KEY_NEXT_RIGHT,
+  type PracticeView,
+} from './view';

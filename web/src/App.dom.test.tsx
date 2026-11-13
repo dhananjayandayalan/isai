@@ -367,10 +367,10 @@ describe('playback', () => {
     const h = harness();
     const low = { ...frere, notes: [{ ...frere.notes[0], midi: 30 }, ...frere.notes.slice(1)] };
     await render(h.deps, low);
-    expect(text()).not.toContain("don't fit");
+    expect(text()).not.toContain("fit on");
     await click('49 keys');
     expect(button('49 keys').getAttribute('aria-pressed')).toBe('true');
-    expect(text()).toContain("1 notes don't fit on 49 keys");
+    expect(text()).toContain("1 note doesn't fit on 49 keys");
   });
 
   it('opens a .song.json file, and shows an error for one that is not a song', async () => {
@@ -655,7 +655,7 @@ describe('practice screen', () => {
     frame(h, 0.1);
     expect(readout('waiting')).toBe('Waiting for F#1'); // it fits on 88 keys
     await click('49 keys');
-    expect(text()).toContain('and training skips them');
+    expect(text()).toContain('and training skips it');
     frame(h, 0.6);
     expect(readout('waiting')).toBe('Waiting for G4');
     expect(readout('steps')).toBe('Step 1 of 7 · 0 of 0 right first time');

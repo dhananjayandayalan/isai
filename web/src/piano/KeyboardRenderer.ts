@@ -10,7 +10,7 @@ import {
   KEY_EXPECT_RIGHT,
   KEY_NEXT_LEFT,
   KEY_NEXT_RIGHT,
-} from '../engine/practice/engine';
+} from '../engine/practice/view';
 import { midiToName } from '../theory/pitch';
 import { BLACK_HEIGHT_RATIO, type KeyLayout, type KeyRect } from './layout';
 

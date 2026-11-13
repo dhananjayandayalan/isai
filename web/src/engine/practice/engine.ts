@@ -17,6 +17,16 @@ import { buildNoteIndex, type Hand, type NoteIndex } from '../activeNotes';
 import { barsOfSong, beatPeriodAt, type Bars } from './bars';
 import { StepMatcher, type OctaveMatch } from './matcher';
 import { buildSteps, firstStepAt, practises, type HandChoice, type PitchRange, type Step } from './steps';
+import {
+  FLASH_CORRECT,
+  FLASH_SECONDS,
+  FLASH_WRONG,
+  KEY_EXPECT_LEFT,
+  KEY_EXPECT_RIGHT,
+  KEY_NEXT_LEFT,
+  KEY_NEXT_RIGHT,
+  type PracticeView,
+} from './view';
 
 export type PracticeMode = 'listen' | 'training';
 
@@ -73,33 +83,6 @@ export const SPEED_STEP = 0.05;
 export type PracticeState = 'stopped' | 'playing' | 'paused';
 /** What "playing" is doing right now. Changes per step, so it is read, never subscribed to. */
 export type PracticePhase = 'idle' | 'count-in' | 'running' | 'waiting';
-
-// Per-key flags for the piano (`PracticeView.keys`).
-export const KEY_EXPECT_RIGHT = 1;
-export const KEY_EXPECT_LEFT = 2;
-export const KEY_NEXT_RIGHT = 4;
-export const KEY_NEXT_LEFT = 8;
-export const FLASH_CORRECT = 1;
-export const FLASH_WRONG = 2;
-/** How long a correct or wrong mark stays on a key. */
-export const FLASH_SECONDS = 0.35;
-
-/**
- * What the piano draws for practice, read every animation frame. Nothing here is React
- * state: `revision` goes up whenever the arrays change, so the piano knows to redraw.
- */
-export interface PracticeView {
-  readonly revision: number;
-  /** KEY_* flags for each MIDI note: the step to play now, and the one after. */
-  readonly keys: Uint8Array;
-  /** FLASH_* for each MIDI note, shown until `flashUntil` (audio-clock seconds). */
-  readonly flashKind: Uint8Array;
-  readonly flashUntil: Float64Array;
-  /** Song notes of this hand are drawn dimmed (the hand not being practised). */
-  readonly dimHand: Hand | null;
-  /** The audio clock, to time the flashes. */
-  now(): number;
-}
 
 export interface ExpectedKey {
   midi: number;

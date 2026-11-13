@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import type { NoteIndex } from '../engine/activeNotes';
-import type { PracticeView } from '../engine/practice/engine';
+import type { PracticeView } from '../engine/practice/view';
 import type { MidiInput } from '../midi/MidiInput';
 import { readPianoColors } from './KeyboardRenderer';
 import type { KeyRange } from './layout';

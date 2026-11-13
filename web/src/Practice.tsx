@@ -459,8 +459,11 @@ export function Practice(props: PracticeProps) {
         </div>
         {outside.below + outside.above > 0 && (
           <div className="alert alert-quiet">
-            {`${outside.below + outside.above} notes don't fit on ${size} keys. Markers at the ` +
-              `ends show when they play${training ? ', and training skips them' : ''}.`}
+            {outside.below + outside.above === 1
+              ? `1 note doesn't fit on ${size} keys. A marker at the end shows when it ` +
+                `plays${training ? ', and training skips it' : ''}.`
+              : `${outside.below + outside.above} notes don't fit on ${size} keys. Markers at the ` +
+                `ends show when they play${training ? ', and training skips them' : ''}.`}
           </div>
         )}
       </div>

@@ -5,20 +5,16 @@ import { FakeInstrument } from '../../audio/FakeInstrument';
 import { FakeTransport } from '../../audio/FakeTransport';
 import { FakeMidiInput } from '../../midi/FakeMidiInput';
 import { parseSong, type Note, type Song } from '../../song';
+import { HOLD_LEAD, PracticeEngine, type PracticeSettings, type PracticeState, type StepEvent } from './engine';
 import {
   FLASH_CORRECT,
   FLASH_SECONDS,
   FLASH_WRONG,
-  HOLD_LEAD,
   KEY_EXPECT_LEFT,
   KEY_EXPECT_RIGHT,
   KEY_NEXT_LEFT,
   KEY_NEXT_RIGHT,
-  PracticeEngine,
-  type PracticeSettings,
-  type PracticeState,
-  type StepEvent,
-} from './engine';
+} from './view';
 
 function note(start: number, end: number, midi: number, hand: Note['hand'] = 'right', velocity = 80): Note {
   return { start, end, midi, velocity, hand, source: 'arranged' };

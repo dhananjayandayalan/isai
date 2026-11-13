@@ -1,9 +1,9 @@
 // Owns the keyboard's animation loop (rule 5). Each requestAnimationFrame it reads the
-// song position from the player (the audio clock, rule 6), looks up the sounding notes and
+// song position from the practice engine (the audio clock, rule 6), looks up the sounding notes and
 // redraws the canvas. Your MIDI notes go into a typed array, never into React state.
 
 import { activeNotesAt, type ActiveNote, type NoteIndex } from '../engine/activeNotes';
-import type { PracticeView } from '../engine/practice/engine';
+import type { PracticeView } from '../engine/practice/view';
 import type { MidiInput, Unsubscribe } from '../midi/MidiInput';
 import { countFlashes, drawKeyboard, type Ctx2D, type PianoColors } from './KeyboardRenderer';
 import { layoutKeys, type KeyLayout, type KeyRange } from './layout';
@@ -21,7 +21,7 @@ export interface CanvasLike {
   getContext(type: '2d'): (Ctx2D & Pick<CanvasRenderingContext2D, 'setTransform'>) | null;
 }
 
-/** What the controller needs from a player: just the position. */
+/** What the controller needs from the practice engine to draw the song: just the position. */
 export interface PositionSource {
   readonly seconds: number;
 }

@@ -9,7 +9,7 @@ import {
   KEY_NEXT_LEFT,
   KEY_NEXT_RIGHT,
   type PracticeView,
-} from '../engine/practice/engine';
+} from '../engine/practice/view';
 import type { Note } from '../song';
 import {
   countFlashes,
