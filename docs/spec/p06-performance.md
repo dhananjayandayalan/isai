@@ -2,7 +2,7 @@
 id: spec-p06-performance
 phase: P6
 title: Performance mode — scoring, results, latency calibration
-status: draft
+status: in-progress
 track: web
 depends_on: [spec-p02-training]
 ---

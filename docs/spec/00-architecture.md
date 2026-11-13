@@ -232,7 +232,8 @@ The service-role key never reaches the browser, the repo or CI logs.
 | 0002 | Song JSON is a schema-first contract with generated types | accepted |
 | 0003 | MIDI input goes through `MidiInput` | accepted |
 | 0004 | Tone.js transport is the audio engine and master clock | accepted |
-| next | Practice engine: one engine, two policies; matching rules (P2) | expected |
+| 0005 | One practice engine with training and performance policies (P2) | proposed |
+| 0006 | Performance scoring, latency model and local practice records (P6) | proposed |
 | next | Schema evolution policy (P3, before the first schema change) | expected |
 | next | Analysis models: beats/key (P3), separation, transcription, pitch (P4), chords (P5) | expected, after spikes |
 | next | `MidiInput` gains pedal and device-change events (P7, amends 0003) | expected |
