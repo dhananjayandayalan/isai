@@ -17,6 +17,8 @@ export class FakeTransport implements Transport {
   readonly audioOffset: number;
   /** See `Transport.lookahead`. Here `start()` simply takes this long. */
   lookahead = 0;
+  /** See `Transport.outputLatency`. */
+  outputLatency = 0;
   private current: TransportState = 'stopped';
   private position = 0;
   private audioNow: number;

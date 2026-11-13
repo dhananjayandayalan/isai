@@ -19,6 +19,11 @@ export interface Transport {
    * this much later, and scheduled callbacks run this early (with the right audio time).
    */
   readonly lookahead: number;
+  /**
+   * Seconds to take off a key press's audio-clock time so it lines up with the song as it
+   * was heard (ADR 0006). 0 when the clock already maps key times to what is being heard.
+   */
+  readonly outputLatency: number;
   /** Start or resume from the current position. */
   start(): void;
   /**

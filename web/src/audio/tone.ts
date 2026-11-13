@@ -71,6 +71,11 @@ function toneTransport(Tone: ToneModule, context: AudioContext): Transport {
     get lookahead() {
       return Tone.getContext().lookAhead;
     },
+    get outputLatency() {
+      // Key times mapped through getOutputTimestamp already sit on what is being heard.
+      if (typeof context.getOutputTimestamp === 'function') return 0;
+      return context.outputLatency || context.baseLatency || 0;
+    },
     start: () => {
       // Pass the position explicitly: after stop() + seek(), Tone would otherwise start at 0.
       transport.start(undefined, transport.seconds);

@@ -15,7 +15,9 @@ import type { MidiInput, MidiNoteEvent, Unsubscribe } from '../../midi/MidiInput
 import type { Song } from '../../song';
 import { buildNoteIndex, type Hand, type NoteIndex } from '../activeNotes';
 import { barsOfSong, beatPeriodAt, type Bars } from './bars';
+import { clampOffset, effectiveTime } from './latency';
 import { StepMatcher, type OctaveMatch } from './matcher';
+import { Scorer, type PerformanceResult } from './scorer';
 import { buildSteps, firstStepAt, practises, type HandChoice, type PitchRange, type Step } from './steps';
 import {
   FLASH_CORRECT,
@@ -28,9 +30,9 @@ import {
   type PracticeView,
 } from './view';
 
-export type PracticeMode = 'listen' | 'training';
+export type PracticeMode = 'listen' | 'training' | 'performance';
 
-/** What makes one mode different from another. P6 adds a performance policy. */
+/** What makes one mode different from another. */
 export interface PracticePolicy {
   /** Playback pauses at each step until the learner has played it. */
   readonly holds: boolean;
@@ -38,11 +40,17 @@ export interface PracticePolicy {
   readonly tracks: boolean;
   /** Isai sounds the practised hand's notes too (so the learner just listens). */
   readonly soundsPractised: boolean;
+  /**
+   * A straight run that is scored (ADR 0006): it always starts from the top with a
+   * count-in, can't be paused or moved, and ends with a result.
+   */
+  readonly scores: boolean;
 }
 
 export const POLICIES: Readonly<Record<PracticeMode, PracticePolicy>> = {
-  listen: { holds: false, tracks: false, soundsPractised: true },
-  training: { holds: true, tracks: true, soundsPractised: false },
+  listen: { holds: false, tracks: false, soundsPractised: true, scores: false },
+  training: { holds: true, tracks: true, soundsPractised: false, scores: false },
+  performance: { holds: false, tracks: true, soundsPractised: false, scores: true },
 };
 
 export interface PracticeSettings {
@@ -61,6 +69,8 @@ export interface PracticeSettings {
   octave: OctaveMatch;
   /** The learner's keyboard; notes outside it are not expected. */
   playable: PitchRange | null;
+  /** Calibrated lag of the learner's keyboard and speakers, in seconds (performance only). */
+  latencyOffset: number;
 }
 
 export const DEFAULT_SETTINGS: PracticeSettings = {
@@ -73,6 +83,7 @@ export const DEFAULT_SETTINGS: PracticeSettings = {
   countIn: false,
   octave: 'exact',
   playable: null,
+  latencyOffset: 0,
 };
 
 export const MIN_SPEED = 0.4;
@@ -125,16 +136,17 @@ const CLICK_ACCENT = { midi: 91, velocity: 112 };
 const CLICK_BEAT = { midi: 84, velocity: 84 };
 const EPSILON = 1e-9;
 
-type EventKind = 'boundary' | 'off' | 'hold' | 'on' | 'click' | 'end' | 'refill';
+type EventKind = 'boundary' | 'off' | 'hold' | 'cue' | 'on' | 'click' | 'end' | 'refill';
 
 /** Order of events due at the same transport time. */
-const ORDER: Record<EventKind, number> = { boundary: 0, off: 1, hold: 2, on: 3, click: 4, end: 5, refill: 6 };
+const ORDER: Record<EventKind, number> = { boundary: 0, off: 1, hold: 2, cue: 3, on: 4, click: 5, end: 6, refill: 7 };
 /** Events a catch-up must not skip over: each changes what happens next. */
 const BARRIER: Record<EventKind, boolean> = {
   boundary: true,
   hold: true,
   end: true,
   off: false,
+  cue: false,
   on: false,
   click: false,
   refill: false,
@@ -144,7 +156,7 @@ interface TimelineEvent {
   /** Transport seconds. */
   at: number;
   kind: EventKind;
-  /** on/off: note index. hold: step index. click: 1 if accented. refill: the next limit. */
+  /** on/off: note index. hold/cue: step index. click: 1 if accented. refill: the next limit. */
   a: number;
   /** click: 1 if it belongs to a count-in (sounds even with the metronome off). */
   b: number;
@@ -206,6 +218,9 @@ export class PracticeEngine implements PracticeView {
   private readonly beats: number[];
   private readonly accents: boolean[];
   private readonly matcher = new StepMatcher();
+  private readonly scorer = new Scorer();
+  /** Transport time the song began in the run being scored (after its count-in). */
+  private runStart = 0;
 
   private current: PracticeState = 'stopped';
   private options: PracticeSettings;
@@ -249,6 +264,7 @@ export class PracticeEngine implements PracticeView {
 
   private readonly stateListeners = new Set<(state: PracticeState) => void>();
   private readonly stepListeners = new Set<(event: StepEvent) => void>();
+  private readonly resultListeners = new Set<(result: PerformanceResult) => void>();
   private detachMidi: Unsubscribe | null = null;
 
   constructor(options: PracticeEngineOptions) {
@@ -328,7 +344,12 @@ export class PracticeEngine implements PracticeView {
   }
 
   get wrongNotes(): number {
-    return this.wrong;
+    return this.policy.scores ? this.scorer.wrong : this.wrong;
+  }
+
+  /** Notes hit so far in a performance run. */
+  get notesHit(): number {
+    return this.scorer.hits;
   }
 
   /** How many times the loop has wrapped since Play was pressed from a stop. */
@@ -349,17 +370,26 @@ export class PracticeEngine implements PracticeView {
 
   play(): void {
     if (this.current === 'playing') return;
-    if (this.current === 'stopped') {
+    const scores = this.policy.scores;
+    // A scored run always starts from the top, whatever the position was.
+    if (this.current === 'stopped' || scores) {
       this.position = this.startPosition();
       this.done = this.clean = this.wrong = this.wraps = 0;
     }
-    this.layOut(this.position, this.options.countIn);
+    if (scores) this.scorer.reset();
+    this.layOut(this.position, this.options.countIn || scores);
+    this.runStart = this.passes[0]?.lead ?? 0;
     this.run();
     this.setState('playing');
   }
 
+  /** In a scored run there is no pause: asking for one ends the run. */
   pause(): void {
     if (this.current !== 'playing') return;
+    if (this.policy.scores) {
+      this.finish();
+      return;
+    }
     this.position = this.clampPosition(this.seconds);
     this.halt('pause');
     this.moveCursor(firstStepAt(this.steps, this.position));
@@ -378,6 +408,8 @@ export class PracticeEngine implements PracticeView {
   seek(seconds: number): void {
     const target = this.clampPosition(seconds);
     if (this.current === 'playing') {
+      if (this.policy.scores) return; // a scored run can't be moved
+
       this.layOut(target, false);
       this.run();
       return;
@@ -391,14 +423,18 @@ export class PracticeEngine implements PracticeView {
   configure(patch: Partial<PracticeSettings>): void {
     const before = this.options;
     const next = this.sanitize({ ...before, ...patch });
-    this.options = next;
-    this.matcher.setOctave(next.octave);
     const stepsChanged =
       next.mode !== before.mode ||
       next.hands !== before.hands ||
       next.octave !== before.octave ||
       !sameLoop(next.loop, before.loop) ||
       !sameRange(next.playable, before.playable);
+    // A scored run is one take: changing what is played, or how fast, abandons it.
+    if (this.current === 'playing' && this.policy.scores && (stepsChanged || next.speed !== before.speed)) {
+      this.stop();
+    }
+    this.options = next;
+    this.matcher.setOctave(next.octave);
     if (stepsChanged) this.steps = this.buildSteps();
     // The other hand, the metronome and the count-in are read when their events fire.
     if (!stepsChanged && next.speed === before.speed) {
@@ -419,6 +455,25 @@ export class PracticeEngine implements PracticeView {
     this.stateListeners.add(listener);
     return () => {
       this.stateListeners.delete(listener);
+    };
+  }
+
+  /**
+   * End a scored run now and report on what was played so far. Nothing happens in the
+   * other modes.
+   */
+  finish(): void {
+    if (this.current !== 'playing' || !this.policy.scores) return;
+    const result = this.conclude(this.clock.now() < this.anchoredAt ? 0 : this.transport.seconds);
+    this.stop();
+    for (const listener of [...this.resultListeners]) listener(result);
+  }
+
+  /** Called once when a scored run ends, by itself or through `finish`. */
+  onResult(listener: (result: PerformanceResult) => void): Unsubscribe {
+    this.resultListeners.add(listener);
+    return () => {
+      this.resultListeners.delete(listener);
     };
   }
 
@@ -450,6 +505,7 @@ export class PracticeEngine implements PracticeView {
     this.attachMidi(null);
     this.stateListeners.clear();
     this.stepListeners.clear();
+    this.resultListeners.clear();
   }
 
   // ------------------------------------------------------------------- settings
@@ -464,7 +520,18 @@ export class PracticeEngine implements PracticeView {
       const start = Math.max(0, loop.start);
       loop = loop.end - start >= MIN_LOOP ? { start, end: loop.end } : null;
     }
-    return { ...settings, speed: clampSpeed(settings.speed), loop };
+    return { ...settings, speed: clampSpeed(settings.speed), loop, latencyOffset: clampOffset(settings.latencyOffset) };
+  }
+
+  /** Add up the scored run, which ended at `endTime` on the transport. */
+  private conclude(endTime: number): PerformanceResult {
+    return this.scorer.result({
+      startTime: this.runStart,
+      endTime,
+      sections: this.song.sections ?? [],
+      bars: this.bars.bars,
+      barWord: this.bars.unit === 'bar' ? 'Bar' : 'Part',
+    });
   }
 
   private buildSteps(): Step[] {
@@ -596,6 +663,20 @@ export class PracticeEngine implements PracticeView {
       }
     }
 
+    if (this.policy.scores) {
+      // Every note the learner is to play, at the time it will be heard, and a cue at each
+      // step that moves the lit keys on to the next one.
+      for (let k = firstStepAt(this.steps, songStart); k < this.steps.length; k++) {
+        const step = this.steps[k];
+        if (!step || step.start >= songEnd) break;
+        add(at(step.start), 'cue', k);
+        step.pitches.forEach((pitch, i) => {
+          const onset = step.starts[i] ?? step.start;
+          this.scorer.expect({ time: at(onset), songTime: onset, pitch, hand: step.hands[i] ?? 'right' });
+        });
+      }
+    }
+
     if (!loop) add(pass.to, 'end');
     pass.events.sort((x, y) => x.at - y.at || ORDER[x.kind] - ORDER[y.kind]);
     return pass;
@@ -673,6 +754,10 @@ export class PracticeEngine implements PracticeView {
       case 'hold':
         this.reachStep(event, time);
         return;
+      case 'cue':
+        // The step's moment has come; the keys to light are the next step's.
+        if (event.a >= this.cursor) this.moveCursor(event.a + 1);
+        return;
       case 'boundary': {
         // A new loop pass: cut what the last one left sounding, and start its steps again.
         const pass = event.pass;
@@ -694,6 +779,10 @@ export class PracticeEngine implements PracticeView {
         this.position = this.startPosition();
         this.moveCursor(firstStepAt(this.steps, this.position));
         this.setState('stopped');
+        if (this.policy.scores) {
+          const result = this.conclude(event.at);
+          for (const listener of [...this.resultListeners]) listener(result);
+        }
         return;
       case 'refill':
         this.collect(event);
@@ -845,6 +934,15 @@ export class PracticeEngine implements PracticeView {
     // An adapter with no usable timestamp reports 0 (or nonsense): then "now" is the best guess.
     const now = this.clock.now();
     const time = Number.isFinite(event.time) && Math.abs(event.time - now) <= 1 ? event.time : now;
+    if (this.policy.scores) {
+      this.matcher.keyDown(event.note);
+      // Where the song was, on the run's timeline, when the learner heard themselves play.
+      const heard = effectiveTime(time, this.transport.outputLatency, this.options.latencyOffset);
+      const at = now < this.anchoredAt ? heard - this.anchoredAt : this.transport.seconds - (now - heard);
+      const verdict = this.scorer.press(event.note, at);
+      this.flash(event.note, verdict.kind === 'hit' ? FLASH_CORRECT : FLASH_WRONG, now);
+      return;
+    }
     const verdict = this.matcher.noteOn(event.note, time);
     if (verdict === 'matched') {
       this.flash(event.note, FLASH_CORRECT, now);
