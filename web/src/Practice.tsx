@@ -17,12 +17,12 @@ import type { MidiInput } from './midi/MidiInput';
 import { Keyboard } from './piano/Keyboard';
 import {
   countOutOfRange,
-  DEFAULT_KEYBOARD_SIZE,
   KEYBOARD_RANGES,
   KEYBOARD_SIZES,
   type KeyboardSize,
 } from './piano/layout';
 import type { FrameScheduler } from './piano/PianoController';
+import type { SessionDraft } from './sessions/types';
 import type { Song } from './song';
 import { midiToName } from './theory/pitch';
 import { formatTime } from './time';
@@ -41,6 +41,19 @@ export interface PracticeProps {
   audioError: string | null;
   /** Loads audio on first use. Must be called straight from a click. */
   ensureAudio: () => Promise<LoadedAudio | null>;
+  /** The choices to open with (from the song overview, or a result's trouble spot). */
+  initial?: { mode: PracticeMode; loopBars: [number, number] | null } | undefined;
+  size: KeyboardSize;
+  onSizeChange: (size: KeyboardSize) => void;
+  /** Calibrated latency of the connected keyboard, in seconds. */
+  latencyOffset: number;
+  /** True while something else has the transport (the latency clicks): Play is disabled. */
+  blocked?: boolean;
+  onPlayingChange?: (playing: boolean) => void;
+  /** A run ended: a performance with its result, or a training run with its summary. */
+  onSession?: (draft: SessionDraft) => void;
+  /** The calendar date and time now (ISO 8601), for the session record. */
+  now?: () => string;
 }
 
 // Speed is kept in whole percent, so stepping up and down never drifts.
@@ -51,6 +64,7 @@ const STEP_PERCENT = Math.round(SPEED_STEP * 100);
 const MODES: { id: PracticeMode; label: string }[] = [
   { id: 'listen', label: 'Listen' },
   { id: 'training', label: 'Training' },
+  { id: 'performance', label: 'Performance' },
 ];
 
 const HANDS: { id: HandChoice; label: string }[] = [
@@ -61,11 +75,19 @@ const HANDS: { id: HandChoice; label: string }[] = [
 
 const READOUT_IDLE = 'Press Play, then play the lit keys.';
 const READOUT_AGAIN = 'Press Play to go again.';
+const READOUT_PERFORM = 'Press Play. After the count-in, play straight through.';
+const HINTS: Partial<Record<PracticeMode, string>> = {
+  training: 'Training waits for your notes. Connect your MIDI keyboard below to play along.',
+  performance: 'Performance scores your notes. Connect your MIDI keyboard below to play.',
+};
 
 /** The line that tells the learner what the engine is doing. Plain text, written through a ref. */
 function readoutText(engine: PracticeEngine): string {
   if (engine.stepCount === 0) return 'There are no notes for this hand here.';
-  if (engine.state === 'stopped') return engine.stepsDone > 0 ? READOUT_AGAIN : READOUT_IDLE;
+  if (engine.state === 'stopped') {
+    if (engine.settings.mode === 'performance') return READOUT_PERFORM;
+    return engine.stepsDone > 0 ? READOUT_AGAIN : READOUT_IDLE;
+  }
   if (engine.state === 'paused') return 'Paused';
   const phase = engine.phase;
   if (phase === 'count-in') return 'Count-in…';
@@ -77,6 +99,9 @@ function readoutText(engine: PracticeEngine): string {
 /** Where the learner is, and how the run is going (or went, once it has stopped). */
 function counterText(engine: PracticeEngine): string {
   if (engine.stepCount === 0) return '';
+  if (engine.settings.mode === 'performance') {
+    return engine.state === 'playing' ? `${engine.notesHit} in time · ${engine.wrongNotes} wrong` : '';
+  }
   const score = `${engine.firstTime} of ${engine.stepsDone} right first time`;
   if (engine.state === 'stopped') return engine.stepsDone > 0 ? score : `${engine.stepCount} steps`;
   return `Step ${Math.min(engine.stepNumber, engine.stepCount)} of ${engine.stepCount} · ${score}`;
@@ -90,27 +115,29 @@ const PHASE_CODE = { idle: 0, 'count-in': 1, running: 2, waiting: 3 } as const;
  * keyboard. Keyed by song, so switching songs unmounts it and disposes its engine.
  *
  * React state holds only what the learner chooses with a click, and play / pause / stop.
- * The position, the "Waiting for …" line and the step counter are written through refs
- * from the keyboard's frame loop (rule 5): no note, hold or resume renders React.
+ * The position, the "Waiting for …" line and the counters are written through refs from
+ * the keyboard's frame loop (rule 5): no note, hold, resume or score renders React. A
+ * performance is scored in the engine; this screen only hands the finished result on.
  */
 export function Practice(props: PracticeProps) {
   const { song, canPlay, midi, frames, keyboardConnected, audioStatus, audioError, ensureAudio } = props;
+  const { initial, size, onSizeChange, latencyOffset, blocked = false, onPlayingChange, onSession, now } = props;
   const index = useMemo(() => buildNoteIndex(song.notes), [song]);
   const bars = useMemo(() => barsOfSong(song), [song]);
   const barCount = bars.bars.length;
 
   const [engine, setEngine] = useState<PracticeEngine | null>(null);
   const [state, setState] = useState<PracticeState>('stopped');
-  const [mode, setMode] = useState<PracticeMode>('listen');
+  const [mode, setMode] = useState<PracticeMode>(initial?.mode ?? 'listen');
   const [hands, setHands] = useState<HandChoice>('both');
   const [otherHand, setOtherHand] = useState<PracticeSettings['otherHand']>('play');
   const [percent, setPercent] = useState(100);
-  const [looping, setLooping] = useState(false);
-  const [loopFrom, setLoopFrom] = useState(1);
-  const [loopTo, setLoopTo] = useState(() => Math.min(4, Math.max(1, barCount)));
+  const firstLoop = initial?.loopBars ?? null;
+  const [looping, setLooping] = useState(firstLoop !== null);
+  const [loopFrom, setLoopFrom] = useState(firstLoop?.[0] ?? 1);
+  const [loopTo, setLoopTo] = useState(() => firstLoop?.[1] ?? Math.min(4, Math.max(1, barCount)));
   const [metronome, setMetronome] = useState(false);
   const [countIn, setCountIn] = useState(false);
-  const [size, setSize] = useState<KeyboardSize>(DEFAULT_KEYBOARD_SIZE);
   const range = KEYBOARD_RANGES[size];
   const outside = useMemo(() => countOutOfRange(song.notes, range), [song, range]);
 
@@ -124,8 +151,9 @@ export function Practice(props: PracticeProps) {
       metronome,
       countIn,
       playable: range,
+      latencyOffset,
     }),
-    [mode, hands, otherHand, percent, looping, bars, loopFrom, loopTo, metronome, countIn, range],
+    [mode, hands, otherHand, percent, looping, bars, loopFrom, loopTo, metronome, countIn, range, latencyOffset],
   );
 
   const engineRef = useRef<PracticeEngine | null>(null);
@@ -137,15 +165,51 @@ export function Practice(props: PracticeProps) {
   const counterRef = useRef<HTMLSpanElement>(null);
   const seeking = useRef(false);
   const shown = useRef({ text: '', value: '', stamp: -1 });
+  /** The run in progress, and the one that has just stopped (a result arrives after the stop). */
+  const run = useRef<{ startedAt: string; clockStart: number } | null>(null);
+  const ended = useRef<{ startedAt: string; clockStart: number } | null>(null);
+  const callbacks = useRef({ onSession, now });
+  useEffect(() => {
+    callbacks.current = { onSession, now };
+  }, [onSession, now]);
 
   useEffect(() => {
     alive.current = true;
     return () => {
       alive.current = false;
+      // Leaving in the middle of a training run still counts as practice: stopping records it.
+      if (engineRef.current && engineRef.current.state !== 'stopped') engineRef.current.stop();
       engineRef.current?.dispose();
       engineRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    onPlayingChange?.(state === 'playing');
+  }, [state, onPlayingChange]);
+
+  /** Follow play and stop to date a run, and record a training run when it stops. */
+  function follow(current: PracticeEngine, next: PracticeState) {
+    if (next === 'playing') {
+      run.current ??= { startedAt: callbacks.current.now?.() ?? '', clockStart: current.now() };
+      return;
+    }
+    if (next !== 'stopped' || !run.current) return;
+    const { startedAt, clockStart } = run.current;
+    ended.current = run.current;
+    run.current = null;
+    const { mode: ranAs, hands: ranHands, speed, loop: ranLoop } = current.settings;
+    if (ranAs !== 'training' || current.stepsDone === 0) return;
+    callbacks.current.onSession?.({
+      mode: 'training',
+      hands: ranHands,
+      speed,
+      loop: ranLoop,
+      startedAt,
+      durationSec: Math.max(0, current.now() - clockStart),
+      result: { steps: current.stepsDone, firstTime: current.firstTime, wrongNotes: current.wrongNotes },
+    });
+  }
 
   // The learner's choices go to the engine as they are made, also while it plays.
   useEffect(() => {
@@ -167,7 +231,23 @@ export function Practice(props: PracticeProps) {
       midi,
       settings: settingsRef.current,
     });
-    created.onStateChange(setState);
+    created.onStateChange((next) => {
+      follow(created, next);
+      setState(next);
+    });
+    // A performance ended (by itself or through Finish): hand the result on, once.
+    created.onResult((result) => {
+      const { hands: ranHands, speed, loop: ranLoop } = created.settings;
+      callbacks.current.onSession?.({
+        mode: 'performance',
+        hands: ranHands,
+        speed,
+        loop: ranLoop,
+        startedAt: ended.current?.startedAt ?? callbacks.current.now?.() ?? '',
+        durationSec: result.durationSec,
+        result,
+      });
+    });
     engineRef.current = created;
     setEngine(created);
     return created;
@@ -223,7 +303,17 @@ export function Practice(props: PracticeProps) {
   const playing = state === 'playing';
   const loading = audioStatus === 'loading';
   const training = mode === 'training';
+  const performing = mode === 'performance';
+  /** The learner plays (training or performance), as opposed to listening. */
+  const tracking = mode !== 'listen';
+  /** A performance is one take: nothing that would change it can be touched while it runs. */
+  const locked = performing && playing;
   const loop = barRange(bars.bars, loopFrom, loopTo);
+  // What happens to notes the keyboard doesn't have, for one note and for several.
+  let one = '';
+  let many = '';
+  if (training) [one, many] = [', and training skips it', ', and training skips them'];
+  if (performing) [one, many] = [", and it isn't scored", ", and they aren't scored"];
   let loopLabel = 'Loop';
   if (loop && bars.unit === 'bar') {
     loopLabel = loopFrom === loopTo ? `Loop bar ${loopFrom}` : `Loop bars ${loopFrom}–${loopTo}`;
@@ -241,16 +331,14 @@ export function Practice(props: PracticeProps) {
               type="button"
               className="seg-btn"
               aria-pressed={mode === m.id}
+              disabled={locked}
               onClick={() => setMode(m.id)}
             >
               {m.label}
             </button>
           ))}
-          <button type="button" className="seg-btn" aria-pressed={false} disabled>
-            Performance <span className="chip">Coming soon</span>
-          </button>
         </div>
-        {training && (
+        {tracking && (
           <div className="row">
             <div className="seg" role="group" aria-label="Hands">
               {HANDS.map((h) => (
@@ -259,6 +347,7 @@ export function Practice(props: PracticeProps) {
                   type="button"
                   className="seg-btn"
                   aria-pressed={hands === h.id}
+                  disabled={locked}
                   onClick={() => setHands(h.id)}
                 >
                   {h.label}
@@ -289,17 +378,13 @@ export function Practice(props: PracticeProps) {
         )}
       </div>
 
-      {training && !keyboardConnected && (
-        <div className="alert alert-quiet">
-          Training waits for your notes. Connect your MIDI keyboard below to play along.
-        </div>
-      )}
+      {tracking && !keyboardConnected && <div className="alert alert-quiet">{HINTS[mode]}</div>}
 
       {/* Always mounted, so what the frame loop wrote survives a change of mode. */}
-      <div hidden={!training}>
+      <div hidden={!tracking}>
         <div className="card-row row-between">
           <span className="t-section" ref={readoutRef} data-readout="waiting" aria-live="off">
-            {READOUT_IDLE}
+            {performing ? READOUT_PERFORM : READOUT_IDLE}
           </span>
           <span className="t-mono t-muted" ref={counterRef} data-readout="steps" aria-live="off" />
         </div>
@@ -308,16 +393,22 @@ export function Practice(props: PracticeProps) {
       <div className="stack-2">
         <div className="row-between">
           <div className="row">
-            <button
-              type="button"
-              className="btn btn-primary btn-play"
-              aria-label={playing ? 'Pause' : 'Play'}
-              disabled={!canPlay}
-              aria-busy={loading}
-              onClick={() => void playPause()}
-            >
-              {playing ? <PauseIcon /> : <PlayIcon />}
-            </button>
+            {locked ? (
+              <button type="button" className="btn btn-primary btn-lg" onClick={() => engine?.finish()}>
+                Finish
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="btn btn-primary btn-play"
+                aria-label={playing ? 'Pause' : 'Play'}
+                disabled={!canPlay || blocked}
+                aria-busy={loading}
+                onClick={() => void playPause()}
+              >
+                {playing ? <PauseIcon /> : <PlayIcon />}
+              </button>
+            )}
             <button
               type="button"
               className="btn btn-secondary btn-icon"
@@ -341,7 +432,7 @@ export function Practice(props: PracticeProps) {
           max={song.durationSec}
           step={0.01}
           defaultValue={0}
-          disabled={!engine}
+          disabled={!engine || locked}
           onPointerDown={() => {
             seeking.current = true;
           }}
@@ -359,7 +450,7 @@ export function Practice(props: PracticeProps) {
             type="button"
             className="btn btn-secondary btn-icon"
             aria-label="Slower"
-            disabled={percent <= MIN_PERCENT}
+            disabled={locked || percent <= MIN_PERCENT}
             onClick={() => setPercent((p) => Math.max(MIN_PERCENT, p - STEP_PERCENT))}
           >
             −
@@ -372,7 +463,7 @@ export function Practice(props: PracticeProps) {
             type="button"
             className="btn btn-secondary btn-icon"
             aria-label="Faster"
-            disabled={percent >= MAX_PERCENT}
+            disabled={locked || percent >= MAX_PERCENT}
             onClick={() => setPercent((p) => Math.min(MAX_PERCENT, p + STEP_PERCENT))}
           >
             +
@@ -384,6 +475,7 @@ export function Practice(props: PracticeProps) {
             type="button"
             className="filter"
             aria-pressed={looping}
+            disabled={locked}
             onClick={() => setLooping((on) => !on)}
           >
             {loopLabel}
@@ -396,6 +488,7 @@ export function Practice(props: PracticeProps) {
               <select
                 className="select"
                 aria-label="Loop from"
+                disabled={locked}
                 value={loopFrom}
                 onChange={(e) => pickFrom(Number(e.target.value))}
               >
@@ -411,6 +504,7 @@ export function Practice(props: PracticeProps) {
               <select
                 className="select"
                 aria-label="Loop to"
+                disabled={locked}
                 value={loopTo}
                 onChange={(e) => pickTo(Number(e.target.value))}
               >
@@ -452,7 +546,8 @@ export function Practice(props: PracticeProps) {
               type="button"
               className="seg-btn"
               aria-pressed={size === s}
-              onClick={() => setSize(s)}
+              disabled={locked}
+              onClick={() => onSizeChange(s)}
             >
               {s} keys
             </button>
@@ -461,10 +556,9 @@ export function Practice(props: PracticeProps) {
         {outside.below + outside.above > 0 && (
           <div className="alert alert-quiet">
             {outside.below + outside.above === 1
-              ? `1 note doesn't fit on ${size} keys. A marker at the end shows when it ` +
-                `plays${training ? ', and training skips it' : ''}.`
+              ? `1 note doesn't fit on ${size} keys. A marker at the end shows when it plays${one}.`
               : `${outside.below + outside.above} notes don't fit on ${size} keys. Markers at the ` +
-                `ends show when they play${training ? ', and training skips them' : ''}.`}
+                `ends show when they play${many}.`}
           </div>
         )}
       </div>

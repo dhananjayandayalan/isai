@@ -246,6 +246,13 @@ a { color: var(--text); }
   background-size: 22px 22px; animation: isai-stripes .8s linear infinite;
 }
 
+/* Histogram (results timing): <div class="histogram" role="img" aria-label="…">
+   <span class="histogram-bar is-in" style="height: 60%"></span> … </div>. The height is data. */
+.histogram { display: flex; align-items: flex-end; gap: var(--space-1); height: 160px; border-bottom: var(--border-width-thin) solid var(--border-strong); }
+.histogram-bar { flex: 1; min-height: 2px; border-radius: var(--radius-xs) var(--radius-xs) 0 0; background: var(--data-3); }
+.histogram-bar.is-in { background: var(--data-1); }   /* inside the "perfect" window */
+.histogram-axis { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: var(--text-2xs); color: var(--text-3); }
+
 /* Skeleton: put on any empty block with a fixed height. */
 .skeleton {
   background: linear-gradient(90deg, var(--surface-raised) 25%, var(--fill-strong) 50%, var(--surface-raised) 75%);

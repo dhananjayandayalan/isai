@@ -5,23 +5,43 @@ import type { AudioSource } from './audio/engine';
 import { instrumentPart } from './audio/parts';
 import type { LoadedAudio } from './audio/types';
 import { monitorMidi } from './engine/monitor';
+import { barsOfSong } from './engine/practice/bars';
+import type { PracticeMode } from './engine/practice/engine';
+import { LatencyCard } from './LatencyCard';
 import type { MidiInput } from './midi/MidiInput';
 import { MidiPanel } from './MidiPanel';
 import type { FrameScheduler } from './piano/PianoController';
 import { Practice, type AudioStatus } from './Practice';
+import { Results } from './Results';
+import { MemorySessionStore, type SessionStore } from './sessions/store';
+import type { NewSession, PerformanceSession, Session, SessionDraft } from './sessions/types';
+import { formatWhen, isoNow } from './sessions/wallClock';
+import { MemorySettingsStore, type AppSettings, type SettingsStore } from './settings/store';
 import { parseSong, SongParseError, type Song } from './song';
+import { SongOverview } from './SongOverview';
 
 /** Everything with side effects, injected so tests can pass fakes (main.tsx wires the real ones). */
 export interface AppDeps {
   audio: AudioSource;
   midi: MidiInput;
   frames?: FrameScheduler;
+  /** Where the learner's setup is remembered; in memory when left out. */
+  settings?: SettingsStore;
+  /** Where practice sessions are kept; in memory when left out. */
+  sessions?: SessionStore;
+  /** The calendar date and time now (ISO 8601), for session records. */
+  now?: () => string;
 }
+
+/** The pages of the app. There is no router yet (P8): one song is open at a time. */
+export type View = 'song' | 'practice' | 'results';
 
 interface AppProps {
   /** Raw Song JSON to open first; defaults to the first example. */
   source?: unknown;
   deps?: AppDeps;
+  /** The page to open on; the song overview by default. */
+  view?: View;
 }
 
 const EXAMPLES = [
@@ -32,6 +52,14 @@ const EXAMPLES = [
 /** `notJson` is set when an opened file couldn't be parsed as JSON at all. */
 type Choice = { id: string; json: unknown; notJson?: string };
 type Loaded = { song: Song } | { error: 'not-json' | 'invalid'; detail: string };
+
+/** How the practice screen opens: from the overview, or from a result's trouble spot. */
+interface Launch {
+  mode: PracticeMode;
+  loopBars: [number, number] | null;
+  /** Changes with every launch, so the practice screen starts afresh. */
+  nonce: number;
+}
 
 function load(choice: Choice): Loaded {
   if (choice.notJson !== undefined) return { error: 'not-json', detail: choice.notJson };
@@ -46,22 +74,55 @@ function message(e: unknown): string {
   return e instanceof Error ? e.message : String(e);
 }
 
-export default function App({ source, deps }: AppProps) {
+export default function App({ source, deps, view: firstView = 'song' }: AppProps) {
   const [choice, setChoice] = useState<Choice>(() =>
     source === undefined ? { id: 'twinkle', json: twinkle } : { id: 'file', json: source },
   );
   const [fileName, setFileName] = useState<string | null>(null);
   const [opens, setOpens] = useState(0);
   const loaded = useMemo(() => load(choice), [choice]);
+  const song = 'song' in loaded ? loaded.song : null;
+
+  const [view, setView] = useState<View>(firstView);
+  const [launch, setLaunch] = useState<Launch>({ mode: 'listen', loopBars: null, nonce: 0 });
+  const [shown, setShown] = useState<PerformanceSession | null>(null);
+
+  const settingsStore = useMemo(() => deps?.settings ?? new MemorySettingsStore(), [deps]);
+  const sessionStore = useMemo(() => deps?.sessions ?? new MemorySessionStore(), [deps]);
+  const [settings, setSettings] = useState<AppSettings>(() => settingsStore.load());
+  const saveSettings = useCallback(
+    (patch: Partial<AppSettings>) => setSettings(settingsStore.save(patch)),
+    [settingsStore],
+  );
+
+  // This song's sessions. Kept with the song id they belong to, so a stale list is never shown.
+  const [history, setHistory] = useState<{ songId: string; list: Session[] } | null>(null);
+  const [sessionsSaved, setSessionsSaved] = useState(true);
+  const [recorded, setRecorded] = useState(0);
+  const songId = song?.id ?? null;
+  useEffect(() => {
+    if (songId === null) return undefined;
+    let current = true;
+    void sessionStore.list(songId).then((list) => {
+      if (!current) return;
+      setHistory({ songId, list });
+      setSessionsSaved(sessionStore.persistent);
+    });
+    return () => {
+      current = false;
+    };
+  }, [songId, sessionStore, recorded]);
+  const sessions = history && history.songId === songId ? history.list : null;
 
   const [audioStatus, setAudioStatus] = useState<AudioStatus>('idle');
   const [audioError, setAudioError] = useState<string | null>(null);
-  const [keyboardConnected, setKeyboardConnected] = useState(false);
-  const [monitor, setMonitor] = useState(true);
-  const monitorRef = useRef(monitor);
+  const [deviceId, setDeviceId] = useState<string | null>(null);
+  const [playing, setPlaying] = useState(false);
+  const [calibrating, setCalibrating] = useState(false);
+  const monitorRef = useRef(settings.monitor);
   useEffect(() => {
-    monitorRef.current = monitor;
-  }, [monitor]);
+    monitorRef.current = settings.monitor;
+  }, [settings.monitor]);
 
   // Your notes through Isai's piano, once audio has loaded and while the toggle is on.
   useEffect(() => {
@@ -108,8 +169,46 @@ export default function App({ source, deps }: AppProps) {
     }
     setFileName(file.name);
     setOpens((n) => n + 1);
-    setChoice(next);
+    pick(next);
   }
+
+  /** Open another song. A result belongs to the song it was played on, so leave that page. */
+  function pick(next: Choice) {
+    setChoice(next);
+    if (view === 'results') setView('song');
+  }
+
+  function open(mode: PracticeMode, loopBars: [number, number] | null = null) {
+    setLaunch((before) => ({ mode, loopBars, nonce: before.nonce + 1 }));
+    setView('practice');
+  }
+
+  /** A run ended on the practice screen: keep it, and show a performance's result. */
+  const onSession = useCallback(
+    (draft: SessionDraft) => {
+      if (!song) return;
+      const record: NewSession = {
+        version: 1,
+        songId: song.id,
+        songTitle: song.title,
+        schemaVersion: song.schemaVersion,
+        pipelineVersion: song.meta.pipelineVersion,
+        ...draft,
+      };
+      if (record.mode === 'performance') {
+        setShown(record);
+        setView('results');
+      }
+      void sessionStore.add(record).then(() => {
+        setSessionsSaved(sessionStore.persistent);
+        setRecorded((n) => n + 1);
+      });
+    },
+    [song, sessionStore],
+  );
+
+  const now = deps?.now ?? isoNow;
+  const offset = deviceId === null ? 0 : (settings.latencyOffsets[deviceId] ?? 0);
 
   return (
     <main className="app-main">
@@ -122,7 +221,7 @@ export default function App({ source, deps }: AppProps) {
                 type="button"
                 className="seg-btn"
                 aria-pressed={choice.id === example.id}
-                onClick={() => setChoice({ id: example.id, json: example.json })}
+                onClick={() => pick({ id: example.id, json: example.json })}
               >
                 {example.label}
               </button>
@@ -139,33 +238,91 @@ export default function App({ source, deps }: AppProps) {
           </label>
         </div>
 
-        {'song' in loaded ? (
-          <>
-            <SongSummary song={loaded.song} fromFile={choice.id === 'file' ? fileName : null} />
-            <Practice
-              key={`${choice.id}-${opens}`}
-              song={loaded.song}
-              canPlay={deps !== undefined}
-              midi={deps?.midi ?? null}
-              frames={deps?.frames}
-              keyboardConnected={keyboardConnected}
-              audioStatus={audioStatus}
-              audioError={audioError}
-              ensureAudio={ensureAudio}
-            />
-          </>
-        ) : (
-          <SongError kind={loaded.error} detail={loaded.detail} fileName={fileName} />
+        {!song && 'error' in loaded && <SongError kind={loaded.error} detail={loaded.detail} fileName={fileName} />}
+
+        {song && view === 'results' && shown && (
+          <Results
+            session={shown}
+            when={formatWhen(shown.startedAt)}
+            saved={sessionsSaved}
+            barWord={barsOfSong(song).unit === 'bar' ? 'bar' : 'part'}
+            onPlayAgain={() => open('performance')}
+            onLoopInTraining={(from, to) => open('training', [from, to])}
+            onBack={() => setView('song')}
+          />
         )}
 
-        {deps && (
-          <MidiPanel
-            midi={deps.midi}
-            onConnect={() => void ensureAudio()}
-            onConnectionChange={(deviceId) => setKeyboardConnected(deviceId !== null)}
-            monitor={monitor}
-            onMonitorChange={setMonitor}
-          />
+        {song && !(view === 'results' && shown) && (
+          <>
+            <SongSummary song={song} fromFile={choice.id === 'file' ? fileName : null} />
+            {view === 'practice' ? (
+              <>
+                <div>
+                  <button type="button" className="btn btn-ghost" onClick={() => setView('song')}>
+                    Back to song
+                  </button>
+                </div>
+                <Practice
+                  key={`${choice.id}-${opens}-${launch.nonce}`}
+                  song={song}
+                  canPlay={deps !== undefined}
+                  midi={deps?.midi ?? null}
+                  frames={deps?.frames}
+                  keyboardConnected={deviceId !== null}
+                  audioStatus={audioStatus}
+                  audioError={audioError}
+                  ensureAudio={ensureAudio}
+                  initial={launch}
+                  size={settings.keyboardSize}
+                  onSizeChange={(keyboardSize) => saveSettings({ keyboardSize })}
+                  latencyOffset={offset}
+                  blocked={calibrating}
+                  onPlayingChange={setPlaying}
+                  onSession={onSession}
+                  now={now}
+                />
+              </>
+            ) : (
+              <SongOverview
+                song={song}
+                sessions={sessions}
+                sessionsSaved={sessionsSaved}
+                formatWhen={formatWhen}
+                onStart={open}
+                onOpenResult={(session) => {
+                  setShown(session);
+                  setView('results');
+                }}
+              />
+            )}
+          </>
+        )}
+
+        {deps && !(view === 'results' && shown) && (
+          <>
+            <MidiPanel
+              midi={deps.midi}
+              onConnect={() => void ensureAudio()}
+              onConnectionChange={(id) => {
+                setDeviceId(id);
+                if (id !== null) saveSettings({ lastDeviceId: id });
+              }}
+              preferredDeviceId={settings.lastDeviceId}
+              monitor={settings.monitor}
+              onMonitorChange={(monitor) => saveSettings({ monitor })}
+            />
+            <LatencyCard
+              midi={deps.midi}
+              deviceId={deviceId}
+              offset={offset}
+              onOffsetChange={(seconds) => {
+                if (deviceId !== null) saveSettings({ latencyOffsets: { ...settings.latencyOffsets, [deviceId]: seconds } });
+              }}
+              ensureAudio={ensureAudio}
+              busy={playing && view === 'practice'}
+              onRunningChange={setCalibrating}
+            />
+          </>
         )}
 
         <p className="t-faint">

@@ -4,13 +4,8 @@
 import type { PerformanceResult } from '../engine/practice/scorer';
 import type { HandChoice } from '../engine/practice/steps';
 
-interface SessionBase {
-  /** Shape of this record. */
-  version: 1;
-  songId: string;
-  songTitle: string;
-  schemaVersion: string;
-  pipelineVersion: string;
+/** What was chosen for a run, and when it happened. */
+interface RunFacts {
   hands: HandChoice;
   /** Speed as a rate: 1 is the song's own tempo. */
   speed: number;
@@ -20,6 +15,15 @@ interface SessionBase {
   startedAt: string;
   /** How long it lasted, in seconds on the audio clock. */
   durationSec: number;
+}
+
+interface SessionBase extends RunFacts {
+  /** Shape of this record. */
+  version: 1;
+  songId: string;
+  songTitle: string;
+  schemaVersion: string;
+  pipelineVersion: string;
 }
 
 export interface TrainingSummary {
@@ -39,6 +43,11 @@ export interface TrainingSession extends SessionBase {
   mode: 'training';
   result: TrainingSummary;
 }
+
+/** A run as the practice screen reports it; the app adds the song to make a session. */
+export type SessionDraft =
+  | (RunFacts & { mode: 'performance'; result: PerformanceResult })
+  | (RunFacts & { mode: 'training'; result: TrainingSummary });
 
 /** A session before it is stored. */
 export type NewSession = PerformanceSession | TrainingSession;

@@ -16,6 +16,8 @@ export interface MidiPanelProps {
   onConnect: () => void;
   /** Called with the connected device's id, or null once nothing is connected. */
   onConnectionChange?: (deviceId: string | null) => void;
+  /** The keyboard used last time: connected again as soon as a scan finds it. */
+  preferredDeviceId?: string | null;
   monitor: boolean;
   onMonitorChange: (monitor: boolean) => void;
 }
@@ -57,7 +59,7 @@ function errorKind(e: unknown): ErrorKind {
  * notes never pass through here (rule 5).
  */
 export function MidiPanel(props: MidiPanelProps) {
-  const { midi, onConnect, onConnectionChange, monitor, onMonitorChange } = props;
+  const { midi, onConnect, onConnectionChange, preferredDeviceId, monitor, onMonitorChange } = props;
   const [status, setStatus] = useState<Status>({ kind: 'idle' });
   const [devices, setDevices] = useState<MidiDevice[]>([]);
   const [connected, setConnectedId] = useState<string | null>(null);
@@ -81,6 +83,9 @@ export function MidiPanel(props: MidiPanelProps) {
         await midi.disconnect().catch(() => undefined);
       }
       setStatus({ kind: 'ready' });
+      // The keyboard from last time is back: no need to pick it again.
+      const preferred = list.find((d) => d.id === preferredDeviceId);
+      if (preferred && !(connected && list.some((d) => d.id === connected))) await connect(preferred);
     } catch (e) {
       setStatus({ kind: 'error', error: errorKind(e) });
     }

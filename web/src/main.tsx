@@ -6,6 +6,8 @@ import App from './App';
 import { createBrowserAudioContext } from './audio/context';
 import { AudioEngine } from './audio/engine';
 import { WebMidiInput } from './midi/WebMidiInput';
+import { IndexedDbSessionStore, ResilientSessionStore } from './sessions/store';
+import { LocalSettingsStore } from './settings/store';
 
 const root = document.getElementById('root');
 if (!root) throw new Error('Missing #root element');
@@ -21,9 +23,12 @@ const audio = new AudioEngine({
   },
 });
 const midi = new WebMidiInput(audio.clock);
+// Kept on this device (ADR 0006). Both cope with storage that throws (private windows).
+const settings = new LocalSettingsStore(() => window.localStorage);
+const sessions = new ResilientSessionStore(new IndexedDbSessionStore(() => window.indexedDB));
 
 createRoot(root).render(
   <StrictMode>
-    <App deps={{ audio, midi }} />
+    <App deps={{ audio, midi, settings, sessions }} />
   </StrictMode>,
 );

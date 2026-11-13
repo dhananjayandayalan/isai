@@ -174,6 +174,8 @@ Copy these shapes. Change the words, not the classes.
 
 **Loaders**: `.skeleton` with a height; `.progress > span[style=width]`; `.progress-lg.progress-striped` for uploads; `.loader-eq` (3–5 spans) for "Isai is listening"; `.spinner` for actions under a second; `.loader-keys` (8 spans) only for the practice start-up.
 
+**Histogram** (results timing): `<div class="histogram" role="img" aria-label="…">` holding one `<span class="histogram-bar" style="height: 60%">` per bin, with `.is-in` on the bins inside the "perfect" window, and a `.histogram-axis` row of labels under it. The chart is one image to a screen reader, so the `aria-label` must say what it shows.
+
 **Feedback**: `.alert` (inverted, blocking problem in a form), `.alert-quiet` (inline hint); `.toast-success|info|warning|error`; `.state.state-empty|state-error` for whole-panel states with a `.state-icon`.
 
 **Music**: `.stage` (falling notes) with `.note-right`, `.note-left`, `.note-ghost` (hand not being practised); `.piano`, `.piano-key-white`, `.piano-key-black`, `.piano-canvas` (a full-width `<canvas>` inside `.piano`); `.chord-now`, `.chord-next`. The animation itself runs on canvas/`requestAnimationFrame` (CLAUDE.md rule 5): read the token values once with `getComputedStyle(document.documentElement).getPropertyValue('--hand-left')` and re-read when the theme changes.
