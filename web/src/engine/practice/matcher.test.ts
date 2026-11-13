@@ -3,7 +3,7 @@ import { EARLY_GRACE, StepMatcher } from './matcher';
 import type { Step } from './steps';
 
 function step(pitches: number[], start = 0): Step {
-  return { index: 0, start, pitches, hands: pitches.map(() => 'right' as const) };
+  return { index: 0, start, pitches, hands: pitches.map(() => 'right' as const), starts: pitches.map(() => start) };
 }
 
 /** A matcher whose target step playback has already reached at `time`. */

@@ -45,3 +45,22 @@ export {
   KEY_NEXT_RIGHT,
   type PracticeView,
 } from './view';
+export { clampOffset, effectiveTime, MAX_OFFSET } from './latency';
+export {
+  HISTOGRAM_BIN,
+  phrases,
+  Scorer,
+  WEIGHTS,
+  WINDOWS,
+  WRONG_PENALTY,
+  type ExpectedNote,
+  type Grade,
+  type PerformanceResult,
+  type PressVerdict,
+  type ScoreBar,
+  type ScoreRegion,
+  type SectionResult,
+  type Tally,
+  type TroubleSpot,
+  type Windows,
+} from './scorer';

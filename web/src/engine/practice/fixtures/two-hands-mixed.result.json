@@ -1,0 +1,131 @@
+{
+  "version": 1,
+  "score": 57.5,
+  "total": {
+    "expected": 24,
+    "perfect": 11,
+    "good": 5,
+    "ok": 2,
+    "missed": 6,
+    "accuracy": 0.6375,
+    "meanOffset": 0.0094,
+    "meanAbsOffset": 0.0417,
+    "spread": 0.0456
+  },
+  "hands": {
+    "left": {
+      "expected": 8,
+      "perfect": 3,
+      "good": 2,
+      "ok": 0,
+      "missed": 3,
+      "accuracy": 0.55,
+      "meanOffset": 0.021,
+      "meanAbsOffset": 0.037,
+      "spread": 0.0303
+    },
+    "right": {
+      "expected": 16,
+      "perfect": 8,
+      "good": 3,
+      "ok": 2,
+      "missed": 3,
+      "accuracy": 0.6813,
+      "meanOffset": 0.005,
+      "meanAbsOffset": 0.0435,
+      "spread": 0.0502
+    }
+  },
+  "sections": [
+    {
+      "label": "A",
+      "start": 0,
+      "end": 4,
+      "tally": {
+        "expected": 12,
+        "perfect": 7,
+        "good": 3,
+        "ok": 0,
+        "missed": 2,
+        "accuracy": 0.7583,
+        "meanOffset": 0.006,
+        "meanAbsOffset": 0.034,
+        "spread": 0.0324
+      }
+    },
+    {
+      "label": "B",
+      "start": 4,
+      "end": 8,
+      "tally": {
+        "expected": 12,
+        "perfect": 4,
+        "good": 2,
+        "ok": 2,
+        "missed": 4,
+        "accuracy": 0.5167,
+        "meanOffset": 0.0138,
+        "meanAbsOffset": 0.0513,
+        "spread": 0.0567
+      }
+    }
+  ],
+  "troubleSpots": [
+    {
+      "fromBar": 2,
+      "toBar": 4,
+      "start": 2,
+      "end": 8,
+      "accuracy": 0.5167,
+      "expected": 18,
+      "missed": 6
+    }
+  ],
+  "wrongNotes": 3,
+  "wrongPerMinute": 22.5,
+  "durationSec": 8,
+  "histogram": {
+    "binSec": 0.02,
+    "left": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      2,
+      0,
+      0,
+      2,
+      0,
+      0,
+      0,
+      0
+    ],
+    "right": [
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      6,
+      1,
+      0,
+      1,
+      1,
+      0,
+      1,
+      0
+    ]
+  },
+  "windows": {
+    "perfect": 0.05,
+    "good": 0.1,
+    "ok": 0.16
+  }
+}

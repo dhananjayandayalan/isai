@@ -1,0 +1,115 @@
+{
+  "version": 1,
+  "score": 70,
+  "total": {
+    "expected": 14,
+    "perfect": 0,
+    "good": 14,
+    "ok": 0,
+    "missed": 0,
+    "accuracy": 0.7,
+    "meanOffset": 0.08,
+    "meanAbsOffset": 0.08,
+    "spread": 0
+  },
+  "hands": {
+    "left": {
+      "expected": 0,
+      "perfect": 0,
+      "good": 0,
+      "ok": 0,
+      "missed": 0,
+      "accuracy": 0,
+      "meanOffset": null,
+      "meanAbsOffset": null,
+      "spread": null
+    },
+    "right": {
+      "expected": 14,
+      "perfect": 0,
+      "good": 14,
+      "ok": 0,
+      "missed": 0,
+      "accuracy": 0.7,
+      "meanOffset": 0.08,
+      "meanAbsOffset": 0.08,
+      "spread": 0
+    }
+  },
+  "sections": [
+    {
+      "label": "Bars 1–4",
+      "start": 0,
+      "end": 9.6,
+      "tally": {
+        "expected": 14,
+        "perfect": 0,
+        "good": 14,
+        "ok": 0,
+        "missed": 0,
+        "accuracy": 0.7,
+        "meanOffset": 0.08,
+        "meanAbsOffset": 0.08,
+        "spread": 0
+      }
+    }
+  ],
+  "troubleSpots": [
+    {
+      "fromBar": 1,
+      "toBar": 4,
+      "start": 0,
+      "end": 9.6,
+      "accuracy": 0.7,
+      "expected": 14,
+      "missed": 0
+    }
+  ],
+  "wrongNotes": 0,
+  "wrongPerMinute": 0,
+  "durationSec": 9.6,
+  "histogram": {
+    "binSec": 0.02,
+    "left": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "right": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      14,
+      0,
+      0,
+      0
+    ]
+  },
+  "windows": {
+    "perfect": 0.05,
+    "good": 0.1,
+    "ok": 0.16
+  }
+}

@@ -17,6 +17,8 @@ export interface Step {
   pitches: number[];
   /** The hand of each pitch, in the same order. */
   hands: Hand[];
+  /** Song time each pitch is struck, in the same order (a rolled chord's differ slightly). */
+  starts: number[];
 }
 
 /** Lowest and highest MIDI note of a keyboard (structurally a piano `KeyRange`). */
@@ -71,6 +73,7 @@ export function buildSteps(notes: readonly Note[], options: StepOptions): Step[]
       start: open.start,
       pitches: sorted.map((n) => n.midi),
       hands: sorted.map((n) => n.hand),
+      starts: sorted.map((n) => n.start),
     });
   };
 

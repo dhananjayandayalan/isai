@@ -17,13 +17,13 @@ describe('buildSteps', () => {
 
   it('makes one step from a single note', () => {
     expect(buildSteps([note(1, 2, 60)], { hands: 'both' })).toEqual([
-      { index: 0, start: 1, pitches: [60], hands: ['right'] },
+      { index: 0, start: 1, pitches: [60], hands: ['right'], starts: [1] },
     ]);
   });
 
   it('groups a chord struck together, pitches ascending with their hands', () => {
     const steps = buildSteps([note(0, 1, 67), note(0, 1, 60, 'left'), note(0, 1, 64)], { hands: 'both' });
-    expect(steps).toEqual([{ index: 0, start: 0, pitches: [60, 64, 67], hands: ['left', 'right', 'right'] }]);
+    expect(steps).toEqual([{ index: 0, start: 0, pitches: [60, 64, 67], hands: ['left', 'right', 'right'], starts: [0, 0, 0] }]);
   });
 
   it('keeps onsets within the tolerance in one step and splits those just outside', () => {
@@ -81,7 +81,7 @@ describe('buildSteps', () => {
 
   it('lists a pitch once when both hands strike the same key together', () => {
     const steps = buildSteps([note(0, 1, 60, 'left'), note(0, 1, 60, 'right')], { hands: 'both' });
-    expect(steps).toEqual([{ index: 0, start: 0, pitches: [60], hands: ['left'] }]);
+    expect(steps).toEqual([{ index: 0, start: 0, pitches: [60], hands: ['left'], starts: [0] }]);
   });
 
   it('filters by hand', () => {
@@ -135,7 +135,7 @@ describe('buildSteps', () => {
     const t = parseSong(twinkle);
     const right = buildSteps(t.notes, { hands: 'right' });
     expect(right).toHaveLength(t.notes.filter((n) => n.hand === 'right').length);
-    expect(right[0]).toEqual({ index: 0, start: 0, pitches: [67], hands: ['right'] });
+    expect(right[0]).toEqual({ index: 0, start: 0, pitches: [67], hands: ['right'], starts: [0] });
     const both = buildSteps(t.notes, { hands: 'both' });
     expect(both[0]?.pitches).toEqual([43, 67]);
     expect(both[0]?.hands).toEqual(['left', 'right']);

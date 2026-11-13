@@ -52,9 +52,9 @@ Option 2, on the transport timeline.
 - **A run that ends early** scores the notes whose window had closed, plus any later note
   that was hit. A run with no scored notes is "too short to score".
 - **Sections.** `song.sections` when the Song has them, otherwise four-bar phrases.
-- **Trouble spots.** Two-bar windows are ranked by accuracy (then by misses, then by
-  position). Up to three that don't overlap and score under 90% are kept, and each grows
-  by a neighbouring bar under 90%, up to four bars.
+- **Trouble spots.** Two-bar windows under 90% are ranked by accuracy (then by misses,
+  then by position). Up to three that don't overlap are kept. As each is kept it grows by
+  its neighbouring bars that are also under 90%, the weaker first, up to four bars.
 - **Latency.** Effective key time = `midiTime − outputLatency − userOffset`.
   - `midiTime` is already on the audio clock (ADR 0004). Where the browser has
     `getOutputTimestamp()`, that mapping lands on the time being *heard*, so
