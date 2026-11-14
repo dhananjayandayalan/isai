@@ -118,3 +118,19 @@ with the notes sounding.
    (`MidiPanel.tsx:88` → `onConnect` → `ensureAudio`), not straight inside the click as
    ADR 0004 asks. Chrome allows it because the page has had a click (sticky activation).
    Worth a line in the code, or an `ensureAudio()` call at the start of the scan click.
+
+## Follow-up (2026-11-14)
+
+| Item | Status |
+|---|---|
+| Blocking 1, histogram centre | fixed in `d71e874`: 17 bins centred on 0; the label gives early, on the beat and late counts; golden histograms re-checked by hand |
+| Suggestion 1, store rejections | fixed in `0740eec` |
+| Suggestion 2, scale spelling | fixed in `0740eec` (`web/src/theory/keys.ts`, 100% lines) |
+| Suggestion 3, IndexedDB commit | fixed in `0740eec` |
+| Suggestion 4, history after a failure | documented in `0740eec`; P8 replaces the store |
+| Suggestion 5, spec table | fixed (P6 `in-review`) |
+| Suggestion 6, commit `3734cf4` | open: rewording history is the owner's call |
+| Suggestion 7, audio inside the click | fixed in `0740eec` |
+
+After the fixes: 528 web tests pass, lint, typecheck, build and `check-tokens.mjs` pass.
+What's left is the owner's: accept ADR 0006, do the by-hand check, decide on `3734cf4`.

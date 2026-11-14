@@ -19,7 +19,7 @@ Nothing in them is built until a phase spec asks for it (CLAUDE.md rule 2).
 | P3 | [p03-analysis-core.md](p03-analysis-core.md) | pipeline | Ingest, tempo and beats, key and scale from real audio | P0 | draft |
 | P4 | [p04-transcription.md](p04-transcription.md) | pipeline | Stem separation, piano transcription, melody tracking | P3 | draft |
 | P5 | [p05-harmony-arranger.md](p05-harmony-arranger.md) | pipeline | Chords and the rule-based two-hand arranger | P4 | draft |
-| P6 | [p06-performance.md](p06-performance.md) | web | Performance mode, scoring, results, latency calibration | P2 | in-progress |
+| P6 | [p06-performance.md](p06-performance.md) | web | Performance mode, scoring, results, latency calibration | P2 | in-review |
 | P7 | [p07-notation-settings.md](p07-notation-settings.md) | web | Notation systems, falling notes, staff, settings, pedal | P2 | draft |
 | P8 | [p08-backend-library.md](p08-backend-library.md) | both | Accounts, upload, queue worker, library | P5, P6 | draft |
 | P9 | [p09-deployment.md](p09-deployment.md) | ops | Production for the friends group: hosting, CI/CD, backups, runbooks | P7, P8 | draft |
