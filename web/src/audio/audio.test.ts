@@ -3,7 +3,7 @@ import { AudioEngine } from './engine';
 import { FakeInstrument } from './FakeInstrument';
 import { FakeTransport } from './FakeTransport';
 import { instrumentPart } from './parts';
-import { DEFAULT_SAMPLES_URL, salamanderUrls } from './tone';
+import { DEFAULT_EPIANO_URL, DEFAULT_SAMPLES_URL, epianoUrls, salamanderUrls } from './tone';
 import type { LoadedAudio } from './types';
 import { SwitchableInstrument } from './voices';
 
@@ -349,5 +349,27 @@ describe('salamanderUrls', () => {
     expect(urls['F#7']).toBe('Fs7.mp3');
     expect(urls.C8).toBe('C8.mp3');
     expect(DEFAULT_SAMPLES_URL).toMatch(/^https:\/\/tonejs\.github\.io\/audio\/salamander\/$/);
+  });
+});
+
+describe('epianoUrls', () => {
+  it('lists the 20 Wurlitzer samples from the spike, as AAC, keyed by note name', () => {
+    const urls = epianoUrls();
+    expect(Object.keys(urls)).toHaveLength(20);
+    expect(Object.values(urls).every((file) => /^[a-g]b?\d(pp|mp|f|ff)\.m4a$/.test(file))).toBe(true);
+    // Each key is the note its file holds (G#2 is the ab2 file, C#4 the db4 file).
+    for (const [note, file] of Object.entries(urls)) {
+      const flat = { 'C#': 'db', 'D#': 'eb', 'F#': 'gb', 'G#': 'ab', 'A#': 'bb' } as Record<string, string>;
+      const name = note.slice(0, -1);
+      expect(file.startsWith((flat[name] ?? name.toLowerCase()) + note.slice(-1))).toBe(true);
+    }
+    expect(urls.A1).toBe('a1f.m4a');
+    expect(urls['G#6']).toBe('ab6f.m4a');
+  });
+
+  it('streams them from a jsDelivr copy pinned to one commit', () => {
+    expect(DEFAULT_EPIANO_URL).toMatch(
+      /^https:\/\/cdn\.jsdelivr\.net\/gh\/smpldsnds\/sfzinstruments-greg-sullivan-e-pianos@[0-9a-f]{40}\/wurlitzer-ep200\/samples\/$/,
+    );
   });
 });
