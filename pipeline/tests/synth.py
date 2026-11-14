@@ -38,3 +38,37 @@ def encode(wav: Path, suffix: str) -> Path:
     out = wav.with_suffix(suffix)
     subprocess.run([exe, "-v", "error", "-y", "-i", str(wav), str(out)], check=True)
     return out
+
+
+def click_track(
+    bpm: float,
+    beats_per_bar: int,
+    seconds: float = 20.0,
+    rate: int = 22_050,
+    ramp_to: float | None = None,
+    start: float = 0.5,
+) -> tuple[Audio, list[float]]:
+    """Clicks on every beat, louder and higher on each downbeat; returns audio and click times.
+
+    With `ramp_to`, the tempo moves linearly from `bpm` to `ramp_to` over the track.
+    """
+    out = np.zeros(round(seconds * rate))
+    length = round(0.03 * rate)
+    n = np.arange(length)
+    envelope = np.exp(-n / (0.006 * rate))
+    times: list[float] = []
+    t, i = start, 0
+    while t < seconds - 0.1:
+        downbeat = i % beats_per_bar == 0
+        burst = (
+            (1.0 if downbeat else 0.45)
+            * envelope
+            * np.sin(2 * np.pi * (1500 if downbeat else 1000) * n / rate)
+        )
+        at = round(t * rate)
+        out[at : at + length] += burst[: out[at : at + length].size]
+        times.append(t)
+        tempo = bpm if ramp_to is None else bpm + (ramp_to - bpm) * t / seconds
+        t += 60 / tempo
+        i += 1
+    return out, times
