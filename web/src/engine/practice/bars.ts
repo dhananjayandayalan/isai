@@ -1,5 +1,5 @@
-// Bars for the loop picker and the metronome. A Song has beat times and a time signature
-// but (until P3 adds `tempo.downbeats`) no downbeats, so the first beat is taken as one.
+// Bars for the loop picker and the metronome. A 0.2.0 Song may carry `tempo.downbeats`
+// (the pipeline's bar starts); without them the first beat is taken as a downbeat.
 // Pure; no audio.
 
 import type { Song } from '../../song';
@@ -65,14 +65,13 @@ export function buildBars(input: BarInput): Bars {
   return { unit: 'bar', bars };
 }
 
+/** The song's bars: from `tempo.downbeats` when the Song has them (schema 0.2.0), else from beats. */
 export function barsOfSong(song: Song): Bars {
-  // `downbeats` arrives with P3's schema change; reading it here keeps this helper ready.
-  const downbeats = (song.tempo as { downbeats?: readonly number[] }).downbeats;
   return buildBars({
     beats: song.tempo.beats,
     beatsPerBar: song.timeSignature.num,
     durationSec: song.durationSec,
-    downbeats,
+    ...(song.tempo.downbeats ? { downbeats: song.tempo.downbeats } : {}),
   });
 }
 

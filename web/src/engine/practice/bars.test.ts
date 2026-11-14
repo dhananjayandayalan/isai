@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import frere from '../../../../schema/examples/frere-jacques-a-cappella.json';
 import twinkle from '../../../../schema/examples/twinkle-g-major.json';
+import twinkle010 from '../../../../schema/examples/versions/0.1.0/twinkle-g-major.json';
 import { parseSong } from '../../song';
 import { barRange, barsOfSong, beatPeriodAt, buildBars, CHUNK_SECONDS } from './bars';
 
@@ -92,6 +93,17 @@ describe('barsOfSong', () => {
       [0, 2],
       [2, 4],
     ]);
+  });
+
+  it("uses the Song's downbeats when it has them, and beats otherwise", () => {
+    const song = parseSong(twinkle);
+    // A pickup: the pipeline says the first full bar starts on the second beat.
+    const shifted = barsOfSong({ ...song, tempo: { ...song.tempo, downbeats: [0.6, 3.0, 5.4, 7.8] } });
+    expect(shifted.bars.map((b) => b.start)).toEqual([0, 3.0, 5.4, 7.8]);
+    const plain = barsOfSong({ ...song, tempo: { bpm: song.tempo.bpm, beats: song.tempo.beats } });
+    expect(plain.bars.map((b) => b.start)).toEqual([0, 2.4, 4.8, 7.2]);
+    // A 0.1.0 Song (no downbeats) works the same as before.
+    expect(barsOfSong(parseSong(twinkle010)).bars).toEqual(plain.bars);
   });
 });
 
