@@ -2,7 +2,7 @@
 id: spec-p05-harmony-arranger
 phase: P5
 title: Harmony and arranger — chords and a playable two-hand arrangement
-status: ready
+status: in-progress
 track: pipeline
 depends_on: [spec-p04-transcription]
 ---
