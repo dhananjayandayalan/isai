@@ -45,7 +45,10 @@ function createPart(instrument: Instrument, holders: Uint8Array): Instrument {
   };
 
   return {
-    loaded: instrument.loaded,
+    // Read through, so a part follows the voice its instrument switches to.
+    get loaded() {
+      return instrument.loaded;
+    },
     noteOn(midi, velocity, time) {
       if (midi >= 0 && midi <= 127 && !mine[midi]) {
         mine[midi] = 1;

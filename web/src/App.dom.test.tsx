@@ -10,6 +10,7 @@ import { AudioEngine } from './audio/engine';
 import { FakeInstrument } from './audio/FakeInstrument';
 import { FakeTransport } from './audio/FakeTransport';
 import type { InstrumentSound } from './audio/types';
+import { SwitchableInstrument } from './audio/voices';
 import { FakeMidiInput } from './midi/FakeMidiInput';
 import type { MidiInput } from './midi/MidiInput';
 import { MidiError } from './midi/WebMidiInput';
@@ -63,6 +64,8 @@ const NOW = '2026-11-14T10:00:00.000Z';
 function harness(options: HarnessOptions = {}) {
   const transport = new FakeTransport();
   const piano = new FakeInstrument(options.sound ?? 'sampled');
+  const electric = new FakeInstrument('sampled');
+  const voiced = new SwitchableInstrument(piano, () => electric);
   const metronome = new FakeInstrument('synth');
   const frames = new ManualFrames();
   const fakeMidi = new FakeMidiInput();
@@ -80,7 +83,7 @@ function harness(options: HarnessOptions = {}) {
       attempts++;
       if (options.failAudio && attempts === 1) throw new Error('no output');
       await gate;
-      return { transport, piano, metronome, clock: transport.clock };
+      return { transport, piano: voiced, metronome, clock: transport.clock };
     },
   });
   const deps: AppDeps = {

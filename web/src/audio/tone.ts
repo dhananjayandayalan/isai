@@ -6,11 +6,45 @@
 
 import type { AudioClock } from '../midi/AudioClock';
 import type { Instrument, InstrumentSound, LoadedAudio, Transport, TransportState } from './types';
+import { SwitchableInstrument } from './voices';
 
 type ToneModule = typeof import('tone');
 
 /** Salamander Grand Piano (CC-BY 3.0, Alexander Holm), as hosted by Tone.js. */
 export const DEFAULT_SAMPLES_URL = 'https://tonejs.github.io/audio/salamander/';
+
+/**
+ * Greg Sullivan's Wurlitzer EP200 (CC BY 3.0), AAC copies on jsDelivr, pinned to a commit
+ * (web/spikes/epiano-samples.md). One velocity layer per sampled note.
+ */
+export const DEFAULT_EPIANO_URL =
+  'https://cdn.jsdelivr.net/gh/smpldsnds/sfzinstruments-greg-sullivan-e-pianos@3d24e105f8a925cc084729856932d06e3545ed26/wurlitzer-ep200/samples/';
+
+/** The 20 electric piano samples, A1 to G#6 (462 KB in all). */
+export function epianoUrls(): Record<string, string> {
+  return {
+    A1: 'a1f.m4a',
+    C2: 'c2f.m4a',
+    E2: 'e2mp.m4a',
+    F2: 'f2f.m4a',
+    'G#2': 'ab2pp.m4a',
+    A2: 'a2mp.m4a',
+    B2: 'b2f.m4a',
+    'D#3': 'eb3mp.m4a',
+    E3: 'e3f.m4a',
+    'G#3': 'ab3f.m4a',
+    'C#4': 'db4f.m4a',
+    E4: 'e4ff.m4a',
+    'F#4': 'gb4mp.m4a',
+    G4: 'g4ff.m4a',
+    'G#4': 'ab4f.m4a',
+    B4: 'b4mp.m4a',
+    'C#5': 'db5f.m4a',
+    G5: 'g5f.m4a',
+    'C#6': 'db6f.m4a',
+    'G#6': 'ab6f.m4a',
+  };
+}
 
 /** Sample files every minor third from A0 to C8; the Sampler pitch-shifts between them. */
 export function salamanderUrls(): Record<string, string> {
@@ -33,13 +67,16 @@ export function salamanderUrls(): Record<string, string> {
 export async function createToneAudio(
   context: AudioContext,
   samplesUrl: string = DEFAULT_SAMPLES_URL,
+  epianoUrl: string = DEFAULT_EPIANO_URL,
 ): Promise<LoadedAudio> {
   const Tone = await import('tone');
   Tone.setContext(context);
   return {
     clock: audioClock(context),
     transport: toneTransport(Tone, context),
-    piano: tonePiano(Tone, samplesUrl),
+    piano: new SwitchableInstrument(tonePiano(Tone, samplesUrl, salamanderUrls()), () =>
+      tonePiano(Tone, epianoUrl, epianoUrls()),
+    ),
     metronome: toneClick(Tone),
   };
 }
@@ -96,13 +133,13 @@ function toneTransport(Tone: ToneModule, context: AudioContext): Transport {
   };
 }
 
-function tonePiano(Tone: ToneModule, samplesUrl: string): Instrument {
+function tonePiano(Tone: ToneModule, samplesUrl: string, urls: Record<string, string>): Instrument {
   let voice: Voice | null = null;
 
   const loaded = new Promise<InstrumentSound>((resolve) => {
     let settled = false;
     const sampler = new Tone.Sampler({
-      urls: salamanderUrls(),
+      urls,
       baseUrl: samplesUrl,
       release: 1,
       onload: () => {

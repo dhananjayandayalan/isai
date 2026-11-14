@@ -19,7 +19,11 @@ const audio = new AudioEngine({
   createContext: createBrowserAudioContext,
   load: async (context) => {
     const { createToneAudio } = await import('./audio/tone');
-    return createToneAudio(context, import.meta.env.VITE_PIANO_SAMPLES_URL || undefined);
+    return createToneAudio(
+      context,
+      import.meta.env.VITE_PIANO_SAMPLES_URL || undefined,
+      import.meta.env.VITE_EPIANO_SAMPLES_URL || undefined,
+    );
   },
 });
 const midi = new WebMidiInput(audio.clock);

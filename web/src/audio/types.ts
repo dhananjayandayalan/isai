@@ -3,6 +3,7 @@
 // tests use FakeTransport / FakeInstrument.
 
 import type { AudioClock } from '../midi/AudioClock';
+import type { VoicedInstrument } from './voices';
 
 export type TransportState = 'started' | 'paused' | 'stopped';
 
@@ -59,7 +60,8 @@ export interface Instrument {
 /** Everything `createToneAudio` provides once Tone.js has loaded. */
 export interface LoadedAudio {
   transport: Transport;
-  piano: Instrument;
+  /** The app's sound: the grand piano, or the electric piano once selected. */
+  piano: VoicedInstrument;
   /** A short click for the metronome and count-in; `noteOn` plays one, pitch from `midi`. */
   metronome: Instrument;
   clock: AudioClock;

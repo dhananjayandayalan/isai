@@ -5,11 +5,12 @@ import { FakeTransport } from './FakeTransport';
 import { instrumentPart } from './parts';
 import { DEFAULT_SAMPLES_URL, salamanderUrls } from './tone';
 import type { LoadedAudio } from './types';
+import { SwitchableInstrument } from './voices';
 
 function fakeAudio(): LoadedAudio {
   return {
     transport: new FakeTransport(),
-    piano: new FakeInstrument(),
+    piano: new SwitchableInstrument(new FakeInstrument(), () => new FakeInstrument()),
     metronome: new FakeInstrument('synth'),
     clock: { now: () => 42, fromDomTimestamp: (ms) => ms / 1000 + 1 },
   };

@@ -16,3 +16,5 @@ export {
 export { FakeTransport } from './FakeTransport';
 export { FakeInstrument, type InstrumentCall } from './FakeInstrument';
 export { instrumentPart } from './parts';
+export { applyVelocityCurve, CURVE_GAMMA, type VelocityCurve } from './velocity';
+export { SwitchableInstrument, type Voice, type VoicedInstrument } from './voices';
