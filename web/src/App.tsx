@@ -128,10 +128,10 @@ export default function App({ source, deps, view: firstView = 'song' }: AppProps
   const [deviceId, setDeviceId] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
   const [calibrating, setCalibrating] = useState(false);
-  const monitorRef = useRef(settings.monitor);
+  const monitorRef = useRef(settings.appSound !== 'off');
   useEffect(() => {
-    monitorRef.current = settings.monitor;
-  }, [settings.monitor]);
+    monitorRef.current = settings.appSound !== 'off';
+  }, [settings.appSound]);
 
   // Your notes through Isai's piano, once audio has loaded and while the toggle is on.
   useEffect(() => {
@@ -325,8 +325,8 @@ export default function App({ source, deps, view: firstView = 'song' }: AppProps
                   if (id !== null) saveSettings({ lastDeviceId: id });
                 }}
                 preferredDeviceId={settings.lastDeviceId}
-                monitor={settings.monitor}
-                onMonitorChange={(monitor) => saveSettings({ monitor })}
+                monitor={settings.appSound !== 'off'}
+                onMonitorChange={(monitor) => saveSettings({ appSound: monitor ? 'grand' : 'off' })}
               />
               <LatencyCard
                 midi={deps.midi}
