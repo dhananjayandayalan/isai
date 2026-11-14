@@ -21,7 +21,10 @@ def test_examples_load_into_generated_model(path: Path) -> None:
 def test_frozen_examples_load_into_generated_model(path: Path) -> None:
     song = Song.model_validate(load_json(path))
     assert song.schemaVersion == path.parent.name
-    assert song.tempo.downbeats is None  # 0.1.0 had no downbeats
+    # Fields added after a version are absent from its frozen examples.
+    if song.schemaVersion == "0.1.0":
+        assert song.tempo.downbeats is None
+    assert song.meta.confidence.notes is None  # added in 0.3.0
 
 
 def test_downbeats_are_typed() -> None:

@@ -43,7 +43,7 @@ def test_analyse_writes_a_valid_song_and_a_midi_file(song_file: Path, tmp_path: 
     assert analyse(song_file, tmp_path / "out", "--cache-dir", str(tmp_path / "cache")) == 0
     song = load_json(tmp_path / "out" / "cadence.song.json")
     validate_song(song)
-    assert song["schemaVersion"] == current_version() == "0.2.0"
+    assert song["schemaVersion"] == current_version() == "0.3.0"
     assert song["title"] == "cadence"
     assert song["sourceType"] == "full-mix"
     assert song["durationSec"] == pytest.approx(9.5, abs=0.01)

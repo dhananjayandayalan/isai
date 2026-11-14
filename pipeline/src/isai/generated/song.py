@@ -145,6 +145,10 @@ class Confidence(BaseModel):
     key: Annotated[float, Field(ge=0.0, le=1.0)]
     tempo: Annotated[float, Field(ge=0.0, le=1.0)]
     chords: Annotated[float, Field(ge=0.0, le=1.0)]
+    notes: Annotated[float | None, Field(ge=0.0, le=1.0)] = None
+    """
+    Confidence in the transcribed notes. Optional; added in 0.3.0.
+    """
 
 
 class Meta(BaseModel):
@@ -164,7 +168,7 @@ class Song(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    schemaVersion: Literal["0.1.0", "0.2.0"]
+    schemaVersion: Literal["0.1.0", "0.2.0", "0.3.0"]
     """
     Version of this schema the file was written against. Every supported version is listed, newest last; the pipeline writes the newest (ADR 0008).
     """

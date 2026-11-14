@@ -7,7 +7,7 @@ export interface Song {
   /**
    * Version of this schema the file was written against. Every supported version is listed, newest last; the pipeline writes the newest (ADR 0008).
    */
-  schemaVersion: '0.1.0' | '0.2.0';
+  schemaVersion: '0.1.0' | '0.2.0' | '0.3.0';
   /**
    * Stable identifier of the song analysis.
    */
@@ -129,4 +129,8 @@ export interface Confidence {
   key: number;
   tempo: number;
   chords: number;
+  /**
+   * Confidence in the transcribed notes. Optional; added in 0.3.0.
+   */
+  notes?: number;
 }

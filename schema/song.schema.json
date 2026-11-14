@@ -21,7 +21,7 @@
   "properties": {
     "schemaVersion": {
       "description": "Version of this schema the file was written against. Every supported version is listed, newest last; the pipeline writes the newest (ADR 0008).",
-      "enum": ["0.1.0", "0.2.0"]
+      "enum": ["0.1.0", "0.2.0", "0.3.0"]
     },
     "id": {
       "description": "Stable identifier of the song analysis.",
@@ -212,7 +212,13 @@
       "properties": {
         "key": { "type": "number", "minimum": 0, "maximum": 1 },
         "tempo": { "type": "number", "minimum": 0, "maximum": 1 },
-        "chords": { "type": "number", "minimum": 0, "maximum": 1 }
+        "chords": { "type": "number", "minimum": 0, "maximum": 1 },
+        "notes": {
+          "description": "Confidence in the transcribed notes. Optional; added in 0.3.0.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
       }
     },
     "Meta": {

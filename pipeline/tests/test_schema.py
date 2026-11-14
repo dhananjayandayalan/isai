@@ -31,8 +31,8 @@ def test_schema_is_valid_draft_2020_12() -> None:
 
 
 def test_lists_every_supported_version_and_writes_the_newest() -> None:
-    assert schema_versions() == ["0.1.0", "0.2.0"]
-    assert current_version() == "0.2.0"
+    assert schema_versions() == ["0.1.0", "0.2.0", "0.3.0"]
+    assert current_version() == "0.3.0"
     for path in VALID:
         assert load_json(path)["schemaVersion"] == current_version(), path.name
 
@@ -200,3 +200,14 @@ def test_schema_dir_env_override_must_exist(
     monkeypatch.setenv("ISAI_SCHEMA_DIR", str(tmp_path))
     with pytest.raises(SchemaNotFoundError, match="ISAI_SCHEMA_DIR"):
         schema_dir()
+
+
+def test_notes_confidence_is_optional_and_between_0_and_1() -> None:
+    doc = load_json(examples_dir() / "twinkle-g-major.json")
+    assert doc["meta"]["confidence"]["notes"] == 1
+    validate_song(doc)
+    del doc["meta"]["confidence"]["notes"]
+    validate_song(doc)
+    doc["meta"]["confidence"]["notes"] = 1.5
+    with pytest.raises(SongValidationError):
+        validate_song(doc)

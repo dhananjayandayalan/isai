@@ -20,7 +20,7 @@ const ucs2length = function ucs2length(str) {
 };
 export const validate = validate20;
 export default validate20;
-const schema31 = {"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://isai.local/schema/song.schema.json","title":"Song","description":"One analysed song: tempo, tonality, chords and a playable two-hand arrangement. Contract between pipeline and web (ADR 0002).","type":"object","additionalProperties":false,"required":["schemaVersion","id","title","sourceType","durationSec","tempo","timeSignature","tonality","chords","notes","meta"],"properties":{"schemaVersion":{"description":"Version of this schema the file was written against. Every supported version is listed, newest last; the pipeline writes the newest (ADR 0008).","enum":["0.1.0","0.2.0"]},"id":{"description":"Stable identifier of the song analysis.","type":"string","minLength":1},"title":{"type":"string","minLength":1},"sourceType":{"description":"Which pipeline path produced the song.","type":"string","enum":["piano-solo","full-mix","a-cappella","carnatic"]},"durationSec":{"type":"number","minimum":0},"tempo":{"$ref":"#/$defs/Tempo"},"timeSignature":{"$ref":"#/$defs/TimeSignature"},"tonality":{"$ref":"#/$defs/Tonality"},"chords":{"type":"array","items":{"$ref":"#/$defs/Chord"}},"notes":{"type":"array","items":{"$ref":"#/$defs/Note"}},"sections":{"type":"array","items":{"$ref":"#/$defs/Section"}},"meta":{"$ref":"#/$defs/Meta"}},"$defs":{"Tempo":{"title":"Tempo","type":"object","additionalProperties":false,"required":["bpm","beats"],"properties":{"bpm":{"description":"Average tempo in beats per minute.","type":"number","exclusiveMinimum":0},"beats":{"description":"Beat times in seconds from the start of the audio.","type":"array","items":{"type":"number","minimum":0}},"downbeats":{"description":"Times in seconds of the first beat of each bar, from the start of the audio. Optional; added in 0.2.0.","type":"array","items":{"type":"number","minimum":0}}}},"TimeSignature":{"title":"TimeSignature","type":"object","additionalProperties":false,"required":["num","den"],"properties":{"num":{"type":"integer","minimum":1},"den":{"type":"integer","enum":[2,4,8,16]}}},"Tonality":{"title":"Tonality","type":"object","additionalProperties":false,"required":["key","mode","scale"],"properties":{"key":{"description":"Tonic note name, e.g. \"G\" or \"Bb\".","type":"string","pattern":"^[A-G](#|b)?$"},"mode":{"type":"string","enum":["major","minor","modal"]},"tonicHz":{"description":"Measured tonic frequency (shruti for Carnatic songs).","type":"number","exclusiveMinimum":0},"scale":{"description":"Pitch classes of the scale (0 = C), in scale order from the tonic.","type":"array","minItems":1,"uniqueItems":true,"items":{"type":"integer","minimum":0,"maximum":11}},"raga":{"description":"Raga name, for Carnatic songs.","type":"string","minLength":1}}},"Chord":{"title":"Chord","type":"object","additionalProperties":false,"required":["start","end","root","quality","label"],"properties":{"start":{"type":"number","minimum":0},"end":{"type":"number","minimum":0},"root":{"description":"Root pitch class (0 = C).","type":"integer","minimum":0,"maximum":11},"quality":{"description":"Chord quality, Harte-style shorthand.","type":"string","enum":["maj","min","dim","aug","sus2","sus4","5","maj6","min6","7","maj7","min7","minmaj7","dim7","hdim7","9","maj9","min9","add9"]},"bass":{"description":"Bass pitch class when it differs from the root (slash chord).","type":"integer","minimum":0,"maximum":11},"label":{"description":"Display label, e.g. \"G\", \"Am7\", \"C/E\".","type":"string","minLength":1}}},"Note":{"title":"Note","type":"object","additionalProperties":false,"required":["start","end","midi","velocity","hand","source"],"properties":{"start":{"type":"number","minimum":0},"end":{"type":"number","minimum":0},"midi":{"type":"integer","minimum":0,"maximum":127},"velocity":{"type":"integer","minimum":0,"maximum":127},"hand":{"type":"string","enum":["left","right"]},"source":{"type":"string","enum":["transcribed","arranged"]}}},"Section":{"title":"Section","type":"object","additionalProperties":false,"required":["start","end","label"],"properties":{"start":{"type":"number","minimum":0},"end":{"type":"number","minimum":0},"label":{"type":"string","minLength":1}}},"Confidence":{"title":"Confidence","description":"Pipeline confidence per estimate, 0 to 1.","type":"object","additionalProperties":false,"required":["key","tempo","chords"],"properties":{"key":{"type":"number","minimum":0,"maximum":1},"tempo":{"type":"number","minimum":0,"maximum":1},"chords":{"type":"number","minimum":0,"maximum":1}}},"Meta":{"title":"Meta","type":"object","additionalProperties":false,"required":["pipelineVersion","createdAt","confidence"],"properties":{"pipelineVersion":{"type":"string","minLength":1},"createdAt":{"type":"string","format":"date-time"},"confidence":{"$ref":"#/$defs/Confidence"}}}}};
+const schema31 = {"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://isai.local/schema/song.schema.json","title":"Song","description":"One analysed song: tempo, tonality, chords and a playable two-hand arrangement. Contract between pipeline and web (ADR 0002).","type":"object","additionalProperties":false,"required":["schemaVersion","id","title","sourceType","durationSec","tempo","timeSignature","tonality","chords","notes","meta"],"properties":{"schemaVersion":{"description":"Version of this schema the file was written against. Every supported version is listed, newest last; the pipeline writes the newest (ADR 0008).","enum":["0.1.0","0.2.0","0.3.0"]},"id":{"description":"Stable identifier of the song analysis.","type":"string","minLength":1},"title":{"type":"string","minLength":1},"sourceType":{"description":"Which pipeline path produced the song.","type":"string","enum":["piano-solo","full-mix","a-cappella","carnatic"]},"durationSec":{"type":"number","minimum":0},"tempo":{"$ref":"#/$defs/Tempo"},"timeSignature":{"$ref":"#/$defs/TimeSignature"},"tonality":{"$ref":"#/$defs/Tonality"},"chords":{"type":"array","items":{"$ref":"#/$defs/Chord"}},"notes":{"type":"array","items":{"$ref":"#/$defs/Note"}},"sections":{"type":"array","items":{"$ref":"#/$defs/Section"}},"meta":{"$ref":"#/$defs/Meta"}},"$defs":{"Tempo":{"title":"Tempo","type":"object","additionalProperties":false,"required":["bpm","beats"],"properties":{"bpm":{"description":"Average tempo in beats per minute.","type":"number","exclusiveMinimum":0},"beats":{"description":"Beat times in seconds from the start of the audio.","type":"array","items":{"type":"number","minimum":0}},"downbeats":{"description":"Times in seconds of the first beat of each bar, from the start of the audio. Optional; added in 0.2.0.","type":"array","items":{"type":"number","minimum":0}}}},"TimeSignature":{"title":"TimeSignature","type":"object","additionalProperties":false,"required":["num","den"],"properties":{"num":{"type":"integer","minimum":1},"den":{"type":"integer","enum":[2,4,8,16]}}},"Tonality":{"title":"Tonality","type":"object","additionalProperties":false,"required":["key","mode","scale"],"properties":{"key":{"description":"Tonic note name, e.g. \"G\" or \"Bb\".","type":"string","pattern":"^[A-G](#|b)?$"},"mode":{"type":"string","enum":["major","minor","modal"]},"tonicHz":{"description":"Measured tonic frequency (shruti for Carnatic songs).","type":"number","exclusiveMinimum":0},"scale":{"description":"Pitch classes of the scale (0 = C), in scale order from the tonic.","type":"array","minItems":1,"uniqueItems":true,"items":{"type":"integer","minimum":0,"maximum":11}},"raga":{"description":"Raga name, for Carnatic songs.","type":"string","minLength":1}}},"Chord":{"title":"Chord","type":"object","additionalProperties":false,"required":["start","end","root","quality","label"],"properties":{"start":{"type":"number","minimum":0},"end":{"type":"number","minimum":0},"root":{"description":"Root pitch class (0 = C).","type":"integer","minimum":0,"maximum":11},"quality":{"description":"Chord quality, Harte-style shorthand.","type":"string","enum":["maj","min","dim","aug","sus2","sus4","5","maj6","min6","7","maj7","min7","minmaj7","dim7","hdim7","9","maj9","min9","add9"]},"bass":{"description":"Bass pitch class when it differs from the root (slash chord).","type":"integer","minimum":0,"maximum":11},"label":{"description":"Display label, e.g. \"G\", \"Am7\", \"C/E\".","type":"string","minLength":1}}},"Note":{"title":"Note","type":"object","additionalProperties":false,"required":["start","end","midi","velocity","hand","source"],"properties":{"start":{"type":"number","minimum":0},"end":{"type":"number","minimum":0},"midi":{"type":"integer","minimum":0,"maximum":127},"velocity":{"type":"integer","minimum":0,"maximum":127},"hand":{"type":"string","enum":["left","right"]},"source":{"type":"string","enum":["transcribed","arranged"]}}},"Section":{"title":"Section","type":"object","additionalProperties":false,"required":["start","end","label"],"properties":{"start":{"type":"number","minimum":0},"end":{"type":"number","minimum":0},"label":{"type":"string","minLength":1}}},"Confidence":{"title":"Confidence","description":"Pipeline confidence per estimate, 0 to 1.","type":"object","additionalProperties":false,"required":["key","tempo","chords"],"properties":{"key":{"type":"number","minimum":0,"maximum":1},"tempo":{"type":"number","minimum":0,"maximum":1},"chords":{"type":"number","minimum":0,"maximum":1},"notes":{"description":"Confidence in the transcribed notes. Optional; added in 0.3.0.","type":"number","minimum":0,"maximum":1}}},"Meta":{"title":"Meta","type":"object","additionalProperties":false,"required":["pipelineVersion","createdAt","confidence"],"properties":{"pipelineVersion":{"type":"string","minLength":1},"createdAt":{"type":"string","format":"date-time"},"confidence":{"$ref":"#/$defs/Confidence"}}}}};
 const schema32 = {"title":"Tempo","type":"object","additionalProperties":false,"required":["bpm","beats"],"properties":{"bpm":{"description":"Average tempo in beats per minute.","type":"number","exclusiveMinimum":0},"beats":{"description":"Beat times in seconds from the start of the audio.","type":"array","items":{"type":"number","minimum":0}},"downbeats":{"description":"Times in seconds of the first beat of each bar, from the start of the audio. Optional; added in 0.2.0.","type":"array","items":{"type":"number","minimum":0}}}};
 const schema33 = {"title":"TimeSignature","type":"object","additionalProperties":false,"required":["num","den"],"properties":{"num":{"type":"integer","minimum":1},"den":{"type":"integer","enum":[2,4,8,16]}}};
 const schema34 = {"title":"Tonality","type":"object","additionalProperties":false,"required":["key","mode","scale"],"properties":{"key":{"description":"Tonic note name, e.g. \"G\" or \"Bb\".","type":"string","pattern":"^[A-G](#|b)?$"},"mode":{"type":"string","enum":["major","minor","modal"]},"tonicHz":{"description":"Measured tonic frequency (shruti for Carnatic songs).","type":"number","exclusiveMinimum":0},"scale":{"description":"Pitch classes of the scale (0 = C), in scale order from the tonic.","type":"array","minItems":1,"uniqueItems":true,"items":{"type":"integer","minimum":0,"maximum":11}},"raga":{"description":"Raga name, for Carnatic songs.","type":"string","minLength":1}}};
@@ -31,7 +31,7 @@ const func1 = Object.prototype.hasOwnProperty;
 const func2 = ucs2length;
 const pattern4 = new RegExp("^[A-G](#|b)?$", "u");
 const schema38 = {"title":"Meta","type":"object","additionalProperties":false,"required":["pipelineVersion","createdAt","confidence"],"properties":{"pipelineVersion":{"type":"string","minLength":1},"createdAt":{"type":"string","format":"date-time"},"confidence":{"$ref":"#/$defs/Confidence"}}};
-const schema39 = {"title":"Confidence","description":"Pipeline confidence per estimate, 0 to 1.","type":"object","additionalProperties":false,"required":["key","tempo","chords"],"properties":{"key":{"type":"number","minimum":0,"maximum":1},"tempo":{"type":"number","minimum":0,"maximum":1},"chords":{"type":"number","minimum":0,"maximum":1}}};
+const schema39 = {"title":"Confidence","description":"Pipeline confidence per estimate, 0 to 1.","type":"object","additionalProperties":false,"required":["key","tempo","chords"],"properties":{"key":{"type":"number","minimum":0,"maximum":1},"tempo":{"type":"number","minimum":0,"maximum":1},"chords":{"type":"number","minimum":0,"maximum":1},"notes":{"description":"Confidence in the transcribed notes. Optional; added in 0.3.0.","type":"number","minimum":0,"maximum":1}}};
 const formats0 = fullFormats["date-time"];
 
 function validate21(data, {instancePath="", parentData, parentDataProperty, rootData=data, dynamicAnchors={}}={}){
@@ -171,7 +171,7 @@ vErrors.push(err10);
 errors++;
 }
 for(const key1 in data2){
-if(!(((key1 === "key") || (key1 === "tempo")) || (key1 === "chords"))){
+if(!((((key1 === "key") || (key1 === "tempo")) || (key1 === "chords")) || (key1 === "notes"))){
 const err11 = {instancePath:instancePath+"/confidence",schemaPath:"#/$defs/Confidence/additionalProperties",keyword:"additionalProperties",params:{additionalProperty: key1},message:"must NOT have additional properties"};
 if(vErrors === null){
 vErrors = [err11];
@@ -287,9 +287,11 @@ vErrors.push(err20);
 errors++;
 }
 }
-}
-else {
-const err21 = {instancePath:instancePath+"/confidence",schemaPath:"#/$defs/Confidence/type",keyword:"type",params:{type: "object"},message:"must be object"};
+if(data2.notes !== undefined){
+let data6 = data2.notes;
+if((typeof data6 == "number") && (isFinite(data6))){
+if(data6 > 1 || isNaN(data6)){
+const err21 = {instancePath:instancePath+"/confidence/notes",schemaPath:"#/$defs/Confidence/properties/notes/maximum",keyword:"maximum",params:{comparison: "<=", limit: 1},message:"must be <= 1"};
 if(vErrors === null){
 vErrors = [err21];
 }
@@ -298,15 +300,48 @@ vErrors.push(err21);
 }
 errors++;
 }
-}
-}
-else {
-const err22 = {instancePath,schemaPath:"#/type",keyword:"type",params:{type: "object"},message:"must be object"};
+if(data6 < 0 || isNaN(data6)){
+const err22 = {instancePath:instancePath+"/confidence/notes",schemaPath:"#/$defs/Confidence/properties/notes/minimum",keyword:"minimum",params:{comparison: ">=", limit: 0},message:"must be >= 0"};
 if(vErrors === null){
 vErrors = [err22];
 }
 else {
 vErrors.push(err22);
+}
+errors++;
+}
+}
+else {
+const err23 = {instancePath:instancePath+"/confidence/notes",schemaPath:"#/$defs/Confidence/properties/notes/type",keyword:"type",params:{type: "number"},message:"must be number"};
+if(vErrors === null){
+vErrors = [err23];
+}
+else {
+vErrors.push(err23);
+}
+errors++;
+}
+}
+}
+else {
+const err24 = {instancePath:instancePath+"/confidence",schemaPath:"#/$defs/Confidence/type",keyword:"type",params:{type: "object"},message:"must be object"};
+if(vErrors === null){
+vErrors = [err24];
+}
+else {
+vErrors.push(err24);
+}
+errors++;
+}
+}
+}
+else {
+const err25 = {instancePath,schemaPath:"#/type",keyword:"type",params:{type: "object"},message:"must be object"};
+if(vErrors === null){
+vErrors = [err25];
+}
+else {
+vErrors.push(err25);
 }
 errors++;
 }
@@ -452,7 +487,7 @@ errors++;
 }
 if(data.schemaVersion !== undefined){
 let data0 = data.schemaVersion;
-if(!((data0 === "0.1.0") || (data0 === "0.2.0"))){
+if(!(((data0 === "0.1.0") || (data0 === "0.2.0")) || (data0 === "0.3.0"))){
 const err12 = {instancePath:instancePath+"/schemaVersion",schemaPath:"#/properties/schemaVersion/enum",keyword:"enum",params:{allowedValues: schema31.properties.schemaVersion.enum},message:"must be equal to one of the allowed values"};
 if(vErrors === null){
 vErrors = [err12];
