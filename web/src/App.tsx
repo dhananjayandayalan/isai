@@ -216,10 +216,14 @@ export default function App({ source, deps, view: firstView = 'song' }: AppProps
     pick(next);
   }
 
-  /** Open another song. A result belongs to the song it was played on, so leave that page. */
+  /**
+   * Open another song. A result belongs to the song it was played on, so leave that page,
+   * also when it is under the Devices screen (Done then goes to the new song's overview).
+   */
   function pick(next: Choice) {
     setChoice(next);
     if (view === 'results') setView('song');
+    if (returnTo === 'results') setReturnTo('song');
   }
 
   function open(mode: PracticeMode, loopBars: [number, number] | null = null) {

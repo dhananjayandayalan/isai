@@ -1155,6 +1155,22 @@ describe('performance', () => {
     expect(readout('waiting')).toBe('Press Play. After the count-in, play straight through.');
   });
 
+  it("never goes back to one song's result after switching songs on the Devices screen", async () => {
+    const h = harness();
+    await h.midi.connect('fake-keyboard');
+    await startPerformance(h, twinkle);
+    await perform(h, twinkle, twinklePresses());
+    await openDevices();
+    expect(button('Back to results')).toBeDefined();
+    await click('Frère Jacques');
+    expect(button('Back to song')).toBeDefined();
+    await leaveDevices();
+    await settle();
+    expect(text()).not.toContain('Performance results');
+    expect(container.querySelector('[aria-label="Song overview"]')).not.toBeNull();
+    expect(container.querySelector('#song-title')?.textContent).toBe(frere.title);
+  });
+
   it('keeps a training run as a session too', async () => {
     const h = harness();
     await h.midi.connect('fake-keyboard');
