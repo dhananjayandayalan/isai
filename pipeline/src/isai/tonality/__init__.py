@@ -34,6 +34,8 @@ class Tonality:
     """How far the recording sits from A440, in cents."""
     chroma: Vector
     """The 12-bin profile the key was read from (C first)."""
+    tonic_hz: float | None = None
+    """The singer's tonic in Hz (a-cappella), `tonality.tonicHz` in the Song."""
 
 
 def tuning_offset(harmonic: Samples, rate: int) -> float:
