@@ -7,6 +7,7 @@ from isai.arrange.constraints import check
 from isai.arrange.melody import (
     cap_rate,
     choose_division,
+    fold_ornaments,
     phrases,
     place_octave,
     quantise,
@@ -69,6 +70,26 @@ def test_note_rate_caps_by_level() -> None:
     assert len(cap_rate(busy, BEATS, BEAT, None)) == 8
     kept = cap_rate(busy, BEATS, BEAT, 1)
     assert [x.start for x in kept] == [0.0, 0.5]  # the on-beat notes
+
+
+def test_ornaments_fold_into_the_note_they_decorate() -> None:
+    eighth = BEAT / 2
+    # A held D, a quick C#-D turn (two sixteenths), then E on the beat.
+    sung = [n(0.0, 0.5, 74), n(0.5, 0.625, 73), n(0.625, 0.75, 74), n(1.0, 1.5, 76)]
+    folded = fold_ornaments(sung, eighth)
+    assert [(x.start, x.end, x.midi) for x in folded] == [(0.0, 0.75, 74), (1.0, 1.5, 76)]
+    # An isolated flick is lengthened when there's room, dropped when there isn't.
+    assert next(
+        (x.start, x.end) for x in fold_ornaments([n(0, 0.1, 72), n(1, 1.5, 74)], eighth)
+    ) == (0, 0.25)
+    assert [x.midi for x in fold_ornaments([n(0, 0.1, 72), n(0.2, 0.7, 74)], eighth)] == [74]
+    # Long notes pass through untouched.
+    assert fold_ornaments([n(0, 0.5, 72)], eighth) == [n(0, 0.5, 72)]
+
+
+def test_full_keeps_sixteenths_that_easy_folds() -> None:
+    run = [n(i * 0.125, (i + 1) * 0.125, 72 + i % 3) for i in range(8)]
+    assert len(right_hand(run, BEATS, 120, "full")) > len(right_hand(run, BEATS, 120, "easy"))
 
 
 def test_right_hand_drops_grace_notes() -> None:
