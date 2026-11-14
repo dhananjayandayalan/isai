@@ -1,7 +1,7 @@
 ---
 id: adr-0008
 title: Song schema evolution policy
-status: proposed
+status: accepted
 date: 2026-11-14
 phase: P3
 supersedes: null

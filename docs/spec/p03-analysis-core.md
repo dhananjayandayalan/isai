@@ -2,7 +2,7 @@
 id: spec-p03-analysis-core
 phase: P3
 title: Analysis core — ingest, tempo and beats, key and scale
-status: ready
+status: in-progress
 track: pipeline
 depends_on: [spec-p00-foundation]
 ---
