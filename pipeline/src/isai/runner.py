@@ -80,11 +80,22 @@ class Runner:
         self._previous_key = key
         return artifact
 
-    def note(self, name: str, version: str, seconds: float) -> None:
-        """Record a step the runner doesn't cache (ingest, which produces the hash itself)."""
+    def note(
+        self,
+        name: str,
+        version: str,
+        seconds: float,
+        options: Mapping[str, Any] | None = None,
+    ) -> None:
+        """Record a step the runner doesn't cache (ingest, which produces the hash itself).
+
+        Its version and options still join the key chain, so changing the step invalidates
+        every cached stage after it.
+        """
         record = StageRecord(name=name, version=version, seconds=seconds, cached=False)
         self.records.append(record)
         self._log(record)
+        self._previous_key = self._key(name, version, options or {})
 
     def _key(self, name: str, version: str, options: Mapping[str, Any]) -> str:
         text = json.dumps(

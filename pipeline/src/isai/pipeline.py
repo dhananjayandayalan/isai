@@ -7,6 +7,7 @@ later stages are cached.
 
 from __future__ import annotations
 
+import hashlib
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -14,7 +15,7 @@ from typing import Any, TextIO
 
 from isai.assemble import SongInfo, assemble
 from isai.ingest import INGEST_VERSION, IngestLimits, ingest
-from isai.ingest.types import LOW_RATE
+from isai.ingest.types import LOW_RATE, Ingested
 from isai.midi_out import song_midi
 from isai.rhythm import RHYTHM_VERSION, BeatTracker, LibrosaTracker, Rhythm, analyse_rhythm
 from isai.runner import Runner, StageRecord
@@ -43,6 +44,19 @@ class Result:
     records: list[StageRecord]
 
 
+def ingest_key(ingested: Ingested, limits: IngestLimits) -> dict[str, Any]:
+    """What ingest's cache key covers: its limits, the trim offset and the audio it hands on.
+
+    The audio hash names the cache folder but is taken before normalising and trimming, so
+    a change there must show up here for the later stages to re-run.
+    """
+    return {
+        "limits": [limits.max_seconds, limits.max_bytes],
+        "offset": ingested.offset_sec,
+        "low": hashlib.sha256(ingested.samples_low.astype("<f4").tobytes()).hexdigest(),
+    }
+
+
 def run(source: Path, info: SongInfo, options: Options) -> Result:
     """Analyse `source` into a Song and its MIDI file."""
     if options.source_type not in SUPPORTED_TYPES:
@@ -58,7 +72,8 @@ def run(source: Path, info: SongInfo, options: Options) -> Result:
     if options.log_stream is not None:
         runner_kwargs["log_stream"] = options.log_stream
     runner = Runner(**runner_kwargs)
-    runner.note("ingest", INGEST_VERSION, time.perf_counter() - started)
+    seconds = time.perf_counter() - started
+    runner.note("ingest", INGEST_VERSION, seconds, ingest_key(ingested, options.limits))
 
     tracker = options.tracker
     rhythm = runner.stage(

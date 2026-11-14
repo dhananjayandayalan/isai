@@ -115,6 +115,23 @@ def test_a_changed_stage_invalidates_the_stages_after_it_only(tmp_path: Path) ->
     assert sorted(p.name for p in tmp_path.iterdir()) == ["abc", "def"]
 
 
+def test_a_changed_uncached_step_invalidates_the_stages_after_it(tmp_path: Path) -> None:
+    counter = Counter()
+    first = Runner(audio_hash="abc", cache_root=tmp_path)
+    first.note("ingest", "1", 0.1, {"offset": 0.5})
+    run(first, counter)
+    same = Runner(audio_hash="abc", cache_root=tmp_path)
+    same.note("ingest", "1", 0.1, {"offset": 0.5})
+    run(same, counter)
+    assert counter.calls == ["beats", "key"]
+    for version, options in (("2", {"offset": 0.5}), ("1", {"offset": 0.9})):
+        counter.calls.clear()
+        changed = Runner(audio_hash="abc", cache_root=tmp_path)
+        changed.note("ingest", version, 0.1, options)
+        run(changed, counter)
+        assert counter.calls == ["beats", "key"]
+
+
 def test_records_timings_and_logs_json_lines() -> None:
     ticks = iter([0.0, 0.25, 1.0, 1.5])
     stream = io.StringIO()

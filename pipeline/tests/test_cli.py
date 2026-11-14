@@ -99,6 +99,26 @@ def test_the_cache_skips_finished_stages_and_no_cache_runs_them(
     assert first.song == second.song == fresh.song == rerun.song
 
 
+def test_an_ingest_change_reruns_the_stages_after_it(
+    song_file: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # A wider trim pad moves the offset and the audio the stages see, with no version bump.
+    info = SongInfo(
+        song_id="x", title="t", source_type="full-mix", created_at="2026-11-14T10:00:00+00:00"
+    )
+    cache = tmp_path / "cache"
+    run(song_file, info, Options(source_type="full-mix", cache_root=cache))
+    monkeypatch.setattr("isai.ingest.trim.PAD_SEC", 0.5)
+    changed = run(song_file, info, Options(source_type="full-mix", cache_root=cache))
+    fresh = run(song_file, info, Options(source_type="full-mix", cache_root=None))
+    assert {r.name: r.cached for r in changed.records} == {
+        "ingest": False,
+        "rhythm": False,
+        "tonality": False,
+    }
+    assert changed.song == fresh.song
+
+
 @needs_ffmpeg
 def test_logs_each_stage_as_a_json_line(
     song_file: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]
