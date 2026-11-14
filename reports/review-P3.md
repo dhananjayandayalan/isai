@@ -53,3 +53,15 @@ stage cache ignores changes to ingest, so stale beats and keys survive an ingest
 5. **Loose types:** `Tonality.mode: str` (`tonality/__init__.py:29`) should be `KeyMode`;
    `SourceType = str` (`assemble.py:14`) adds nothing; `ExitCode.INPUT_MISSING` also covers
    bad arguments, so `USAGE` would be a clearer name.
+
+## Follow-up (2026-11-14)
+
+- **Blocking 1 fixed** in `b0c0b61`: `Runner.note` takes options and joins the key chain;
+  ingest passes its limits, the trim offset and a digest of the audio it hands on. A test
+  changes the trim pad (no version bump) and checks that rhythm and tonality re-run and
+  match a fresh run; it fails without the fix.
+- **Suggestions 1–5 done** in `ce642d4`. On 4: "C, E and G lead" isn't true of an
+  I–IV–V–I (F, in IV, outweighs E), so the test asserts C then G, and every diatonic bin
+  above 1.5× every chromatic one.
+- The beat-tracking spike harness is in (`20b2696`); the comparison itself still waits for
+  the golden audio.
