@@ -6,8 +6,10 @@
 import type { Hand, NoteIndex } from '../engine/activeNotes';
 import type { Ctx2D } from '../piano/KeyboardRenderer';
 import { signature, type KeySpec } from '../theory/keys';
-import { Speller, staffStep, type Motion } from '../theory/spelling';
+import { Speller, staffStep } from '../theory/spelling';
 import { laneIndexAt, type LaneEntry } from './chordLane';
+import { GHOST_ALPHA } from './FallingNotes';
+import { motionInHand } from './lines';
 import type { StageColors } from './stage';
 
 /** A note ready for the staff: where it sits and which accidental to print, if any. */
@@ -51,28 +53,18 @@ function signatureByLetter(spec: KeySpec): number[] {
 export function buildStaffNotes(index: NoteIndex, spec: KeySpec): StaffNote[] {
   const speller = new Speller(spec);
   const keyAccidentals = signatureByLetter(spec);
-  const byHand: Record<Hand, number[]> = { left: [], right: [] };
-  index.notes.forEach((note, i) => byHand[note.hand].push(i));
-  const result = new Array<StaffNote>(index.notes.length);
-  for (const hand of ['left', 'right'] as const) {
-    const order = byHand[hand];
-    order.forEach((noteIndex, k) => {
-      const note = index.notes[noteIndex];
-      if (!note) return;
-      const next = index.notes[order[k + 1] ?? -1];
-      const motion: Motion = !next || next.midi === note.midi ? 0 : next.midi > note.midi ? 1 : -1;
-      const spelled = speller.pitch(note.midi, motion);
-      const fromKey = spelled.accidental !== keyAccidentals[spelled.letter];
-      result[noteIndex] = {
-        start: note.start,
-        end: note.end,
-        hand,
-        step: staffStep(spelled),
-        accidental: fromKey ? (ACCIDENTAL_GLYPH[spelled.accidental] ?? '') : '',
-      };
-    });
-  }
-  return result;
+  const motions = motionInHand(index);
+  return index.notes.map((note, i) => {
+    const spelled = speller.pitch(note.midi, motions[i]);
+    const fromKey = spelled.accidental !== keyAccidentals[spelled.letter];
+    return {
+      start: note.start,
+      end: note.end,
+      hand: note.hand,
+      step: staffStep(spelled),
+      accidental: fromKey ? (ACCIDENTAL_GLYPH[spelled.accidental] ?? '') : '',
+    };
+  });
 }
 
 export interface StaffFrame {
@@ -93,7 +85,6 @@ export interface StaffFrame {
 
 /** Where the playhead sits, as a share of the width after the clefs. */
 export const PLAYHEAD_AT = 0.2;
-const GHOST_ALPHA = 0.3;
 
 export interface StaffGeometry {
   /** Half the distance between two staff lines: one step. */
@@ -161,7 +152,9 @@ export function drawStaff(ctx: Ctx2D, frame: StaffFrame): void {
     ctx.fillRect(Math.round(x), barTop, 1, barBottom - barTop);
   }
 
-  // Notes: a duration line, ledger lines, the accidental and the notehead.
+  // Notes: a duration line, ledger lines, the accidental and the notehead. Glyph sizes
+  // (accidentals, clefs, key signature) follow the staff's line spacing, not the font
+  // size: they must fit between the lines. Only the chord lane is text that scales.
   ctx.textAlign = 'right';
   ctx.textBaseline = 'middle';
   ctx.font = `${Math.round(g.half * 2.4)}px serif`;

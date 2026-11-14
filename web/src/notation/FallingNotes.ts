@@ -7,8 +7,8 @@ import type { Hand, NoteIndex } from '../engine/activeNotes';
 import type { Ctx2D } from '../piano/KeyboardRenderer';
 import type { KeyLayout } from '../piano/layout';
 import type { NoteLabel, NoteNamer } from '../theory/labels';
-import type { Motion } from '../theory/spelling';
 import { laneIndexAt, type LaneEntry } from './chordLane';
+import { motionInHand } from './lines';
 import type { StageColors } from './stage';
 
 export interface FallingFrame {
@@ -31,7 +31,7 @@ export interface FallingFrame {
   otherHand: { hand: Hand; show: boolean } | null;
 }
 
-/** How faint the hand you aren't playing is drawn. */
+/** How faint the hand you aren't playing is drawn, on the falling notes and the staff. */
 export const GHOST_ALPHA = 0.3;
 /** Bars are never drawn thinner than this, so short notes stay visible. */
 export const MIN_BAR = 3;
@@ -53,18 +53,8 @@ export function steppedPosition(seconds: number, beats: readonly number[]): numb
  * follows where that hand goes next.
  */
 export function labelNotes(index: NoteIndex, namer: NoteNamer): NoteLabel[] {
-  const nextOf = new Map<number, number>();
-  const last: Partial<Record<Hand, number>> = {};
-  index.notes.forEach((note, i) => {
-    const previous = last[note.hand];
-    if (previous !== undefined) nextOf.set(previous, i);
-    last[note.hand] = i;
-  });
-  return index.notes.map((note, i) => {
-    const next = index.notes[nextOf.get(i) ?? -1];
-    const motion: Motion = !next || next.midi === note.midi ? 0 : next.midi > note.midi ? 1 : -1;
-    return namer.note(note.midi, motion);
-  });
+  const motions = motionInHand(index);
+  return index.notes.map((note, i) => namer.note(note.midi, motions[i]));
 }
 
 /** First note that may still be on screen at `seconds` (every earlier one has ended). */

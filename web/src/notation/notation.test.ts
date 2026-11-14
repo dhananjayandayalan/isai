@@ -9,6 +9,7 @@ import { parseSong, type Note } from '../song';
 import { NoteNamer, type LaneChord } from '../theory/labels';
 import { buildLane, laneIndexAt } from './chordLane';
 import { drawFallingNotes, GHOST_ALPHA, labelNotes, MIN_BAR, steppedPosition, type FallingFrame } from './FallingNotes';
+import { motionInHand } from './lines';
 import { readStageColors, type StageColors } from './stage';
 import {
   BASS,
@@ -159,6 +160,19 @@ describe('falling notes', () => {
     const labels = labelNotes(line, new NoteNamer({ key: 'C', mode: 'major' }));
     // In time order: right C, left Db (going down to C), right C# (going up to D), left C, right D.
     expect(labels.map((l) => l.text)).toEqual(['C', 'Db', 'C#', 'C', 'D']);
+  });
+
+  it('spells a chord tone by where the hand goes next, not by the other notes of the chord', () => {
+    // Right hand: Eb/D# with C at 0 s, then E at 1 s. The hand goes up, so it is D#, though
+    // the C struck with it is lower.
+    const chord = buildNoteIndex([note(0, 1, 63), note(0, 1, 60), note(1, 2, 64), note(0, 2, 40, 'left')]);
+    expect(motionInHand(chord)).toEqual([1, 1, 0, 0]);
+    const namer = new NoteNamer({ key: 'C', mode: 'major' });
+    expect(labelNotes(chord, namer).map((l) => l.text)).toEqual(['D#', 'C', 'E', 'E']);
+    expect(buildStaffNotes(chord, { key: 'C', mode: 'major' })[0]).toMatchObject({ accidental: '♯', step: 29 });
+    // A repeated note, or nothing after it, gives no direction.
+    expect(motionInHand(buildNoteIndex([note(0, 1, 61), note(1, 2, 61)]))).toEqual([0, 0]);
+    expect(motionInHand(buildNoteIndex([]))).toEqual([]);
   });
 
   it('shows the chord lane: upcoming chords at their start, the one sounding at the bottom', () => {
