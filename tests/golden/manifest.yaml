@@ -14,6 +14,9 @@
 #     tonic_hz  optional measured tonic, mainly for a-cappella and carnatic
 #     raga      optional, carnatic only
 #     bpm       reference tempo; half/double are accepted but flagged
+#     beats_per_bar  optional, 3 or 4 (the beat-tracking spike scores metre with it)
+#   beats       optional reference beats (.beats: "time position-in-bar" per line, 1 = downbeat),
+#               relative to this folder; gives beat and downbeat F-measure
 #   chords_lab  optional reference chord file (.lab: start end label), relative to this folder
 #   midi        optional reference MIDI for note F1 (piano-solo), relative to this folder
 #   notes       free text: why this song is in the set, known difficulties

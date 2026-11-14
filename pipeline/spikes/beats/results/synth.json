@@ -1,0 +1,288 @@
+{
+  "summary": [
+    {
+      "tracker": "librosa",
+      "songs": 8,
+      "beat_f": 0.953,
+      "downbeat_f": 0.625,
+      "tempo_right": 0.875,
+      "tempo_octave": 0.125,
+      "metre_right": 1.0,
+      "seconds_per_audio_minute": 0.83
+    },
+    {
+      "tracker": "beat-this",
+      "songs": 8,
+      "beat_f": 0.873,
+      "downbeat_f": 0.591,
+      "tempo_right": 1.0,
+      "tempo_octave": 0.0,
+      "metre_right": 0.75,
+      "seconds_per_audio_minute": 1.02
+    }
+  ],
+  "rows": [
+    {
+      "song": "clicks-60-4",
+      "tracker": "librosa",
+      "seconds": 2.44,
+      "audio_seconds": 30.0,
+      "bpm": 60.09,
+      "tempo": "right",
+      "beats_per_bar": 4,
+      "metre": "True",
+      "stability": 0.0041,
+      "beat_f": 1.0,
+      "downbeat_f": 1.0,
+      "agreement": {
+        "beat-this": 0.0
+      }
+    },
+    {
+      "song": "clicks-60-4",
+      "tracker": "beat-this",
+      "seconds": 0.51,
+      "audio_seconds": 30.0,
+      "bpm": null,
+      "tempo": "n/a",
+      "beats_per_bar": 4,
+      "metre": "True",
+      "stability": null,
+      "beat_f": 0.0,
+      "downbeat_f": 0.0,
+      "agreement": {
+        "librosa": 0.0
+      }
+    },
+    {
+      "song": "clicks-90-3",
+      "tracker": "librosa",
+      "seconds": 0.12,
+      "audio_seconds": 30.0,
+      "bpm": 90.67,
+      "tempo": "right",
+      "beats_per_bar": 3,
+      "metre": "True",
+      "stability": 0.0086,
+      "beat_f": 0.9863,
+      "downbeat_f": 1.0,
+      "agreement": {
+        "beat-this": 0.9863
+      }
+    },
+    {
+      "song": "clicks-90-3",
+      "tracker": "beat-this",
+      "seconds": 0.52,
+      "audio_seconds": 30.0,
+      "bpm": 90.91,
+      "tempo": "right",
+      "beats_per_bar": 4,
+      "metre": "False",
+      "stability": 0.0143,
+      "beat_f": 1.0,
+      "downbeat_f": 0.4898,
+      "agreement": {
+        "librosa": 0.9863
+      }
+    },
+    {
+      "song": "clicks-120-4",
+      "tracker": "librosa",
+      "seconds": 0.13,
+      "audio_seconds": 30.0,
+      "bpm": 120.19,
+      "tempo": "right",
+      "beats_per_bar": 4,
+      "metre": "True",
+      "stability": 0.0052,
+      "beat_f": 0.9897,
+      "downbeat_f": 1.0,
+      "agreement": {
+        "beat-this": 0.9897
+      }
+    },
+    {
+      "song": "clicks-120-4",
+      "tracker": "beat-this",
+      "seconds": 0.5,
+      "audio_seconds": 30.0,
+      "bpm": 120.0,
+      "tempo": "right",
+      "beats_per_bar": 4,
+      "metre": "True",
+      "stability": 0.0184,
+      "beat_f": 1.0,
+      "downbeat_f": 0.3111,
+      "agreement": {
+        "librosa": 0.9897
+      }
+    },
+    {
+      "song": "clicks-174-4",
+      "tracker": "librosa",
+      "seconds": 0.13,
+      "audio_seconds": 30.0,
+      "bpm": 172.27,
+      "tempo": "right",
+      "beats_per_bar": 4,
+      "metre": "True",
+      "stability": 0.0154,
+      "beat_f": 0.993,
+      "downbeat_f": 1.0,
+      "agreement": {
+        "beat-this": 0.993
+      }
+    },
+    {
+      "song": "clicks-174-4",
+      "tracker": "beat-this",
+      "seconds": 0.52,
+      "audio_seconds": 30.0,
+      "bpm": 176.47,
+      "tempo": "right",
+      "beats_per_bar": 4,
+      "metre": "True",
+      "stability": 0.0308,
+      "beat_f": 1.0,
+      "downbeat_f": 0.4138,
+      "agreement": {
+        "librosa": 0.993
+      }
+    },
+    {
+      "song": "clicks-150-3",
+      "tracker": "librosa",
+      "seconds": 0.13,
+      "audio_seconds": 30.0,
+      "bpm": 152.0,
+      "tempo": "right",
+      "beats_per_bar": 3,
+      "metre": "True",
+      "stability": 0.0144,
+      "beat_f": 1.0,
+      "downbeat_f": 1.0,
+      "agreement": {
+        "beat-this": 1.0
+      }
+    },
+    {
+      "song": "clicks-150-3",
+      "tracker": "beat-this",
+      "seconds": 0.49,
+      "audio_seconds": 30.0,
+      "bpm": 150.0,
+      "tempo": "right",
+      "beats_per_bar": 4,
+      "metre": "False",
+      "stability": 0.0,
+      "beat_f": 1.0,
+      "downbeat_f": 0.5122,
+      "agreement": {
+        "librosa": 1.0
+      }
+    },
+    {
+      "song": "drums-100",
+      "tracker": "librosa",
+      "seconds": 0.12,
+      "audio_seconds": 30.0,
+      "bpm": 99.38,
+      "tempo": "right",
+      "beats_per_bar": 4,
+      "metre": "True",
+      "stability": 0.0091,
+      "beat_f": 0.9877,
+      "downbeat_f": 0.0,
+      "agreement": {
+        "beat-this": 0.9756
+      }
+    },
+    {
+      "song": "drums-100",
+      "tracker": "beat-this",
+      "seconds": 0.52,
+      "audio_seconds": 30.0,
+      "bpm": 100.0,
+      "tempo": "right",
+      "beats_per_bar": 4,
+      "metre": "True",
+      "stability": 0.0047,
+      "beat_f": 0.988,
+      "downbeat_f": 1.0,
+      "agreement": {
+        "librosa": 0.9756
+      }
+    },
+    {
+      "song": "drums-132",
+      "tracker": "librosa",
+      "seconds": 0.12,
+      "audio_seconds": 30.0,
+      "bpm": 132.51,
+      "tempo": "right",
+      "beats_per_bar": 4,
+      "metre": "True",
+      "stability": 0.0094,
+      "beat_f": 1.0,
+      "downbeat_f": 0.0,
+      "agreement": {
+        "beat-this": 1.0
+      }
+    },
+    {
+      "song": "drums-132",
+      "tracker": "beat-this",
+      "seconds": 0.51,
+      "audio_seconds": 30.0,
+      "bpm": 130.43,
+      "tempo": "right",
+      "beats_per_bar": 4,
+      "metre": "True",
+      "stability": 0.0191,
+      "beat_f": 1.0,
+      "downbeat_f": 1.0,
+      "agreement": {
+        "librosa": 1.0
+      }
+    },
+    {
+      "song": "drums-96-rubato",
+      "tracker": "librosa",
+      "seconds": 0.13,
+      "audio_seconds": 30.0,
+      "bpm": 191.41,
+      "tempo": "octave",
+      "beats_per_bar": 4,
+      "metre": "True",
+      "stability": 0.045,
+      "beat_f": 0.6667,
+      "downbeat_f": 0.0,
+      "agreement": {
+        "beat-this": 0.6496
+      }
+    },
+    {
+      "song": "drums-96-rubato",
+      "tracker": "beat-this",
+      "seconds": 0.5,
+      "audio_seconds": 30.0,
+      "bpm": 96.77,
+      "tempo": "right",
+      "beats_per_bar": 4,
+      "metre": "True",
+      "stability": 0.0413,
+      "beat_f": 1.0,
+      "downbeat_f": 1.0,
+      "agreement": {
+        "librosa": 0.6496
+      }
+    }
+  ],
+  "unavailable": {
+    "beat-this-dbn": "ModuleNotFoundError: No module named 'madmom'",
+    "madmom": "ModuleNotFoundError: No module named 'madmom'"
+  },
+  "skipped_songs": [],
+  "model_load_seconds": 1.87
+}
