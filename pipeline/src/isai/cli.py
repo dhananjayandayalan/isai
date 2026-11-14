@@ -69,6 +69,17 @@ def _parser() -> argparse.ArgumentParser:
     analyse.add_argument(
         "--log-json", action="store_true", help="log each stage as a JSON line on stderr"
     )
+    analyse.add_argument(
+        "--device",
+        choices=["auto", "cpu", "cuda"],
+        default="auto",
+        help="where the models run (default: auto, the GPU when torch sees one)",
+    )
+    analyse.add_argument(
+        "--keep-stems",
+        action="store_true",
+        help="full-mix: also write the separated stems to <out>/stems/ (local use only)",
+    )
     models_parser = commands.add_parser("models", help="list or download the analysis models")
     models_commands = models_parser.add_subparsers(dest="models_command", required=True)
     models_commands.add_parser("list", help="each model, its licence and whether it's here")
@@ -143,6 +154,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         cache_root=None if args.no_cache else args.cache_dir,
         from_stage=args.from_stage,
         log_json=args.log_json,
+        device=args.device,
+        keep_stems=args.out / "stems" if args.keep_stems else None,
     )
     try:
         result = run(source, info, options)
@@ -158,6 +171,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return ExitCode.INVALID_SONG
     song_path, midi_path = write_outputs(result, args.out, source.stem)
     print(f"Wrote {song_path} and {midi_path}")
+    if result.stem_files:
+        print(f"Wrote {len(result.stem_files)} stems to {result.stem_files[0].parent}")
     return ExitCode.OK
 
 

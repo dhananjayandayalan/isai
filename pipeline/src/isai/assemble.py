@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any
 
@@ -10,6 +11,7 @@ from isai.ingest.types import Ingested
 from isai.rhythm.types import Rhythm
 from isai.schema import current_version, validate_song
 from isai.tonality import Tonality
+from isai.transcribe.types import TNote
 
 _DECIMALS = 3
 
@@ -30,8 +32,38 @@ def _times(values: Any, offset: float) -> list[float]:
     return [round(float(v) + offset, _DECIMALS) for v in values]
 
 
+def _notes(
+    notes: Sequence[TNote], hands: Sequence[str], offset: float, duration: float
+) -> list[dict[str, Any]]:
+    """Song notes on the original timeline, inside the song, sorted; zero-length ones dropped."""
+    out: list[dict[str, Any]] = []
+    for note, hand in zip(notes, hands, strict=True):
+        start = round(note.start + offset, _DECIMALS)
+        end = min(round(note.end + offset, _DECIMALS), duration)
+        if end <= start:
+            continue
+        out.append(
+            {
+                "start": start,
+                "end": end,
+                "midi": int(min(127, max(0, note.midi))),
+                "velocity": int(min(127, max(1, note.velocity))),
+                "hand": hand,
+                "source": "transcribed",
+            }
+        )
+    out.sort(key=lambda n: (n["start"], n["midi"], n["hand"]))
+    return out
+
+
 def assemble(
-    info: SongInfo, ingested: Ingested, rhythm: Rhythm, tonality: Tonality
+    info: SongInfo,
+    ingested: Ingested,
+    rhythm: Rhythm,
+    tonality: Tonality,
+    notes: Sequence[TNote] = (),
+    hands: Sequence[str] = (),
+    notes_confidence: float | None = None,
 ) -> dict[str, Any]:
     """The Song (newest schema version), validated. Stage times move back by the trimmed offset."""
     offset = ingested.offset_sec
@@ -48,7 +80,7 @@ def assemble(
         "timeSignature": {"num": rhythm.beats_per_bar, "den": 4},
         "tonality": {"key": tonality.key, "mode": tonality.mode, "scale": list(tonality.scale)},
         "chords": [],
-        "notes": [],
+        "notes": _notes(notes, hands, offset, duration),
         "meta": {
             "pipelineVersion": __version__,
             "createdAt": info.created_at,
@@ -59,5 +91,9 @@ def assemble(
             },
         },
     }
+    if tonality.tonic_hz is not None:
+        song["tonality"]["tonicHz"] = round(tonality.tonic_hz, 2)
+    if notes_confidence is not None:
+        song["meta"]["confidence"]["notes"] = round(notes_confidence, 4)
     validate_song(song)
     return song

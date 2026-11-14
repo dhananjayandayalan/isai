@@ -76,11 +76,39 @@ class PyinTracker:
         )
 
 
+# torchcrepe's bin grid: 360 bins, 20 cents apart, from this many cents above 10 Hz.
+_CENTS_PER_BIN = 20.0
+_FIRST_BIN_CENTS = 1997.3794084376191
+_WINDOW_BINS = 4
+
+
+def viterbi_weighted(logits: Any) -> tuple[Any, Any]:
+    """Viterbi path, refined to a weighted average of the bins around it. Deterministic.
+
+    torchcrepe's own decoders add random dither (+-20 cents, from numpy's global random
+    state) to hide the bin quantisation; that makes runs differ and blurs the tuning
+    measurement. CREPE's original local weighted average gives the sub-bin precision
+    without noise.
+    """
+    import torch
+    import torchcrepe  # pyright: ignore[reportMissingTypeStubs]
+
+    decoded: Any = torchcrepe.decode.viterbi(logits)  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
+    bins = decoded[0]
+    index = torch.arange(logits.size(1), device=logits.device)[None, :, None]
+    near = (index - bins[:, None, :]).abs() <= _WINDOW_BINS
+    probs = torch.sigmoid(logits) * near
+    cents_axis = _CENTS_PER_BIN * index + _FIRST_BIN_CENTS
+    cents = (cents_axis * probs).sum(dim=1) / probs.sum(dim=1).clamp_min(1e-9)
+    return bins, 10 * 2 ** (cents / 1200)
+
+
 class CrepeTracker:
-    """torchcrepe's "full" CREPE model with Viterbi decoding; periodicity as confidence."""
+    """torchcrepe's "full" CREPE model, Viterbi decoded without dither; periodicity as
+    confidence."""
 
     name = "torchcrepe"
-    version = "full-1"
+    version = "full-2"
 
     def __init__(self, device: Device = "cpu", batch_size: int = 512) -> None:
         self.device = device
@@ -100,7 +128,7 @@ class CrepeTracker:
                 fmin=FMIN,
                 fmax=FMAX,
                 model="full",
-                decoder=torchcrepe.decode.viterbi,  # pyright: ignore[reportUnknownMemberType]
+                decoder=viterbi_weighted,
                 return_periodicity=True,
                 batch_size=self.batch_size,
                 device=self.device,

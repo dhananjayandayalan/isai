@@ -54,11 +54,19 @@ def test_analyse_writes_a_valid_song_and_a_midi_file(song_file: Path, tmp_path: 
     # Times are on the original audio: the first beat is after the second of silence.
     assert song["tempo"]["beats"][0] == pytest.approx(1.0, abs=0.05)
     assert set(song["tempo"]["downbeats"]) <= set(song["tempo"]["beats"])
-    assert song["notes"] == [] and song["chords"] == []
+    # A full mix gives the (fake) vocal melody, all in the right hand.
+    notes = song["notes"]
+    assert notes and {n["hand"] for n in notes} == {"right"}
+    assert {n["source"] for n in notes} == {"transcribed"}
+    assert notes[0]["start"] >= 0.9  # on the original timeline, after the silence
+    assert song["chords"] == []
     confidence = song["meta"]["confidence"]
     assert confidence["key"] > 0 and confidence["tempo"] > 0 and confidence["chords"] == 0
+    assert confidence["notes"] == pytest.approx(0.9)
     midi = mido.MidiFile(file=io.BytesIO((tmp_path / "out" / "cadence.mid").read_bytes()))
     assert [t.name for t in midi.tracks[1:]] == ["Right hand", "Left hand"]
+    right = [m for m in midi.tracks[1] if m.type == "note_on" and m.velocity > 0]
+    assert len(right) == len(notes)
 
 
 @needs_ffmpeg
@@ -92,10 +100,16 @@ def test_the_cache_skips_finished_stages_and_no_cache_runs_them(
         song_file, info, Options(source_type="full-mix", cache_root=cache, from_stage="tonality")
     )
     cached = lambda result: {r.name: r.cached for r in result.records}  # noqa: E731
-    assert cached(first) == {"ingest": False, "rhythm": False, "tonality": False}
-    assert cached(second) == {"ingest": False, "rhythm": True, "tonality": True}
-    assert cached(fresh) == {"ingest": False, "rhythm": False, "tonality": False}
-    assert cached(rerun) == {"ingest": False, "rhythm": True, "tonality": False}
+    stages = ("separate", "rhythm", "tonality", "melody", "bass")
+
+    def every(value: bool) -> dict[str, bool]:
+        return {"ingest": False} | dict.fromkeys(stages, value)
+
+    assert cached(first) == every(False)
+    assert cached(second) == every(True)
+    assert cached(fresh) == every(False)
+    # From tonality on: separate and rhythm come from the cache, the rest re-run.
+    assert cached(rerun) == every(False) | {"separate": True, "rhythm": True}
     assert first.song == second.song == fresh.song == rerun.song
 
 
@@ -111,11 +125,8 @@ def test_an_ingest_change_reruns_the_stages_after_it(
     monkeypatch.setattr("isai.ingest.trim.PAD_SEC", 0.5)
     changed = run(song_file, info, Options(source_type="full-mix", cache_root=cache))
     fresh = run(song_file, info, Options(source_type="full-mix", cache_root=None))
-    assert {r.name: r.cached for r in changed.records} == {
-        "ingest": False,
-        "rhythm": False,
-        "tonality": False,
-    }
+    assert not any(r.cached for r in changed.records)
+    assert len(changed.records) == 6  # ingest, separate, rhythm, tonality, melody, bass
     assert changed.song == fresh.song
 
 
@@ -125,9 +136,16 @@ def test_logs_each_stage_as_a_json_line(
 ) -> None:
     assert analyse(song_file, tmp_path / "out", "--no-cache", "--log-json") == 0
     lines = [json.loads(line) for line in capsys.readouterr().err.splitlines()]
-    assert [line["stage"] for line in lines] == ["ingest", "rhythm", "tonality"]
+    assert [line["stage"] for line in lines] == [
+        "ingest",
+        "separate",
+        "rhythm",
+        "tonality",
+        "melody",
+        "bass",
+    ]
     assert all(line["event"] == "stage" and line["seconds"] >= 0 for line in lines)
-    rhythm, tonality = lines[1]["detail"], lines[2]["detail"]
+    rhythm, tonality = lines[2]["detail"], lines[3]["detail"]
     assert rhythm["tracker"].startswith("librosa")
     assert rhythm["stable"] is True and rhythm["beatsPerBar"] == 4
     assert abs(rhythm["bpm"] - 60) < 1
