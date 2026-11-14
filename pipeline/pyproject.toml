@@ -15,6 +15,23 @@ dependencies = [
     "soundfile>=0.14.0",
 ]
 
+# The models (P4) need torch. Pick one build: `uv sync --extra cuda` (NVIDIA GPU) or
+# `uv sync --extra cpu`. Without either, everything but the model stages works, and the
+# fast tests run on fakes.
+[project.optional-dependencies]
+cpu = [
+    "torch>=2.11",
+    "torchaudio>=2.11",
+    "piano-transcription-inference>=0.0.6",
+    "torchcrepe>=0.0.24",
+]
+cuda = [
+    "torch>=2.11",
+    "torchaudio>=2.11",
+    "piano-transcription-inference>=0.0.6",
+    "torchcrepe>=0.0.24",
+]
+
 [project.scripts]
 isai = "isai.cli:main"
 gen-models = "isai.gen_models:main"
@@ -25,8 +42,28 @@ dev = [
     "pyright>=1.1.390",
     "pytest>=8.3",
     "pytest-cov>=6.0",
+    "hypothesis>=6.170",
     "ruff>=0.8",
 ]
+
+[tool.uv]
+conflicts = [[{ extra = "cpu" }, { extra = "cuda" }]]
+
+[tool.uv.sources]
+torch = [
+    { index = "pytorch-cpu", extra = "cpu" },
+    { index = "pytorch-cu130", extra = "cuda" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true
 
 [build-system]
 requires = ["hatchling"]

@@ -2,7 +2,8 @@
 
 `isai analyse song.mp3 --type full-mix --out out/` writes `out/song.song.json` and
 `out/song.mid`. Exit codes: 0 done, 1 invalid Song, 2 input missing or bad arguments,
-3 schema not found, 4 decode failed, 5 too long, 6 silent.
+3 schema not found, 4 decode failed, 5 too long, 6 silent, 7 a model or torch missing.
+`isai models list` and `isai models fetch` manage the model weights.
 """
 
 from __future__ import annotations
@@ -17,9 +18,10 @@ from pathlib import Path
 
 from jsonschema import FormatChecker
 
-from isai import __version__
+from isai import __version__, models
 from isai.assemble import SongInfo
-from isai.errors import ExitCode, PipelineError
+from isai.errors import ExitCode, ModelMissingError, PipelineError
+from isai.models import fetch as fetch_model
 from isai.pipeline import LATER_TYPES, STAGES, SUPPORTED_TYPES, Options, Result, run
 from isai.schema import SchemaNotFoundError, SongValidationError
 
@@ -67,7 +69,40 @@ def _parser() -> argparse.ArgumentParser:
     analyse.add_argument(
         "--log-json", action="store_true", help="log each stage as a JSON line on stderr"
     )
+    models_parser = commands.add_parser("models", help="list or download the analysis models")
+    models_commands = models_parser.add_subparsers(dest="models_command", required=True)
+    models_commands.add_parser("list", help="each model, its licence and whether it's here")
+    fetch = models_commands.add_parser("fetch", help="download and verify models")
+    fetch.add_argument("names", nargs="*", help="model names (default: all)")
     return parser
+
+
+def _models(args: argparse.Namespace) -> int:
+    if args.models_command == "list":
+        for model in models.REGISTRY.values():
+            try:
+                status = f"here ({models.model_path(model.name)})"
+            except ModelMissingError:
+                status = "missing"
+            size = f"{model.size / 1e6:.0f} MB"
+            print(f"{model.name}: {model.what}; {size}; {model.licence}; {status}")
+        return ExitCode.OK
+    unknown = [name for name in args.names if name not in models.REGISTRY]
+    if unknown:
+        known = ", ".join(models.REGISTRY)
+        print(f"isai: unknown model {', '.join(unknown)} (known: {known})", file=sys.stderr)
+        return ExitCode.USAGE
+    for name in args.names or list(models.REGISTRY):
+        try:
+            path = fetch_model(name)
+        except ModelMissingError as e:
+            print(f"isai: {e}", file=sys.stderr)
+            return e.exit_code
+        except OSError as e:
+            print(f"isai: downloading {name} failed: {e}", file=sys.stderr)
+            return ExitCode.MODEL_MISSING
+        print(f"{name}: {path}")
+    return ExitCode.OK
 
 
 def _created_at(value: str | None) -> str:
@@ -84,6 +119,8 @@ def _created_at(value: str | None) -> str:
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = _parser().parse_args(argv)
+    if args.command == "models":
+        return _models(args)
     source: Path = args.file
     if args.type in LATER_TYPES:
         print(f"isai: {args.type} songs are coming in a later version", file=sys.stderr)

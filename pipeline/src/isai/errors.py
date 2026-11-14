@@ -14,6 +14,8 @@ class ExitCode(IntEnum):
     DECODE_FAILED = 4
     TOO_LONG = 5
     SILENT = 6
+    MODEL_MISSING = 7
+    """torch or a model's weights are missing, or the weights fail their checksum."""
 
 
 class PipelineError(Exception):
@@ -38,3 +40,9 @@ class SilentAudioError(PipelineError):
     """The file decodes but holds no audio above the silence threshold."""
 
     exit_code = ExitCode.SILENT
+
+
+class ModelMissingError(PipelineError):
+    """torch isn't installed, or a model's weights are missing or fail their checksum."""
+
+    exit_code = ExitCode.MODEL_MISSING
