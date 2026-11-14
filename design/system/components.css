@@ -308,6 +308,7 @@ a { color: var(--text); }
 
 /* Falling-notes stage */
 .stage { position: relative; background: var(--surface-sunken); border: var(--border-width) solid var(--border); border-bottom: 0; border-radius: var(--radius-xl) var(--radius-xl) 0 0; overflow: hidden; }
+.stage-canvas { display: block; width: 100%; } /* falling notes or the staff; the controller sets its height */
 .note-right { background: var(--hand-right); border: var(--border-width) solid var(--hand-right-border); color: var(--on-hand-right); border-radius: var(--radius-md); }
 .note-left  { background: var(--hand-left);  border: var(--border-width) solid var(--hand-left-border);  color: var(--on-hand-left);  border-radius: var(--radius-md); }
 .note-ghost { background: transparent;        border: var(--border-width) solid var(--border-strong);    color: var(--text-4);        border-radius: var(--radius-md); }

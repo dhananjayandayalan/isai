@@ -11,6 +11,7 @@ import {
   KEY_NEXT_LEFT,
   KEY_NEXT_RIGHT,
 } from '../engine/practice/view';
+import type { NoteLabel } from '../theory/labels';
 import { midiToName } from '../theory/pitch';
 import { BLACK_HEIGHT_RATIO, type KeyLayout, type KeyRect } from './layout';
 
@@ -91,6 +92,8 @@ export interface PracticeOverlay {
   now: number;
   /** Song notes of this hand are drawn dimmed. */
   dimHand: Hand | null;
+  /** Leave that hand's notes off the keys altogether ("Show the hand I'm not playing" off). */
+  hideDimHand?: boolean;
 }
 
 export interface KeyboardFrame {
@@ -104,6 +107,13 @@ export interface KeyboardFrame {
   song: readonly ActiveNote[];
   /** Label each C with its octave (C4). */
   labels: boolean;
+  /**
+   * A name for every key (index = MIDI) in the chosen notation, shown on the C keys and on
+   * the keys to play now. Null shows only the C keys, as C4.
+   */
+  names?: readonly NoteLabel[] | null;
+  /** Keys let go while the sustain pedal is down: drawn as held. */
+  sustained?: Uint8Array | null;
   practice?: PracticeOverlay | null;
 }
 
@@ -113,8 +123,32 @@ export const DIM_ALPHA = 0.45;
 const EXPECT = KEY_EXPECT_RIGHT | KEY_EXPECT_LEFT;
 const NEXT = KEY_NEXT_RIGHT | KEY_NEXT_LEFT;
 
+/** Font size in px of a CSS font shorthand ("500 11px mono" is 11). */
+function fontPx(font: string): number {
+  const match = /(\d+(?:\.\d+)?)px/.exec(font);
+  return match ? Number(match[1]) : 11;
+}
+
+/** A key's name centred at `x`, if it fits; swara octave dots above or below. */
+function drawName(ctx: Ctx2D, label: NoteLabel, x: number, y: number, width: number, size: number) {
+  if (label.text.length * size * 0.62 > width) return;
+  ctx.fillText(label.text, x, y);
+  for (let d = 0; d < label.dotsBelow; d++) {
+    ctx.beginPath();
+    ctx.arc(x, y + 3 + d * 4, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  for (let d = 0; d < label.dotsAbove; d++) {
+    ctx.beginPath();
+    ctx.arc(x, y - size - 2 - d * 4, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
 export function drawKeyboard(ctx: Ctx2D, frame: KeyboardFrame): void {
   const { layout, height, colors, held } = frame;
+  const sustained = frame.sustained ?? null;
+  const down = (midi: number) => (held[midi] ?? 0) > 0 || (sustained?.[midi] ?? 0) > 0;
   const practice = frame.practice ?? null;
   const flags = practice?.keys;
   const songHands = new Map<number, Hand>();
@@ -147,6 +181,7 @@ export function drawKeyboard(ctx: Ctx2D, frame: KeyboardFrame): void {
       drawPill(ctx, key, gap, y, pill, flag & KEY_EXPECT_RIGHT ? 'right' : 'left', colors);
     } else if (hand) {
       const dim = hand === practice?.dimHand;
+      if (dim && practice?.hideDimHand) return;
       if (dim) ctx.globalAlpha = DIM_ALPHA;
       drawPill(ctx, key, gap, y, pill, hand, colors);
       if (dim) ctx.globalAlpha = 1;
@@ -158,27 +193,39 @@ export function drawKeyboard(ctx: Ctx2D, frame: KeyboardFrame): void {
   for (const key of layout.whites) {
     const flag = flags?.[key.midi] ?? 0;
     let fill = colors.white;
-    if ((held[key.midi] ?? 0) > 0 || flag & EXPECT) fill = colors.whiteActive;
+    if (down(key.midi) || flag & EXPECT) fill = colors.whiteActive;
     else if (practice?.dimHand && songHands.get(key.midi) === practice.dimHand) fill = colors.whiteHint;
     drawKey(ctx, key, gap, height, fill, colors.radius);
   }
+  const names = frame.labels ? (frame.names ?? null) : null;
+  const size = fontPx(colors.labelFont);
+  /** Which keys carry a name: the C keys, and with names the keys to play now. */
+  const named = (midi: number) => midi % 12 === 0 || (names !== null && ((flags?.[midi] ?? 0) & EXPECT) !== 0);
   if (frame.labels) {
     ctx.font = colors.labelFont;
     ctx.fillStyle = colors.label;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'alphabetic';
     for (const key of layout.whites) {
-      if (key.midi % 12 === 0) {
-        ctx.fillText(midiToName(key.midi), key.x + key.width / 2, height - pill - gap * 4);
-      }
+      if (!named(key.midi)) continue;
+      const label = names?.[key.midi] ?? { text: midiToName(key.midi), dotsAbove: 0, dotsBelow: 0 };
+      drawName(ctx, label, key.x + key.width / 2, height - pill - gap * 4, key.width, size);
     }
   }
   for (const key of layout.whites) mark(key, whiteY);
   for (const key of layout.blacks) {
     const flag = flags?.[key.midi] ?? 0;
-    const fill = (held[key.midi] ?? 0) > 0 || flag & EXPECT ? colors.blackActive : colors.black;
+    const fill = down(key.midi) || flag & EXPECT ? colors.blackActive : colors.black;
     drawKey(ctx, key, 0, blackHeight, fill, colors.radius);
     mark(key, blackY);
+    const label = names?.[key.midi];
+    if (label && named(key.midi)) {
+      ctx.font = colors.labelFont;
+      ctx.fillStyle = colors.pillRight;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'alphabetic';
+      drawName(ctx, label, key.x + key.width / 2, blackY - gap * 2, key.width, size);
+    }
   }
   if (below) drawMarker(ctx, 'below', layout.width, height, layout.whiteWidth, below, colors);
   if (above) drawMarker(ctx, 'above', layout.width, height, layout.whiteWidth, above, colors);
