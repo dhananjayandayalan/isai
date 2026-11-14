@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { MidiDevice, MidiInput } from './midi/MidiInput';
 import { MidiError } from './midi/WebMidiInput';
 
@@ -16,10 +16,8 @@ export interface MidiPanelProps {
   onConnect: () => void;
   /** Called with the connected device's id, or null once nothing is connected. */
   onConnectionChange?: (deviceId: string | null) => void;
-  /** The keyboard used last time: connected again as soon as a scan finds it. */
+  /** The keyboard used last time: connected again as soon as a scan, or plugging it in, finds it. */
   preferredDeviceId?: string | null;
-  monitor: boolean;
-  onMonitorChange: (monitor: boolean) => void;
 }
 
 const ERROR_TEXT: Record<ErrorKind, { title: string; next: string; retry: string | null }> = {
@@ -59,7 +57,7 @@ function errorKind(e: unknown): ErrorKind {
  * notes never pass through here (rule 5).
  */
 export function MidiPanel(props: MidiPanelProps) {
-  const { midi, onConnect, onConnectionChange, preferredDeviceId, monitor, onMonitorChange } = props;
+  const { midi, onConnect, onConnectionChange, preferredDeviceId } = props;
   const [status, setStatus] = useState<Status>({ kind: 'idle' });
   const [devices, setDevices] = useState<MidiDevice[]>([]);
   const [connected, setConnectedId] = useState<string | null>(null);
@@ -106,6 +104,23 @@ export function MidiPanel(props: MidiPanelProps) {
     }
   }
 
+  // Keyboards plugged in or out after the first scan (ADR 0007): no "Scan again" needed.
+  // The handler reads the latest render's state through a ref.
+  const onDevices = useRef((list: MidiDevice[]) => void list);
+  onDevices.current = (list: MidiDevice[]) => {
+    setDevices(list);
+    setScanned(true);
+    if (status.kind !== 'error' && status.kind !== 'scanning') setStatus({ kind: 'ready' });
+    if (connected && !list.some((d) => d.id === connected)) {
+      setConnected(null);
+      void midi.disconnect().catch(() => undefined);
+      return;
+    }
+    const preferred = list.find((d) => d.id === preferredDeviceId);
+    if (!connected && preferred) void connect(preferred);
+  };
+  useEffect(() => midi.onDevicesChanged((list) => onDevices.current(list)), [midi]);
+
   async function disconnect() {
     try {
       await midi.disconnect();
@@ -121,26 +136,8 @@ export function MidiPanel(props: MidiPanelProps) {
     <section className="card stack-4" aria-labelledby="midi-title">
       <div className="row-between">
         <h2 className="t-card-title" id="midi-title">
-          Your keyboard
+          Input device
         </h2>
-        <div className="seg" role="group" aria-label="Play my notes through Isai">
-          <button
-            type="button"
-            className="seg-btn"
-            aria-pressed={monitor}
-            onClick={() => onMonitorChange(true)}
-          >
-            Isai plays my notes
-          </button>
-          <button
-            type="button"
-            className="seg-btn"
-            aria-pressed={!monitor}
-            onClick={() => onMonitorChange(false)}
-          >
-            My keyboard's sound
-          </button>
-        </div>
       </div>
       <MidiBody
         status={status}

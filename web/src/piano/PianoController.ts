@@ -255,6 +255,8 @@ export class PianoController {
     }
     if (!this.dirty && seconds === this.lastSeconds) return false;
 
+    // The stage's context first, so the keys' is always the last one created.
+    if (this.stage && this.stageCanvas) this.stageCtx ??= this.stageCanvas.getContext('2d');
     this.ctx ??= this.canvas.getContext('2d');
     const ctx = this.ctx;
     const layout = this.layout;

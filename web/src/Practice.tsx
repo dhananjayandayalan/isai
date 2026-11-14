@@ -14,7 +14,12 @@ import {
 } from './engine/practice/engine';
 import type { HandChoice } from './engine/practice/steps';
 import type { MidiInput } from './midi/MidiInput';
-import { Keyboard } from './piano/Keyboard';
+import { NOTATION_OPTIONS } from './notationOptions';
+import { buildLane } from './notation/chordLane';
+import { labelNotes } from './notation/FallingNotes';
+import { buildStaffNotes } from './notation/StaffRenderer';
+import { Keyboard, type StageProps } from './piano/Keyboard';
+import { keyNames } from './piano/keyNames';
 import {
   countOutOfRange,
   KEYBOARD_RANGES,
@@ -24,6 +29,8 @@ import {
 import type { FrameScheduler } from './piano/PianoController';
 import type { SessionDraft } from './sessions/types';
 import type { Song } from './song';
+import { signature, type KeySpec } from './theory/keys';
+import { NoteNamer, type NamingOptions, type Notation } from './theory/labels';
 import { midiToName } from './theory/pitch';
 import { formatTime } from './time';
 
@@ -54,7 +61,30 @@ export interface PracticeProps {
   onSession?: (draft: SessionDraft) => void;
   /** The calendar date and time now (ISO 8601), for the session record. */
   now?: () => string;
+  /** How notes are named and shown: the Devices screen's settings. */
+  display?: PracticeDisplay;
+  /** Change the note-name setting (saved by the app). */
+  onNotationChange?: (notation: Notation) => void;
+  /** Open the Devices screen, to connect a keyboard. */
+  onOpenDevices?: () => void;
 }
+
+export interface PracticeDisplay {
+  naming: NamingOptions;
+  /** Song seconds the falling notes show ahead. */
+  lookahead: number;
+  /** Show the hand not being practised faint, rather than hide it. */
+  showOtherHand: boolean;
+  /** The metronome is on when the screen opens. */
+  metronome: boolean;
+}
+
+const DEFAULT_DISPLAY: PracticeDisplay = {
+  naming: { notation: 'letters', octaves: false, swaraDetail: 'short', minor: 'do' },
+  lookahead: 4,
+  showOtherHand: true,
+  metronome: false,
+};
 
 // Speed is kept in whole percent, so stepping up and down never drifts.
 const MIN_PERCENT = Math.round(MIN_SPEED * 100);
@@ -77,8 +107,8 @@ const READOUT_IDLE = 'Press Play, then play the lit keys.';
 const READOUT_AGAIN = 'Press Play to go again.';
 const READOUT_PERFORM = 'Press Play. After the count-in, play straight through.';
 const HINTS: Partial<Record<PracticeMode, string>> = {
-  training: 'Training waits for your notes. Connect your MIDI keyboard below to play along.',
-  performance: 'Performance scores your notes. Connect your MIDI keyboard below to play.',
+  training: 'Training waits for your notes. Connect your MIDI keyboard to play along.',
+  performance: 'Performance scores your notes. Connect your MIDI keyboard to play.',
 };
 
 /** The line that tells the learner what the engine is doing. Plain text, written through a ref. */
@@ -122,9 +152,40 @@ const PHASE_CODE = { idle: 0, 'count-in': 1, running: 2, waiting: 3 } as const;
 export function Practice(props: PracticeProps) {
   const { song, canPlay, midi, frames, keyboardConnected, audioStatus, audioError, ensureAudio } = props;
   const { initial, size, onSizeChange, latencyOffset, blocked = false, onPlayingChange, onSession, now } = props;
+  const { display = DEFAULT_DISPLAY, onNotationChange, onOpenDevices } = props;
   const index = useMemo(() => buildNoteIndex(song.notes), [song]);
   const bars = useMemo(() => barsOfSong(song), [song]);
   const barCount = bars.bars.length;
+
+  // What the stage and the keys show, built once per song and setting, never per frame.
+  const { notation, octaves, swaraDetail, minor } = display.naming;
+  const { lookahead, showOtherHand } = display;
+  const spec = useMemo<KeySpec>(
+    () => ({ key: song.tonality.key, mode: song.tonality.mode, scale: song.tonality.scale }),
+    [song],
+  );
+  const namer = useMemo(
+    () => new NoteNamer(spec, { notation, octaves, swaraDetail, minor }),
+    [spec, notation, octaves, swaraDetail, minor],
+  );
+  const names = useMemo(() => keyNames(namer), [namer]);
+  const noteLabels = useMemo(() => labelNotes(index, namer), [index, namer]);
+  const staffNotes = useMemo(() => buildStaffNotes(index, spec), [index, spec]);
+  const lane = useMemo(() => buildLane(song.chords, namer), [song, namer]);
+  const stage = useMemo<StageProps>(
+    () => ({
+      mode: notation === 'staff' ? 'staff' : 'falling',
+      lookahead,
+      labels: noteLabels,
+      staffNotes,
+      keySignature: signature(spec),
+      beats: song.tempo.beats,
+      barStarts: bars.unit === 'bar' ? bars.bars.map((bar) => bar.start) : [],
+      lane,
+      showOtherHand,
+    }),
+    [notation, lookahead, noteLabels, staffNotes, spec, song, bars, lane, showOtherHand],
+  );
 
   const [engine, setEngine] = useState<PracticeEngine | null>(null);
   const [state, setState] = useState<PracticeState>('stopped');
@@ -136,7 +197,7 @@ export function Practice(props: PracticeProps) {
   const [looping, setLooping] = useState(firstLoop !== null);
   const [loopFrom, setLoopFrom] = useState(firstLoop?.[0] ?? 1);
   const [loopTo, setLoopTo] = useState(() => firstLoop?.[1] ?? Math.min(4, Math.max(1, barCount)));
-  const [metronome, setMetronome] = useState(false);
+  const [metronome, setMetronome] = useState(display.metronome);
   const [countIn, setCountIn] = useState(false);
   const range = KEYBOARD_RANGES[size];
   const outside = useMemo(() => countOutOfRange(song.notes, range), [song, range]);
@@ -376,7 +437,16 @@ export function Practice(props: PracticeProps) {
         )}
       </div>
 
-      {tracking && !keyboardConnected && <div className="alert alert-quiet">{HINTS[mode]}</div>}
+      {tracking && !keyboardConnected && (
+        <div className="alert alert-quiet row-between">
+          <span>{HINTS[mode]}</span>
+          {onOpenDevices && (
+            <button type="button" className="btn btn-secondary" onClick={onOpenDevices}>
+              Set up my keyboard
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Always mounted, so what the frame loop wrote survives a change of mode. */}
       <div hidden={!tracking}>
@@ -537,6 +607,21 @@ export function Practice(props: PracticeProps) {
       <SoundState status={audioStatus} detail={audioError} onRetry={() => void ensureAudio()} />
 
       <div className="row-between">
+        <label className="row">
+          <span className="label">Note names</span>
+          <select
+            className="select"
+            aria-label="Note names"
+            value={notation}
+            onChange={(e) => onNotationChange?.(e.target.value as Notation)}
+          >
+            {NOTATION_OPTIONS.map((option) => (
+              <option key={option.id} value={option.id}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
         <div className="seg" role="group" aria-label="Keyboard size">
           {KEYBOARD_SIZES.map((s) => (
             <button
@@ -571,6 +656,8 @@ export function Practice(props: PracticeProps) {
         practice={engine}
         range={range}
         midi={midi}
+        names={names}
+        stage={stage}
         onFrame={onFrame}
         {...(frames ? { frames } : {})}
       />

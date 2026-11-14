@@ -4,6 +4,8 @@ import twinkle from '../../schema/examples/twinkle-g-major.json';
 import type { AudioSource } from './audio/engine';
 import { instrumentPart } from './audio/parts';
 import type { LoadedAudio } from './audio/types';
+import type { Voice } from './audio/voices';
+import { Devices } from './Devices';
 import { monitorMidi } from './engine/monitor';
 import { barsOfSong } from './engine/practice/bars';
 import type { PracticeMode } from './engine/practice/engine';
@@ -34,7 +36,14 @@ export interface AppDeps {
 }
 
 /** The pages of the app. There is no router yet (P8): one song is open at a time. */
-export type View = 'song' | 'practice' | 'results';
+export type View = 'song' | 'practice' | 'results' | 'devices';
+
+/** The page Done on the Devices screen goes back to, and what it says. */
+const RETURN_LABEL: Record<Exclude<View, 'devices'>, string> = {
+  song: 'Back to song',
+  practice: 'Back to practice',
+  results: 'Back to results',
+};
 
 interface AppProps {
   /** Raw Song JSON to open first; defaults to the first example. */
@@ -84,6 +93,7 @@ export default function App({ source, deps, view: firstView = 'song' }: AppProps
   const song = 'song' in loaded ? loaded.song : null;
 
   const [view, setView] = useState<View>(firstView);
+  const [returnTo, setReturnTo] = useState<Exclude<View, 'devices'>>(firstView === 'devices' ? 'song' : firstView);
   const [launch, setLaunch] = useState<Launch>({ mode: 'listen', loopBars: null, nonce: 0 });
   const [shown, setShown] = useState<PerformanceSession | null>(null);
 
@@ -128,10 +138,11 @@ export default function App({ source, deps, view: firstView = 'song' }: AppProps
   const [deviceId, setDeviceId] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
   const [calibrating, setCalibrating] = useState(false);
-  const monitorRef = useRef(settings.appSound !== 'off');
+  // Read by the monitor on every note, so a change takes effect at once.
+  const settingsRef = useRef(settings);
   useEffect(() => {
-    monitorRef.current = settings.appSound !== 'off';
-  }, [settings.appSound]);
+    settingsRef.current = settings;
+  }, [settings]);
 
   // Your notes through Isai's piano, once audio has loaded and while the toggle is on.
   useEffect(() => {
@@ -142,9 +153,32 @@ export default function App({ source, deps, view: firstView = 'song' }: AppProps
         const piano = deps.audio.loaded?.piano;
         return piano ? instrumentPart(piano, 'learner') : null;
       },
-      enabled: () => monitorRef.current,
+      enabled: () => settingsRef.current.appSound !== 'off',
+      velocityCurve: () => settingsRef.current.velocityCurve,
     });
   }, [deps]);
+
+  /**
+   * Put the app's sound on the chosen voice (the electric piano loads the first time).
+   * "Off" only silences your notes; Isai's own parts play on the grand piano.
+   */
+  const applyVoice = useCallback(
+    (audio: LoadedAudio | null | undefined, appSound: AppSettings['appSound']): Promise<void> | null => {
+      const voice: Voice = appSound === 'electric' ? 'electric' : 'grand';
+      if (!audio || audio.piano.voice === voice) return null;
+      setAudioStatus('loading');
+      return audio.piano.select(voice).then(setAudioStatus);
+    },
+    [],
+  );
+
+  const changeSettings = useCallback(
+    (patch: Partial<AppSettings>) => {
+      saveSettings(patch);
+      if (patch.appSound) void applyVoice(deps?.audio.loaded, patch.appSound);
+    },
+    [saveSettings, applyVoice, deps],
+  );
 
   /**
    * Load Tone.js and the piano on first use. Call it from a click and don't await anything
@@ -156,6 +190,7 @@ export default function App({ source, deps, view: firstView = 'song' }: AppProps
     try {
       const audio = await deps.audio.load();
       setAudioStatus(await audio.piano.loaded);
+      await applyVoice(audio, settingsRef.current.appSound);
       setAudioError(null);
       return audio;
     } catch (e) {
@@ -164,7 +199,7 @@ export default function App({ source, deps, view: firstView = 'song' }: AppProps
       setAudioStatus('failed');
       return null;
     }
-  }, [deps]);
+  }, [deps, applyVoice]);
 
   async function openFile(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -190,6 +225,12 @@ export default function App({ source, deps, view: firstView = 'song' }: AppProps
   function open(mode: PracticeMode, loopBars: [number, number] | null = null) {
     setLaunch((before) => ({ mode, loopBars, nonce: before.nonce + 1 }));
     setView('practice');
+  }
+
+  /** The Devices screen; Done goes back to where the learner was (practice keeps its state). */
+  function openDevices() {
+    if (view !== 'devices') setReturnTo(view);
+    setView('devices');
   }
 
   /** A run ended on the practice screen: keep it, and show a performance's result. */
@@ -224,6 +265,12 @@ export default function App({ source, deps, view: firstView = 'song' }: AppProps
 
   const now = deps?.now ?? isoNow;
   const offset = deviceId === null ? 0 : (settings.latencyOffsets[deviceId] ?? 0);
+  const onDevices = view === 'devices';
+  /** The page under the Devices screen, when it is open. */
+  const page = onDevices ? returnTo : view;
+  // Practice stays mounted while the Devices screen is open over it, so nothing is lost.
+  const practiceMounted = page === 'practice';
+  const showResults = page === 'results' && shown !== null;
 
   return (
     <main className="app-main">
@@ -242,20 +289,27 @@ export default function App({ source, deps, view: firstView = 'song' }: AppProps
               </button>
             ))}
           </div>
-          <label className="btn btn-secondary">
-            Open a .song.json file
-            <input
-              type="file"
-              accept=".json,application/json"
-              className="sr-only"
-              onChange={(e) => void openFile(e)}
-            />
-          </label>
+          <div className="row">
+            <label className="btn btn-secondary">
+              Open a .song.json file
+              <input
+                type="file"
+                accept=".json,application/json"
+                className="sr-only"
+                onChange={(e) => void openFile(e)}
+              />
+            </label>
+            {deps && (
+              <button type="button" className="btn btn-secondary" aria-pressed={onDevices} onClick={openDevices}>
+                MIDI & keyboard
+              </button>
+            )}
+          </div>
         </div>
 
         {!song && 'error' in loaded && <SongError kind={loaded.error} detail={loaded.detail} fileName={fileName} />}
 
-        {song && view === 'results' && shown && (
+        {song && showResults && !onDevices && (
           <Results
             session={shown}
             when={formatWhen(shown.startedAt)}
@@ -267,10 +321,10 @@ export default function App({ source, deps, view: firstView = 'song' }: AppProps
           />
         )}
 
-        {song && !(view === 'results' && shown) && (
-          <>
+        {song && !showResults && (
+          <div hidden={onDevices} className="stack-6">
             <SongSummary song={song} fromFile={choice.id === 'file' ? fileName : null} />
-            {view === 'practice' ? (
+            {practiceMounted ? (
               <>
                 <div>
                   <button type="button" className="btn btn-ghost" onClick={() => setView('song')}>
@@ -295,6 +349,19 @@ export default function App({ source, deps, view: firstView = 'song' }: AppProps
                   onPlayingChange={setPlaying}
                   onSession={onSession}
                   now={now}
+                  display={{
+                    naming: {
+                      notation: settings.notation,
+                      octaves: settings.octaves,
+                      swaraDetail: settings.swaraDetail,
+                      minor: settings.minorSolfege,
+                    },
+                    lookahead: settings.lookahead,
+                    showOtherHand: settings.showOtherHand,
+                    metronome: settings.metronome,
+                  }}
+                  onNotationChange={(notation) => saveSettings({ notation })}
+                  onOpenDevices={openDevices}
                 />
               </>
             ) : (
@@ -310,41 +377,51 @@ export default function App({ source, deps, view: firstView = 'song' }: AppProps
                 }}
               />
             )}
-          </>
+          </div>
         )}
 
-        {/* Hidden, not unmounted, on the results page: the panel holds the connection. */}
+        {/* Always mounted, hidden on the other pages: the keyboard panel holds the connection. */}
         {deps && (
-          <div hidden={view === 'results' && shown !== null}>
-            <div className="stack-6">
-              <MidiPanel
-                midi={deps.midi}
-                onConnect={() => void ensureAudio()}
-                onConnectionChange={(id) => {
-                  setDeviceId(id);
-                  if (id !== null) saveSettings({ lastDeviceId: id });
-                }}
-                preferredDeviceId={settings.lastDeviceId}
-                monitor={settings.appSound !== 'off'}
-                onMonitorChange={(monitor) => saveSettings({ appSound: monitor ? 'grand' : 'off' })}
-              />
-              <LatencyCard
-                midi={deps.midi}
-                deviceId={deviceId}
-                offset={offset}
-                onOffsetChange={(seconds) => {
-                  if (deviceId !== null) saveSettings({ latencyOffsets: { ...settings.latencyOffsets, [deviceId]: seconds } });
-                }}
-                ensureAudio={ensureAudio}
-                busy={playing && view === 'practice'}
-                onRunningChange={setCalibrating}
-              />
-            </div>
+          <div hidden={!onDevices}>
+            <Devices
+              midi={deps.midi}
+              settings={settings}
+              onChange={changeSettings}
+              onDone={() => setView(returnTo)}
+              doneLabel={RETURN_LABEL[returnTo]}
+              panel={
+                <MidiPanel
+                  midi={deps.midi}
+                  onConnect={() => void ensureAudio()}
+                  onConnectionChange={(id) => {
+                    setDeviceId(id);
+                    if (id !== null) saveSettings({ lastDeviceId: id });
+                  }}
+                  preferredDeviceId={settings.lastDeviceId}
+                />
+              }
+              latency={
+                <LatencyCard
+                  midi={deps.midi}
+                  deviceId={deviceId}
+                  offset={offset}
+                  onOffsetChange={(seconds) => {
+                    if (deviceId !== null) {
+                      saveSettings({ latencyOffsets: { ...settings.latencyOffsets, [deviceId]: seconds } });
+                    }
+                  }}
+                  ensureAudio={ensureAudio}
+                  busy={playing && practiceMounted}
+                  onRunningChange={setCalibrating}
+                />
+              }
+            />
           </div>
         )}
 
         <p className="t-faint">
-          Piano sound: Salamander Grand Piano by Alexander Holm (CC-BY 3.0), via Tone.js.
+          Piano sound: Salamander Grand Piano by Alexander Holm (CC-BY 3.0), via Tone.js. Electric piano:
+          Wurlitzer EP200 samples by Greg Sullivan (CC-BY 3.0).
         </p>
       </div>
     </main>

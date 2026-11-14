@@ -96,6 +96,7 @@ function harness(options: HarnessOptions = {}) {
   };
   return {
     ...({ deps, midi: fakeMidi, transport, piano, metronome, frames } satisfies Harness),
+    electric,
     resume,
     finishLoading: () => finishLoading(),
   };
@@ -129,12 +130,28 @@ async function render(deps: AppDeps, source?: unknown, view: View = 'practice') 
   });
 }
 
+/** A button the learner can see (not on a hidden page), by its label or text. */
 function button(name: string): HTMLButtonElement {
   const found = [...container.querySelectorAll('button')].find(
-    (b) => b.getAttribute('aria-label') === name || b.textContent?.trim() === name,
+    (b) => (b.getAttribute('aria-label') === name || b.textContent?.trim() === name) && !b.closest('[hidden]'),
   );
-  if (!found) throw new Error(`No button "${name}"`);
+  if (!found) throw new Error(`No visible button "${name}"`);
   return found;
+}
+
+/** Open the MIDI & keyboard screen, and come back from it with Done. */
+async function openDevices() {
+  await click('MIDI & keyboard');
+}
+
+async function leaveDevices() {
+  const done = [...container.querySelectorAll('button')].find(
+    (b) => /^Back to (song|practice|results)$/.test(b.textContent?.trim() ?? '') && !b.closest('[hidden]'),
+  );
+  if (!done) throw new Error('No Done button on the Devices screen');
+  await act(async () => {
+    done.click();
+  });
 }
 
 async function click(name: string) {
@@ -471,14 +488,22 @@ describe('practice screen', () => {
     await click('Muted');
     expect(pressed('Muted')).toBe(true);
 
-    expect(text()).toContain('Connect your MIDI keyboard below');
+    expect(text()).toContain('Connect your MIDI keyboard to play along');
+    await click('Set up my keyboard');
+    expect(button('Back to practice')).toBeDefined();
     await click('Find my keyboard');
     await act(async () => {
       container.querySelector<HTMLInputElement>('input[type=radio]')?.click();
     });
-    expect(text()).not.toContain('Connect your MIDI keyboard below');
+    await leaveDevices();
+    // Practice kept every choice while the Devices screen was open.
+    expect(pressed('Left hand')).toBe(true);
+    expect(pressed('Muted')).toBe(true);
+    expect(text()).not.toContain('Connect your MIDI keyboard');
+    await openDevices();
     await click('Disconnect');
-    expect(text()).toContain('Connect your MIDI keyboard below');
+    await leaveDevices();
+    expect(text()).toContain('Connect your MIDI keyboard to play along');
   });
 
   it('holds at a step, says what it waits for, and carries on when you play it', async () => {
@@ -530,7 +555,10 @@ describe('practice screen', () => {
     await click('Training');
     await click('Right hand');
     await click('Muted');
-    await click("My keyboard's sound"); // so only Isai's own notes reach the piano
+    // App sound off, so only Isai's own notes reach the piano.
+    await openDevices();
+    await click('Off (use my keyboard)');
+    await leaveDevices();
     await click('Play');
     frame(h, 0.1);
     act(() => h.midi.emitNoteOn(67, { time: h.transport.audioTime }));
@@ -603,7 +631,7 @@ describe('practice screen', () => {
     const h = harness();
     await render(h.deps);
     expect(pressed('Loop bars 1–4')).toBe(false);
-    expect(container.querySelector('select')).toBeNull();
+    expect(container.querySelector('select[aria-label="Loop from"]')).toBeNull();
     await click('Loop bars 1–4');
     expect(pressed('Loop bars 1–4')).toBe(true);
     expect(container.querySelectorAll('select[aria-label="Loop from"] option')).toHaveLength(4);
@@ -734,7 +762,7 @@ describe('practice screen', () => {
 describe('MIDI panel', () => {
   it('finds, connects and disconnects a keyboard, and plays your notes', async () => {
     const h = harness();
-    await render(h.deps);
+    await render(h.deps, undefined, 'devices');
     await click('Find my keyboard');
     expect(text()).toContain('Fake keyboard');
     const radio = container.querySelector<HTMLInputElement>('input[type=radio]');
@@ -747,7 +775,7 @@ describe('MIDI panel', () => {
     expect(h.piano.sounding.has(60)).toBe(true);
     act(() => h.midi.emitNoteOff(60));
 
-    await click("My keyboard's sound");
+    await click('Off (use my keyboard)');
     act(() => h.midi.emitNoteOn(62));
     expect(h.piano.sounding.has(62)).toBe(false);
 
@@ -757,7 +785,7 @@ describe('MIDI panel', () => {
 
   it('shows the empty state when no keyboard is plugged in', async () => {
     const h = harness({ midi: new FakeMidiInput([]) });
-    await render(h.deps);
+    await render(h.deps, undefined, 'devices');
     await click('Find my keyboard');
     expect(text()).toContain('No keyboards found');
     expect(button('Scan again')).toBeDefined();
@@ -779,7 +807,7 @@ describe('MIDI panel', () => {
       onDevicesChanged: () => () => undefined,
     };
     const h = harness({ midi: failing });
-    await render(h.deps);
+    await render(h.deps, undefined, 'devices');
     await click('Find my keyboard');
     expect(container.querySelector('[role=alert]')?.textContent).toContain(title);
     if (retry) expect(button(retry)).toBeDefined();
@@ -789,7 +817,7 @@ describe('MIDI panel', () => {
     const busy = new FakeMidiInput();
     busy.connect = () => Promise.reject(new MidiError('busy', 'busy'));
     const h = harness({ midi: busy });
-    await render(h.deps);
+    await render(h.deps, undefined, 'devices');
     await click('Find my keyboard');
     await act(async () => {
       container.querySelector<HTMLInputElement>('input[type=radio]')?.click();
@@ -801,7 +829,7 @@ describe('MIDI panel', () => {
   it('says so when a keyboard will not disconnect cleanly, and lets go of it anyway', async () => {
     const midi = new FakeMidiInput();
     const h = harness({ midi });
-    await render(h.deps);
+    await render(h.deps, undefined, 'devices');
     await click('Find my keyboard');
     await act(async () => {
       container.querySelector<HTMLInputElement>('input[type=radio]')?.click();
@@ -818,7 +846,7 @@ describe('MIDI panel', () => {
     const devices = [{ id: 'k', name: 'Stage piano' }];
     const midi = new FakeMidiInput(devices);
     const h = harness({ midi });
-    await render(h.deps);
+    await render(h.deps, undefined, 'devices');
     await click('Find my keyboard');
     await act(async () => {
       container.querySelector<HTMLInputElement>('input[type=radio]')?.click();
@@ -1178,7 +1206,8 @@ describe('kept on this device', () => {
     const first = harness({ settings: new LocalSettingsStore(() => storage) });
     await render(first.deps);
     await click('49 keys');
-    await click("My keyboard's sound");
+    await openDevices();
+    await click('Off (use my keyboard)');
     await click('Find my keyboard');
     await act(async () => {
       container.querySelector<HTMLInputElement>('input[type=radio]')?.click();
@@ -1188,7 +1217,8 @@ describe('kept on this device', () => {
     const second = harness({ settings: new LocalSettingsStore(() => storage) });
     await reload(second.deps, 'practice');
     expect(pressed('49 keys')).toBe(true);
-    expect(pressed("My keyboard's sound")).toBe(true);
+    await openDevices();
+    expect(pressed('Off (use my keyboard)')).toBe(true);
     // The keyboard from last time is connected as soon as a scan finds it, and sound
     // starts inside the click, not after the scan's await (ADR 0004).
     const find = button('Find my keyboard');
@@ -1267,6 +1297,7 @@ describe('latency card', () => {
   const ALL_CLICKS = Array.from({ length: CALIBRATION.clicks }, (_, i) => i);
 
   async function connectKeyboard() {
+    await openDevices();
     await click('Find my keyboard');
     await act(async () => {
       container.querySelector<HTMLInputElement>('input[type=radio]')?.click();
@@ -1294,8 +1325,10 @@ describe('latency card', () => {
     const h = harness();
     await render(h.deps, frere, 'song');
     await settle();
+    await openDevices();
     expect(button('Calibrate').disabled).toBe(true);
     expect(text()).toContain('Connect your keyboard above to calibrate it');
+    await leaveDevices();
     await connectKeyboard();
     expect(button('Calibrate').disabled).toBe(false);
 
@@ -1309,6 +1342,7 @@ describe('latency card', () => {
     expect(h.transport.state).toBe('stopped');
 
     // Every press 30 ms late is on time once the offset is taken off.
+    await leaveDevices();
     await click('Performance');
     await perform(
       h,
@@ -1326,8 +1360,11 @@ describe('latency card', () => {
     await render(h.deps, frere);
     await connectKeyboard();
     await click('Calibrate');
+    await leaveDevices(); // the clicks keep going under the Devices screen
     expect(button('Play').disabled).toBe(true);
+    await openDevices();
     await click('Stop the clicks');
+    await leaveDevices();
     expect(button('Play').disabled).toBe(false);
     expect(h.transport.state).toBe('stopped');
   });
@@ -1359,5 +1396,361 @@ describe('latency card', () => {
     expect(h.transport.state).toBe('stopped');
     expect(container.querySelector('[data-readout=tap]')).toBeNull();
     expect(readout('offset')).toBe('0 ms'); // testing never changes the offset
+  });
+});
+
+// ---------------------------------------------------------------- P7: notation, display and settings
+
+/** Every text drawn on any canvas since the contexts were last cleared. */
+function drawnTexts(): string[] {
+  return contexts.flatMap((ctx) => ctx.ops.flatMap((op) => (op.op === 'text' ? [op.text] : [])));
+}
+
+function clearDrawn() {
+  for (const ctx of contexts) ctx.reset();
+}
+
+async function chooseNotation(value: string) {
+  const select = container.querySelector<HTMLSelectElement>('select[aria-label="Note names"]');
+  if (!select) throw new Error('No note-name select');
+  await act(async () => {
+    select.value = value;
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+}
+
+function checkbox(label: string): HTMLInputElement {
+  const found = [...container.querySelectorAll('label')].find((l) => l.textContent?.trim() === label);
+  const input = found?.querySelector<HTMLInputElement>('input[type=checkbox]');
+  if (!input) throw new Error(`No checkbox "${label}"`);
+  return input;
+}
+
+async function toggle(label: string) {
+  await act(async () => {
+    checkbox(label).click();
+  });
+}
+
+describe('Devices screen', () => {
+  function memoryStorage() {
+    const items = new Map<string, string>();
+    return {
+      getItem: (key: string) => items.get(key) ?? null,
+      setItem: (key: string, value: string) => void items.set(key, value),
+    };
+  }
+
+  async function changeEverySetting() {
+    await openDevices();
+    await click('61 keys');
+    await click('Electric piano');
+    await click('Hard');
+    await click('Swaras (Sa Ri Ga)');
+    await click('Detailed (S R2 G3)');
+    await choose('Falling notes look ahead', 6);
+    await toggle('Metronome click while practising');
+    await toggle("Show the arranged hand I'm not playing");
+  }
+
+  function expectEverySetting() {
+    expect(pressed('61 keys')).toBe(true);
+    expect(pressed('Electric piano')).toBe(true);
+    expect(pressed('Hard')).toBe(true);
+    expect(pressed('Swaras (Sa Ri Ga)')).toBe(true);
+    expect(pressed('Detailed (S R2 G3)')).toBe(true);
+    expect(container.querySelector<HTMLSelectElement>('select[aria-label="Falling notes look ahead"]')?.value).toBe('6');
+    expect(checkbox('Metronome click while practising').checked).toBe(true);
+    expect(checkbox("Show the arranged hand I'm not playing").checked).toBe(false);
+  }
+
+  it('saves every setting, and they survive a reload', async () => {
+    const storage = memoryStorage();
+    const first = harness({ settings: new LocalSettingsStore(() => storage) });
+    await render(first.deps, undefined, 'song');
+    await changeEverySetting();
+    expectEverySetting();
+    // The choices that depend on another one appear with it.
+    await click('Solfège (Do Re Mi)');
+    await click('La-based minor');
+    await click('Letters (C D E)');
+    await toggle('Show octave numbers (C4)');
+    await click('Swaras (Sa Ri Ga)');
+
+    const second = harness({ settings: new LocalSettingsStore(() => storage) });
+    await reload(second.deps, 'song');
+    await openDevices();
+    expectEverySetting();
+    await click('Solfège (Do Re Mi)');
+    expect(pressed('La-based minor')).toBe(true);
+    await click('Letters (C D E)');
+    expect(checkbox('Show octave numbers (C4)').checked).toBe(true);
+    // And Practice opens with the metronome default.
+    await leaveDevices();
+    await click('Start training');
+    expect(pressed('Metronome')).toBe(true);
+  });
+
+  it('keeps every setting for the visit when storage throws', async () => {
+    const h = harness({
+      settings: new LocalSettingsStore(() => {
+        throw new DOMException('The operation is insecure.', 'SecurityError');
+      }),
+    });
+    await render(h.deps, undefined, 'song');
+    await changeEverySetting();
+    expectEverySetting();
+  });
+
+  it('notices keyboards plugged in and unplugged, and reconnects the last one, without Scan again', async () => {
+    const h = harness();
+    await render(h.deps, undefined, 'devices');
+    await click('Find my keyboard');
+    await act(async () => {
+      container.querySelector<HTMLInputElement>('input[type=radio]')?.click();
+    });
+    expect(h.midi.connectedDeviceId).toBe('fake-keyboard');
+    const stage = { id: 'stage', name: 'Stage piano' };
+    await act(async () => h.midi.setDevices([{ id: 'fake-keyboard', name: 'Fake keyboard' }, stage]));
+    expect(text()).toContain('Stage piano');
+    await act(async () => h.midi.setDevices([stage])); // the connected keyboard unplugged
+    await settle();
+    expect(h.midi.connectedDeviceId).toBeNull();
+    expect(text()).not.toContain('Connected ·');
+    await act(async () => h.midi.setDevices([stage, { id: 'fake-keyboard', name: 'Fake keyboard' }])); // back
+    await settle();
+    expect(h.midi.connectedDeviceId).toBe('fake-keyboard');
+    expect(text()).toContain('Connected');
+    await act(async () => h.midi.setDevices([]));
+    await settle();
+    expect(text()).toContain('No keyboards found');
+  });
+
+  it('shows the last keys, their velocity and the pedal as you play, without React renders', async () => {
+    const h = harness();
+    await h.midi.connect('fake-keyboard');
+    await render(h.deps, undefined, 'devices');
+    const before = commits;
+    act(() => {
+      for (const note of [60, 64, 67, 72]) h.midi.emitNoteOn(note, { velocity: 72 });
+      h.midi.emitPedal(127);
+    });
+    expect(readout('last-notes')).toBe('E4 G4 C5');
+    expect(readout('velocity')).toBe('72');
+    expect(readout('pedal')).toBe('down');
+    act(() => h.midi.emitPedal(0));
+    expect(readout('pedal')).toBe('up');
+    expect(commits).toBe(before);
+  });
+});
+
+describe('sound', () => {
+  it('plays your notes and Isai on the electric piano once chosen, and Off silences only your notes', async () => {
+    const h = harness();
+    await h.midi.connect('fake-keyboard');
+    await render(h.deps);
+    await click('Play'); // loads audio on the grand piano
+    await click('Stop');
+    await openDevices();
+    await click('Electric piano');
+    await settle();
+    act(() => h.midi.emitNoteOn(60, { velocity: 90 }));
+    expect(h.electric.sounding.has(60)).toBe(true);
+    expect(h.piano.sounding.has(60)).toBe(false);
+    act(() => h.midi.emitNoteOff(60));
+    await leaveDevices();
+    await click('Play');
+    act(() => {
+      h.transport.advanceBy(0.1);
+      h.frames.step();
+    });
+    expect(h.electric.sounding.has(67)).toBe(true); // Isai's melody on the electric piano too
+    await click('Stop');
+    await openDevices();
+    await click('Off (use my keyboard)');
+    await settle();
+    act(() => h.midi.emitNoteOn(62));
+    expect(h.piano.sounding.has(62) || h.electric.sounding.has(62)).toBe(false);
+  });
+
+  it('chooses the electric piano before audio has loaded, and uses it from the first note', async () => {
+    const h = harness();
+    await h.midi.connect('fake-keyboard');
+    await render(h.deps);
+    await openDevices();
+    await click('Electric piano');
+    await leaveDevices();
+    await click('Play');
+    act(() => {
+      h.transport.advanceBy(0.1);
+      h.frames.step();
+    });
+    expect(onsOf(h.electric).length).toBeGreaterThan(0);
+    expect(onsOf(h.piano)).toHaveLength(0);
+  });
+
+  it('applies the velocity curve to your notes', async () => {
+    const h = harness();
+    await h.midi.connect('fake-keyboard');
+    await render(h.deps, undefined, 'devices');
+    await click('Find my keyboard');
+    await act(async () => {
+      container.querySelector<HTMLInputElement>('input[type=radio]')?.click();
+    });
+    await settle();
+    await click('Soft');
+    act(() => h.midi.emitNoteOn(60, { velocity: 32 }));
+    expect(h.piano.calls.at(-1)).toMatchObject({ type: 'on', midi: 60, velocity: 56 });
+  });
+
+  it('sustains your notes with the pedal', async () => {
+    const h = harness();
+    await h.midi.connect('fake-keyboard');
+    await render(h.deps);
+    await click('Play');
+    await click('Stop');
+    act(() => {
+      h.midi.emitPedal(127);
+      h.midi.emitNoteOn(60, { velocity: 90 });
+      h.midi.emitNoteOff(60);
+    });
+    expect(h.piano.sounding.has(60)).toBe(true);
+    act(() => h.midi.emitPedal(0));
+    expect(h.piano.sounding.has(60)).toBe(false);
+  });
+});
+
+describe('notation on the practice screen', () => {
+  it('names the keys, the falling notes and the chord lane in the chosen notation, and saves it', async () => {
+    const storage = new Map<string, string>();
+    const settings = new LocalSettingsStore(() => ({
+      getItem: (key: string) => storage.get(key) ?? null,
+      setItem: (key: string, value: string) => void storage.set(key, value),
+    }));
+    const h = harness({ settings });
+    await render(h.deps);
+    expect(container.querySelector('[aria-label="Falling notes"]')).not.toBeNull();
+    act(() => h.frames.step());
+    // Letters: the melody's G4 on its falling bar and the G chord in the lane. (The key
+    // names are covered in the piano tests: 88 keys on this 520 px canvas are too narrow.)
+    expect(drawnTexts()).toContain('G');
+    expect(drawnTexts()).not.toContain('S');
+
+    await chooseNotation('swaras');
+    clearDrawn();
+    act(() => h.frames.step());
+    expect(drawnTexts()).toContain('S'); // the lane's G chord is Sa
+    expect(settings.load().notation).toBe('swaras');
+
+    await chooseNotation('roman');
+    clearDrawn();
+    act(() => h.frames.step());
+    expect(drawnTexts()).toContain('I');
+
+    await chooseNotation('staff');
+    clearDrawn();
+    act(() => h.frames.step());
+    expect(container.querySelector('[aria-label="Scrolling staff"]')).not.toBeNull();
+    expect(drawnTexts()).toContain('𝄞');
+    expect(drawnTexts()).toContain('♯'); // G major's key signature
+  });
+
+  it('hides the hand you are not playing when asked', async () => {
+    const h = harness();
+    await h.midi.connect('fake-keyboard');
+    await render(h.deps);
+    await openDevices();
+    await toggle("Show the arranged hand I'm not playing");
+    await leaveDevices();
+    await click('Training');
+    await click('Right hand');
+    act(() => h.frames.step());
+    const leftBars = () =>
+      contexts.flatMap((ctx) => ctx.rects()).filter((r) => r.alpha === 0.3 || r.fill === '');
+    expect(leftBars().filter((r) => r.alpha === 0.3)).toHaveLength(0);
+  });
+
+  it('marks the notes that do not fit the keyboard on the stage', async () => {
+    const h = harness();
+    const low = { ...frere, notes: [{ ...frere.notes[0], midi: 30 }, ...frere.notes.slice(1)] };
+    await render(h.deps, low);
+    await click('49 keys');
+    clearDrawn();
+    act(() => h.frames.step());
+    const markers = contexts.flatMap((ctx) => ctx.ops).filter((op) => op.op === 'path');
+    expect(markers.some((m) => m.op === 'path' && m.points.some(([x]) => x === 0))).toBe(true);
+  });
+});
+
+describe('rule 5 with the stage running', () => {
+  it.each(['letters', 'staff'])(
+    '200 notes, the pedal and 100 frames with %s cause no React commit',
+    async (notation) => {
+      const h = harness();
+      await h.midi.connect('fake-keyboard');
+      await render(h.deps);
+      await chooseNotation(notation);
+      await click('Play');
+      act(() => h.frames.step());
+      const before = commits;
+      clearDrawn();
+      act(() => {
+        for (let i = 0; i < 200; i++) {
+          if (i % 50 === 0) h.midi.emitPedal(i % 100 === 0 ? 127 : 0);
+          h.midi.emitNoteOn(40 + (i % 48), { velocity: 90 });
+          if (i % 2) h.midi.emitNoteOff(40 + (i % 48));
+        }
+        for (let i = 0; i < 100; i++) {
+          h.transport.advanceTo((i + 1) * 0.03);
+          h.frames.step();
+        }
+      });
+      expect(commits).toBe(before);
+      // ...while the stage and the keys kept drawing.
+      expect(contexts.filter((ctx) => ctx.ops.length > 0).length).toBeGreaterThanOrEqual(2);
+    },
+  );
+});
+
+describe('keyboard-only use', () => {
+  /** Every control a keyboard user can reach, with the name a screen reader gives it. */
+  function controls() {
+    return [...container.querySelectorAll<HTMLElement>('button, select, input, a[href]')].filter(
+      (el) => !el.closest('[hidden]'),
+    );
+  }
+
+  function accessibleName(el: HTMLElement): string {
+    const own = el.getAttribute('aria-label') ?? '';
+    if (own) return own;
+    if (el instanceof HTMLInputElement || el instanceof HTMLSelectElement) {
+      return el.closest('label')?.textContent?.trim() ?? '';
+    }
+    return el.textContent?.trim() ?? '';
+  }
+
+  it.each(['practice', 'devices'] as const)('every control on %s is a native, named, reachable control', async (view) => {
+    const h = harness();
+    await render(h.deps, undefined, view);
+    await click(view === 'practice' ? 'Training' : 'Find my keyboard');
+    const all = controls();
+    expect(all.length).toBeGreaterThan(8);
+    for (const el of all) {
+      expect(accessibleName(el), el.outerHTML.slice(0, 80)).not.toBe('');
+      expect(el.tabIndex, el.outerHTML.slice(0, 80)).toBeGreaterThanOrEqual(0);
+    }
+    // Nothing clickable that a keyboard can't reach: no click handlers on plain elements.
+    expect(container.querySelectorAll('[tabindex]:not([tabindex="0"]):not([tabindex="-1"])')).toHaveLength(0);
+    expect(container.querySelectorAll('div[onclick], span[onclick]')).toHaveLength(0);
+  });
+
+  it('reaches the Devices screen and comes back with buttons alone', async () => {
+    const h = harness();
+    await render(h.deps);
+    await click('MIDI & keyboard');
+    expect(pressed('MIDI & keyboard')).toBe(true);
+    expect(button('Back to practice')).toBeDefined();
+    await click('Back to practice');
+    expect(pressed('Listen')).toBe(true);
   });
 });
