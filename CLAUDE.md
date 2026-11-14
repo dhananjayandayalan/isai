@@ -96,3 +96,30 @@ Schema:
 - When a model or library choice is uncertain, write a small spike in `pipeline/spikes/`
   and measure on the golden set before adopting it.
 - End each task with: what changed, test/eval results, and anything left open.
+
+## Where we left off (2026-11-15)
+
+Branches are stacked and unmerged: `p3-analysis` → `p4-transcription` → `p5-arranger`
+(current). P4 and P5 are built and pass their checks; their remaining exit criteria need
+the owner's ears and the golden audio. Plans: `docs/spec/plans/P3.md`, `P4.md`, `P5.md`.
+
+**Open regression, start here.** The owner's verdict on `Maayangal Saathiyam`
+(full-mix, a film song with vocals): the output is "definitely not good".
+- **Before** the last three code commits: the timing was off, but the keys (notes) and
+  chord mapping sounded good.
+- **After** them: the key and chord mapping got worse. The commits:
+  - `994470c`: sung ornaments fold into the main note (8th minimum at easy and medium).
+  - `9b1dcef`: Beat This! replaces librosa as the beat tracker (ADR 0009).
+  - `d97a6cc`: chords and patterns sit on a gap-filled beat grid (harmony version 2),
+    and the left hand re-anchors at each bar start.
+- Next steps:
+  - A/B the same song before and after. `--beat-tracker librosa` isolates the tracker;
+    `git stash` or a worktree at `fe867f9` gives the full "before" state.
+  - Find which commit hurt the notes and chords, and fix or revert it, keeping whatever
+    did fix the timing.
+  - "Keys" may mean the piano keys (notes), not the musical key, which stayed D minor.
+- Don't judge by proxy numbers alone (drum-onset alignment, notes per second): they
+  improved while the result sounded worse. Ask the owner which bars or times sound wrong,
+  never for the song's tempo or key; finding those is the app's job.
+- Re-run with a fresh cache; the owner clears `pipeline/.cache` and `pipeline/out`:
+  `uv run isai analyse "<song.mp3>" --type full-mix --out out --level all --log-json`.
