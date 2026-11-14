@@ -10,7 +10,9 @@ Run the golden evaluation for Isai. Scope: **$ARGUMENTS** (blank means all songs
    `a-cappella`, `carnatic`) and expected values: key/tonic, tempo, and optionally a
    reference chord `.lab` file or MIDI.
 2. Skip any song whose audio file is missing and list it in the report.
-3. For each song run `uv run --directory pipeline isai analyse <audio> --out .cache/golden/<id>`.
+3. For each song run `uv run --directory pipeline isai analyse <audio> --type <type> --out .cache/golden/<id> --log-json`
+   (`<type>` from the manifest entry; `carnatic` songs are skipped until P10). Keep the
+   JSON-line stage timings for the runtime column.
 4. Score each song:
    - **Key/tonic:** exact match, or relative/parallel key (partial credit).
    - **Tempo:** within 2% (also accept half or double tempo, flagged).
