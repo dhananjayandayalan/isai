@@ -16,7 +16,12 @@ Run the golden evaluation for Isai. Scope: **$ARGUMENTS** (blank means all songs
 4. Score each song:
    - **Key/tonic:** exact match, or relative/parallel key (partial credit).
    - **Tempo:** within 2% (also accept half or double tempo, flagged).
-   - **Chords:** weighted chord overlap against the `.lab` reference (root + quality).
+   - **Chords:** WCSR (weighted chord symbol recall) against the `.lab` reference, twice:
+     root plus major/minor (target ≥ 0.65 on full-mix songs) and full quality.
+   - **Arrangement (every song with notes from the arranger):** the constraint-violation
+     count from `isai.arrange.constraints.check` (must be 0), and a row per song for the
+     owner's playability checklist (melody recognisable, left hand fits the chords, no
+     awkward jumps), left blank for the owner to fill in.
    - **Notes (piano-solo):** onset F1 against the reference MIDI, 50 ms tolerance, plus
      onset+offset F1 (offset within 20% of the note or 50 ms) and velocity correlation.
      Target onset F1 ≥ 0.85.

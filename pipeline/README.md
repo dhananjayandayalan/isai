@@ -36,14 +36,17 @@ uv run isai analyse song.mp3 --type full-mix --out out/
 ```
 
 writes `out/song.song.json` (Song schema 0.3.0) and `out/song.mid` (tempo map, time and
-key signature, right and left hand). The Song has beats, downbeats, tempo, time
-signature, key, mode, scale, confidences and notes (chords come in P5):
+key signature, right and left hand, chord names as markers). The Song has beats,
+downbeats, tempo, time signature, key, mode, scale, confidences, chords and two hands:
 
 | `--type` | Stages | Notes in the Song |
 |---|---|---|
-| `piano-solo` | rhythm, tonality, piano transcription, key from notes, hands | the piano part in two hands |
-| `full-mix` | separation, rhythm, tonality (bass + other), melody (vocal stem), bass line, key from notes | the vocal melody, right hand (the bass line is cached for P5's left hand) |
-| `a-cappella` | rhythm, tonality, melody, key from notes, `tonicHz` | the sung melody, right hand |
+| `piano-solo` | rhythm, tonality, piano transcription, key from notes, hands, chords (audio + notes) | the piano part in two hands (`--simplify` arranges it instead) |
+| `full-mix` | separation, rhythm, tonality (bass + other), melody (vocal stem), bass line, key from notes, chords (stems; slash bass from the bass line), arranger | the vocal melody in the right hand, chord patterns in the left |
+| `a-cappella` | rhythm, tonality, melody, key from notes, `tonicHz`, chords suggested from the melody, arranger | the sung melody in the right hand, chord patterns in the left |
+
+Arranged Songs are checked for playability (each hand within a 9th and 4 notes, a gap
+between the hands, nothing shorter than a 1/16, A0–C8) before they're written.
 
 | Flag | |
 |---|---|
@@ -52,8 +55,10 @@ signature, key, mode, scale, confidences and notes (chords come in P5):
 | `--id`, `--created-at` | fix the Song's id and creation time (ISO 8601 with a UTC offset, like `2026-11-14T10:00:00+05:30`); with both, the same audio gives byte-identical output |
 | `--cache-dir` | where stage outputs are cached (default `.cache/`, gitignored) |
 | `--no-cache` | run every stage afresh |
-| `--from-stage <stage>` | re-run that stage and the ones after it: `separate`, `rhythm`, `tonality`, `piano`, `melody` or `bass` |
+| `--from-stage <stage>` | re-run that stage and the ones after it: `separate`, `rhythm`, `tonality`, `piano`, `melody`, `bass` or `harmony` |
 | `--device auto\|cpu\|cuda` | where the models run (default `auto`: the GPU when torch sees one) |
+| `--level easy\|medium\|full\|all` | the arrangement level (default `medium`); `all` writes `<stem>.easy.song.json`, `.medium` and `.full` (and their `.mid`) from one analysis |
+| `--simplify easy\|medium` | piano-solo: arrange the transcription's top line over the recognised chords instead of keeping it |
 | `--keep-stems` | full-mix: also write the four stems to `<out>/stems/` as WAVs. For local listening only; without it no audio leaves `.cache/` (rule 8), and the worker never passes it |
 | `--log-json` | one JSON line per stage on stderr, with its timing, whether it came from the cache, and a `detail` of what it found (rhythm: tracker, bpm, beats per bar, stability, stable; tonality: key, mode, confidence, tuning) |
 
