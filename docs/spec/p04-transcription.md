@@ -2,7 +2,7 @@
 id: spec-p04-transcription
 phase: P4
 title: Transcription — stems, piano notes, melody
-status: draft
+status: in-progress
 track: pipeline
 depends_on: [spec-p03-analysis-core]
 ---
