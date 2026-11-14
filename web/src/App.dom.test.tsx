@@ -14,6 +14,7 @@ import { SwitchableInstrument } from './audio/voices';
 import { FakeMidiInput } from './midi/FakeMidiInput';
 import type { MidiInput } from './midi/MidiInput';
 import { MidiError } from './midi/WebMidiInput';
+import { GHOST_ALPHA } from './notation/FallingNotes';
 import { ManualFrames, RecordingContext } from './piano/testing';
 import { CALIBRATION } from './settings/calibration';
 import {
@@ -1536,7 +1537,14 @@ describe('Devices screen', () => {
     await act(async () => h.midi.setDevices([stage, { id: 'fake-keyboard', name: 'Fake keyboard' }])); // back
     await settle();
     expect(h.midi.connectedDeviceId).toBe('fake-keyboard');
-    expect(text()).toContain('Connected');
+    // It says it came back by itself: its sound may wait for the next click.
+    expect(text()).toContain("Connected again by itself · if you don't hear your notes, press Play");
+    // Picking a keyboard by hand is a plain connection again: the stage piano, then this one.
+    const radios = () => [...container.querySelectorAll<HTMLInputElement>('input[type=radio][name=midi-device]')];
+    await act(async () => radios()[0]?.click());
+    await act(async () => radios()[1]?.click());
+    expect(h.midi.connectedDeviceId).toBe('fake-keyboard');
+    expect(text()).toContain('Connected · play a key to see it light up');
     await act(async () => h.midi.setDevices([]));
     await settle();
     expect(text()).toContain('No keyboards found');
@@ -1557,6 +1565,12 @@ describe('Devices screen', () => {
     act(() => h.midi.emitPedal(0));
     expect(readout('pedal')).toBe('up');
     expect(commits).toBe(before);
+    // With a curve, the readout shows what it makes of your touch.
+    await click('Soft');
+    const afterClick = commits;
+    act(() => h.midi.emitNoteOn(60, { velocity: 32 }));
+    expect(readout('velocity')).toBe('32 → 56');
+    expect(commits).toBe(afterClick);
   });
 });
 
@@ -1675,15 +1689,27 @@ describe('notation on the practice screen', () => {
     const h = harness();
     await h.midi.connect('fake-keyboard');
     await render(h.deps);
+    await click('Training');
+    await click('Right hand');
+    await click('Play'); // the engine says which hand is practised once it runs
+    act(() => h.transport.advanceBy(0.1));
+    // jsdom has no theme tokens, so the hands share a colour: tell them apart by the ghost alpha.
+    const bars = () => {
+      const all = contexts.flatMap((ctx) => ctx.rects());
+      return { ghost: all.filter((r) => r.alpha === GHOST_ALPHA).length, solid: all.filter((r) => r.alpha === undefined).length };
+    };
+    clearDrawn();
+    act(() => h.frames.step());
+    const shown = bars();
+    expect(shown.ghost).toBeGreaterThan(0); // the left hand, faint
     await openDevices();
     await toggle("Show the arranged hand I'm not playing");
     await leaveDevices();
-    await click('Training');
-    await click('Right hand');
+    clearDrawn();
     act(() => h.frames.step());
-    const leftBars = () =>
-      contexts.flatMap((ctx) => ctx.rects()).filter((r) => r.alpha === 0.3 || r.fill === '');
-    expect(leftBars().filter((r) => r.alpha === 0.3)).toHaveLength(0);
+    const hidden = bars();
+    expect(hidden.ghost).toBe(0);
+    expect(hidden.solid).toBeGreaterThan(0); // the right hand is still there
   });
 
   it('marks the notes that do not fit the keyboard on the stage', async () => {
@@ -1755,9 +1781,38 @@ describe('keyboard-only use', () => {
       expect(accessibleName(el), el.outerHTML.slice(0, 80)).not.toBe('');
       expect(el.tabIndex, el.outerHTML.slice(0, 80)).toBeGreaterThanOrEqual(0);
     }
-    // Nothing clickable that a keyboard can't reach: no click handlers on plain elements.
+    // No positive tab index, so the tab order is the page order.
     expect(container.querySelectorAll('[tabindex]:not([tabindex="0"]):not([tabindex="-1"])')).toHaveLength(0);
-    expect(container.querySelectorAll('div[onclick], span[onclick]')).toHaveLength(0);
+  });
+
+  it.each([
+    ['practice', ['Listen', 'Training', 'Play', 'Slower', 'select:Note names', '49 keys']],
+    [
+      'devices',
+      [
+        'Back to song',
+        'Find my keyboard',
+        '61 keys',
+        'Electric piano',
+        'Hard',
+        'Calibrate',
+        'Swaras (Sa Ri Ga)',
+        'select:Falling notes look ahead',
+        'check:Metronome click while practising',
+      ],
+    ],
+  ] as const)('tabs through %s in reading order', async (view, expected) => {
+    const h = harness();
+    await render(h.deps, undefined, view);
+    const order = controls();
+    const position = (name: string) => {
+      if (name.startsWith('select:')) return order.indexOf(container.querySelector<HTMLElement>(`select[aria-label="${name.slice(7)}"]`)!);
+      if (name.startsWith('check:')) return order.indexOf(checkbox(name.slice(6)));
+      return order.indexOf(button(name));
+    };
+    const positions = expected.map(position);
+    expect(positions.every((p) => p >= 0), String(positions)).toBe(true);
+    expect([...positions].sort((a, b) => a - b)).toEqual(positions);
   });
 
   it('reaches the Devices screen and comes back with buttons alone', async () => {

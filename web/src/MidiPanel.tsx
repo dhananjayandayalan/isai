@@ -62,6 +62,8 @@ export function MidiPanel(props: MidiPanelProps) {
   const [devices, setDevices] = useState<MidiDevice[]>([]);
   const [connected, setConnectedId] = useState<string | null>(null);
   const [scanned, setScanned] = useState(false);
+  /** The keyboard came back and was connected without a click (its sound may wait for one). */
+  const [reconnected, setReconnected] = useState(false);
 
   const setConnected = (deviceId: string | null) => {
     setConnectedId(deviceId);
@@ -92,11 +94,12 @@ export function MidiPanel(props: MidiPanelProps) {
     }
   }
 
-  async function connect(device: MidiDevice) {
+  async function connect(device: MidiDevice, byItself = false) {
     onConnect();
     try {
       await midi.connect(device.id);
       setConnected(device.id);
+      setReconnected(byItself);
       setStatus({ kind: 'ready' });
     } catch (e) {
       setConnected(null);
@@ -105,20 +108,22 @@ export function MidiPanel(props: MidiPanelProps) {
   }
 
   // Keyboards plugged in or out after the first scan (ADR 0007): no "Scan again" needed.
-  // The handler reads the latest render's state through a ref.
+  // The subscription calls the latest render's handler, kept in a ref after each commit.
   const onDevices = useRef((list: MidiDevice[]) => void list);
-  onDevices.current = (list: MidiDevice[]) => {
-    setDevices(list);
-    setScanned(true);
-    if (status.kind !== 'error' && status.kind !== 'scanning') setStatus({ kind: 'ready' });
-    if (connected && !list.some((d) => d.id === connected)) {
-      setConnected(null);
-      void midi.disconnect().catch(() => undefined);
-      return;
-    }
-    const preferred = list.find((d) => d.id === preferredDeviceId);
-    if (!connected && preferred) void connect(preferred);
-  };
+  useEffect(() => {
+    onDevices.current = (list: MidiDevice[]) => {
+      setDevices(list);
+      setScanned(true);
+      if (status.kind !== 'error' && status.kind !== 'scanning') setStatus({ kind: 'ready' });
+      if (connected && !list.some((d) => d.id === connected)) {
+        setConnected(null);
+        void midi.disconnect().catch(() => undefined);
+        return;
+      }
+      const preferred = list.find((d) => d.id === preferredDeviceId);
+      if (!connected && preferred) void connect(preferred, true);
+    };
+  });
   useEffect(() => midi.onDevicesChanged((list) => onDevices.current(list)), [midi]);
 
   async function disconnect() {
@@ -143,6 +148,7 @@ export function MidiPanel(props: MidiPanelProps) {
         status={status}
         devices={devices}
         connected={connected}
+        reconnected={reconnected}
         onScan={() => void scan()}
         onConnect={(d) => void connect(d)}
         onDisconnect={() => void disconnect()}
@@ -155,12 +161,13 @@ interface MidiBodyProps {
   status: Status;
   devices: MidiDevice[];
   connected: string | null;
+  reconnected: boolean;
   onScan: () => void;
   onConnect: (device: MidiDevice) => void;
   onDisconnect: () => void;
 }
 
-function MidiBody({ status, devices, connected, onScan, onConnect, onDisconnect }: MidiBodyProps) {
+function MidiBody({ status, devices, connected, reconnected, onScan, onConnect, onDisconnect }: MidiBodyProps) {
   if (status.kind === 'idle') {
     return (
       <div className="stack-3">
@@ -222,9 +229,11 @@ function MidiBody({ status, devices, connected, onScan, onConnect, onDisconnect 
             <span className="stack-1">
               <b>{device.name}</b>
               <span className="t-muted">
-                {connected === device.id
-                  ? 'Connected · play a key to see it light up'
-                  : (device.manufacturer ?? 'MIDI keyboard')}
+                {connected !== device.id
+                  ? (device.manufacturer ?? 'MIDI keyboard')
+                  : reconnected
+                    ? "Connected again by itself · if you don't hear your notes, press Play"
+                    : 'Connected · play a key to see it light up'}
               </span>
             </span>
           </label>

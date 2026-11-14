@@ -322,3 +322,37 @@ describe('the other modes', () => {
     expect(results).toEqual([]);
   });
 });
+
+describe('the sustain pedal (ADR 0007)', () => {
+  it('does not move a training hold on, or count as a note', () => {
+    const { engine, transport, midi, piano } = run({ settings: { mode: 'training' } });
+    engine.play();
+    transport.advanceTo(0.1);
+    expect(engine.phase).toBe('waiting');
+    midi.emitPedal(127, { time: transport.audioTime });
+    midi.emitPedal(0, { time: transport.audioTime });
+    expect(engine.phase).toBe('waiting');
+    expect(engine.state).toBe('playing');
+    expect(engine.wrongNotes).toBe(0);
+    expect(ons(piano)).toEqual([]); // nothing sounds while it waits, pedal or not
+    midi.emitNoteOn(60, { time: transport.audioTime }); // the step itself moves it on
+    expect(engine.phase).not.toBe('waiting');
+  });
+
+  it('changes nothing in a scored run', () => {
+    const plain = run();
+    plain.engine.play();
+    plain.playMelody(2);
+    plain.transport.advanceTo(10);
+    const pedalled = run();
+    pedalled.engine.play();
+    for (let i = 0; i < 8; i++) {
+      pedalled.transport.advanceTo(2 + i * 0.25);
+      pedalled.midi.emitPedal(i % 2 ? 0 : 127, { time: pedalled.transport.audioTime });
+    }
+    pedalled.playMelody(2);
+    pedalled.transport.advanceTo(10);
+    expect(pedalled.results[0]).toEqual(plain.results[0]);
+    expect(pedalled.results[0]?.wrongNotes).toBe(0);
+  });
+});

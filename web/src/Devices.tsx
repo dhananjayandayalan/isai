@@ -1,4 +1,5 @@
 import { useEffect, useRef, type ReactNode } from 'react';
+import { applyVelocityCurve } from './audio/velocity';
 import type { MidiInput } from './midi/MidiInput';
 import { KEYBOARD_RANGES, KEYBOARD_SIZES, type KeyboardSize } from './piano/layout';
 import { NOTATION_OPTIONS } from './notationOptions';
@@ -83,6 +84,11 @@ export function Devices({ midi, settings, onChange, panel, latency, onDone, done
   const lastRef = useRef<HTMLElement>(null);
   const velocityRef = useRef<HTMLElement>(null);
   const pedalRef = useRef<HTMLElement>(null);
+  // Read on every key, so the readout follows a curve change at once.
+  const curveRef = useRef(settings.velocityCurve);
+  useEffect(() => {
+    curveRef.current = settings.velocityCurve;
+  }, [settings.velocityCurve]);
 
   useEffect(() => {
     const recent: string[] = [];
@@ -90,7 +96,9 @@ export function Devices({ midi, settings, onChange, panel, latency, onDone, done
       recent.push(midiToName(e.note));
       if (recent.length > 3) recent.shift();
       if (lastRef.current) lastRef.current.textContent = recent.join(' ');
-      if (velocityRef.current) velocityRef.current.textContent = String(e.velocity);
+      // The key's velocity, and what the curve makes of it ("40 → 61").
+      const shaped = applyVelocityCurve(e.velocity, curveRef.current);
+      if (velocityRef.current) velocityRef.current.textContent = shaped === e.velocity ? String(e.velocity) : `${e.velocity} → ${shaped}`;
     });
     const offPedal = midi.onPedal((e) => {
       if (pedalRef.current) pedalRef.current.textContent = e.down ? 'down' : 'up';
