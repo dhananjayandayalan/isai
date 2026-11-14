@@ -6,7 +6,7 @@ import type { CanvasLike, FrameScheduler } from './PianoController';
 export type DrawOp =
   | { op: 'roundRect'; x: number; y: number; w: number; h: number; fill: string; alpha?: number }
   | { op: 'outline'; x: number; y: number; w: number; h: number; stroke: string }
-  | { op: 'circle'; x: number; y: number; r: number; fill: string }
+  | { op: 'circle'; x: number; y: number; r: number; fill: string; alpha?: number }
   | { op: 'fillRect'; x: number; y: number; w: number; h: number; fill: string }
   | { op: 'text'; text: string; x: number; y: number; fill: string; font: string }
   | { op: 'path'; points: [number, number][]; fill: string }
@@ -61,10 +61,8 @@ export class RecordingContext implements Ctx2D, Pick<CanvasRenderingContext2D, '
   closePath(): void {}
   fill(): void {
     this.filled = true;
-    if (this.shape?.op === 'roundRect') {
-      const alpha = this.globalAlpha === 1 ? {} : { alpha: this.globalAlpha };
-      this.ops.push({ ...this.shape, fill: this.colour, ...alpha });
-    } else if (this.shape) this.ops.push({ ...this.shape, fill: this.colour });
+    const alpha = this.globalAlpha === 1 ? {} : { alpha: this.globalAlpha };
+    if (this.shape) this.ops.push({ ...this.shape, fill: this.colour, ...alpha });
     else if (this.points.length) this.ops.push({ op: 'path', points: this.points, fill: this.colour });
   }
   stroke(): void {
