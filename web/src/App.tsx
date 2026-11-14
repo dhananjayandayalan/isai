@@ -298,31 +298,34 @@ export default function App({ source, deps, view: firstView = 'song' }: AppProps
           </>
         )}
 
-        {deps && !(view === 'results' && shown) && (
-          <>
-            <MidiPanel
-              midi={deps.midi}
-              onConnect={() => void ensureAudio()}
-              onConnectionChange={(id) => {
-                setDeviceId(id);
-                if (id !== null) saveSettings({ lastDeviceId: id });
-              }}
-              preferredDeviceId={settings.lastDeviceId}
-              monitor={settings.monitor}
-              onMonitorChange={(monitor) => saveSettings({ monitor })}
-            />
-            <LatencyCard
-              midi={deps.midi}
-              deviceId={deviceId}
-              offset={offset}
-              onOffsetChange={(seconds) => {
-                if (deviceId !== null) saveSettings({ latencyOffsets: { ...settings.latencyOffsets, [deviceId]: seconds } });
-              }}
-              ensureAudio={ensureAudio}
-              busy={playing && view === 'practice'}
-              onRunningChange={setCalibrating}
-            />
-          </>
+        {/* Hidden, not unmounted, on the results page: the panel holds the connection. */}
+        {deps && (
+          <div hidden={view === 'results' && shown !== null}>
+            <div className="stack-6">
+              <MidiPanel
+                midi={deps.midi}
+                onConnect={() => void ensureAudio()}
+                onConnectionChange={(id) => {
+                  setDeviceId(id);
+                  if (id !== null) saveSettings({ lastDeviceId: id });
+                }}
+                preferredDeviceId={settings.lastDeviceId}
+                monitor={settings.monitor}
+                onMonitorChange={(monitor) => saveSettings({ monitor })}
+              />
+              <LatencyCard
+                midi={deps.midi}
+                deviceId={deviceId}
+                offset={offset}
+                onOffsetChange={(seconds) => {
+                  if (deviceId !== null) saveSettings({ latencyOffsets: { ...settings.latencyOffsets, [deviceId]: seconds } });
+                }}
+                ensureAudio={ensureAudio}
+                busy={playing && view === 'practice'}
+                onRunningChange={setCalibrating}
+              />
+            </div>
+          </div>
         )}
 
         <p className="t-faint">

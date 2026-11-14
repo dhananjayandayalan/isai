@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 import { act, Profiler } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
+import { IDBFactory } from 'fake-indexeddb';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import frere from '../../schema/examples/frere-jacques-a-cappella.json';
 import twinkle from '../../schema/examples/twinkle-g-major.json';
-import App, { type AppDeps } from './App';
+import App, { type AppDeps, type View } from './App';
 import { AudioEngine } from './audio/engine';
 import { FakeInstrument } from './audio/FakeInstrument';
 import { FakeTransport } from './audio/FakeTransport';
@@ -13,6 +14,14 @@ import { FakeMidiInput } from './midi/FakeMidiInput';
 import type { MidiInput } from './midi/MidiInput';
 import { MidiError } from './midi/WebMidiInput';
 import { ManualFrames, RecordingContext } from './piano/testing';
+import { CALIBRATION } from './settings/calibration';
+import {
+  IndexedDbSessionStore,
+  MemorySessionStore,
+  ResilientSessionStore,
+  type SessionStore,
+} from './sessions/store';
+import { LocalSettingsStore, type SettingsStore } from './settings/store';
 import { midiToName } from './theory/pitch';
 
 declare global {
@@ -44,7 +53,12 @@ interface HarnessOptions {
   failAudio?: boolean;
   /** Hold the audio load until the test calls `finishLoading()`. */
   slowAudio?: boolean;
+  settings?: SettingsStore;
+  sessions?: SessionStore;
 }
+
+/** The calendar time every session in these tests starts at. */
+const NOW = '2026-11-14T10:00:00.000Z';
 
 function harness(options: HarnessOptions = {}) {
   const transport = new FakeTransport();
@@ -69,7 +83,14 @@ function harness(options: HarnessOptions = {}) {
       return { transport, piano, metronome, clock: transport.clock };
     },
   });
-  const deps: AppDeps = { audio, midi: options.midi ?? fakeMidi, frames };
+  const deps: AppDeps = {
+    audio,
+    midi: options.midi ?? fakeMidi,
+    frames,
+    sessions: options.sessions ?? new MemorySessionStore(),
+    now: () => NOW,
+    ...(options.settings ? { settings: options.settings } : {}),
+  };
   return {
     ...({ deps, midi: fakeMidi, transport, piano, metronome, frames } satisfies Harness),
     resume,
@@ -94,11 +115,12 @@ afterEach(() => {
   container.remove();
 });
 
-async function render(deps: AppDeps, source?: unknown) {
+/** Render the app. Most tests start on the practice screen; the P6 tests on the song overview. */
+async function render(deps: AppDeps, source?: unknown, view: View = 'practice') {
   await act(async () => {
     root.render(
       <Profiler id="app" onRender={() => commits++}>
-        <App deps={deps} {...(source === undefined ? {} : { source })} />
+        <App deps={deps} view={view} {...(source === undefined ? {} : { source })} />
       </Profiler>,
     );
   });
@@ -422,12 +444,12 @@ describe('practice screen', () => {
       h.frames.step();
     });
 
-  it('starts in Listen, with Performance still to come', async () => {
+  it('starts in Listen, with Training and Performance a click away', async () => {
     const h = harness();
     await render(h.deps);
     expect(pressed('Listen')).toBe(true);
     expect(pressed('Training')).toBe(false);
-    expect(button('Performance Coming soon').disabled).toBe(true);
+    expect(button('Performance').disabled).toBe(false);
     expect(group('Hands')).toBeNull();
     expect(container.querySelector('[data-readout=waiting]')?.closest('[hidden]')).not.toBeNull();
     expect(text()).not.toContain('Connect your MIDI keyboard');
@@ -801,5 +823,496 @@ describe('MIDI panel', () => {
     await click('Scan again');
     expect(midi.connectedDeviceId).toBeNull();
     expect(text()).toContain('No keyboards found');
+  });
+});
+
+// ---------------------------------------------------------------- P6: performance mode
+
+/** Let promise chains (IndexedDB, saved sessions) run to the end, inside act. */
+async function settle() {
+  for (let i = 0; i < 10; i++) {
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+  }
+}
+
+/** Unmount and mount again in the same page, as a reload does (the stores are what survive). */
+async function reload(deps: AppDeps, view: View = 'song') {
+  act(() => root.unmount());
+  root = createRoot(container);
+  await render(deps, undefined, view);
+  await settle();
+}
+
+/** A number on the Results page. */
+const result = (name: string) => container.querySelector(`[data-result="${name}"]`)?.textContent ?? '';
+
+const sectionAccuracy = (label: string) =>
+  container.querySelector(`[data-section="${label}"] .t-mono`)?.textContent ?? '';
+
+/** The histogram bars' counts: all of them, and only those inside the perfect window. */
+function histogram(): { all: number; inside: number } {
+  const bars = [...container.querySelectorAll<HTMLElement>('.histogram-bar')];
+  const sum = (list: HTMLElement[]) => list.reduce((total, bar) => total + Number(bar.dataset.count), 0);
+  return { all: sum(bars), inside: sum(bars.filter((bar) => bar.classList.contains('is-in'))) };
+}
+
+type ExampleSong = typeof twinkle | typeof frere;
+
+/** A performance always counts in one bar. */
+const countIn = (song: ExampleSong) =>
+  ((song.tempo.beats[1] ?? 0) - (song.tempo.beats[0] ?? 0)) * song.timeSignature.num;
+
+interface Press {
+  /** Song seconds; the count-in is added. */
+  at: number;
+  midi: number;
+}
+
+/**
+ * Play a performance on the practice screen, which must already be in Performance: Play,
+ * each press at its time, then let the song run out. React must not commit from the first
+ * frame after Play until the run ends (rule 5).
+ */
+async function perform(h: ReturnType<typeof harness>, song: ExampleSong, presses: Press[]) {
+  await click('Play');
+  act(() => h.frames.step());
+  const before = commits;
+  const lead = countIn(song);
+  for (const press of [...presses].sort((a, b) => a.at - b.at)) {
+    act(() => {
+      h.transport.advanceTo(lead + press.at);
+      h.midi.emitNoteOn(press.midi, { time: h.transport.audioTime });
+      h.midi.emitNoteOff(press.midi, { time: h.transport.audioTime });
+      h.frames.step();
+    });
+    expect(commits).toBe(before);
+  }
+  await act(async () => {
+    h.transport.advanceTo(lead + song.durationSec + 1);
+  });
+  await settle();
+  expect(commits).toBeGreaterThan(before); // the run ended: now React renders the result
+}
+
+/**
+ * Twinkle, both hands: the right hand on time in phrase 1 and 80 ms late in phrase 2, the
+ * left hand on time in phrase 1 and silent in phrase 2, and two wrong notes.
+ */
+function twinklePresses(): Press[] {
+  const presses: Press[] = [];
+  for (const note of twinkle.notes) {
+    const phraseTwo = note.start >= 4.8;
+    if (note.hand === 'right') presses.push({ at: note.start + (phraseTwo ? 0.08 : 0), midi: note.midi });
+    else if (!phraseTwo) presses.push({ at: note.start, midi: note.midi });
+  }
+  presses.push({ at: 1, midi: 100 }, { at: 5, midi: 100 });
+  return presses;
+}
+
+/** Frère Jacques (right hand only): bar 1 on time, then two notes 150 ms early and two missed. */
+const FRERE_PRESSES: Press[] = [
+  { at: 0, midi: 65 },
+  { at: 0.5, midi: 67 },
+  { at: 1, midi: 69 },
+  { at: 1.5, midi: 65 },
+  { at: 1.85, midi: 65 },
+  { at: 2.35, midi: 67 },
+];
+
+/**
+ * Results worked out by hand from the presses above and ADR 0006 (perfect 1, good 0.7,
+ * ok 0.4, a wrong note costs 0.5 of a note):
+ *
+ * Twinkle: 14 right-hand and 7 left-hand notes, 21 in all.
+ * - Right: 7 perfect + 7 good (80 ms) = (7 + 4.9) / 14 = 85%.
+ * - Left: 3 perfect, 4 missed = 3 / 7 = 43%.
+ * - Phrase 1 (0–4.8 s): 10 perfect of 10 = 100%. Phrase 2: 7 good, 4 missed = 4.9 / 11 = 45%.
+ * - Total: 10 perfect + 7 good of 21 = 14.9 / 21 = 71%; 17 of 21 notes in time.
+ * - Score: 100 × (14.9 − 2 × 0.5) / 21 = 66.2, shown as 66.
+ * - Timing: (10 × 0 + 7 × 80 ms) / 17 = +33 ms, slightly late; a spread of 0 and 80 ms is uneven.
+ * - Bars (2.4 s): 1 and 2 are perfect; 3 is 2.8 / 6 and 4 is 2.1 / 5. Bars 3–4 together
+ *   are 4.9 / 11 = 45%, with 4 of 11 missed: the only two-bar window under 90% that is free.
+ *
+ * Frère Jacques: 8 notes, two 2-second bars, no sections, so one phrase "Bars 1–2".
+ * - 4 perfect + 2 ok (150 ms early) = (4 + 0.8) / 8 = 60%, score 60, 6 of 8 in time.
+ * - Timing: (4 × 0 − 2 × 150 ms) / 6 = −50 ms, early; uneven.
+ * - Trouble spot: bars 1–2 at 60%, 2 of 8 missed.
+ */
+const FIXTURES = [
+  {
+    name: 'Twinkle',
+    song: twinkle as ExampleSong,
+    presses: twinklePresses(),
+    numbers: { score: '66', accuracy: '71%', timing: '+33 ms', 'timing-words': 'slightly late, uneven', wrong: '2' },
+    hands: { right: '85%', left: '43%' },
+    inTime: '17 of 21 notes in time',
+    sections: { 'Phrase 1': '100%', 'Phrase 2': '45%' },
+    trouble: { id: '3-4', title: 'Bars 3–4', detail: '45% in time · 4 of 11 notes missed' },
+    histogram: { all: 17, inside: 10, right: 14, left: 3 },
+  },
+  {
+    name: 'Frère Jacques',
+    song: frere as ExampleSong,
+    presses: FRERE_PRESSES,
+    numbers: { score: '60', accuracy: '60%', timing: '−50 ms', 'timing-words': 'early, uneven', wrong: '0' },
+    hands: { right: '60%', left: '–' },
+    inTime: '6 of 8 notes in time',
+    sections: { 'Bars 1–2': '60%' },
+    trouble: { id: '1-2', title: 'Bars 1–2', detail: '60% in time · 2 of 8 notes missed' },
+    histogram: { all: 6, inside: 4, right: 6, left: 0 },
+  },
+];
+
+/** Open a song on its overview and go into Performance. */
+async function startPerformance(h: ReturnType<typeof harness>, song: ExampleSong) {
+  await render(h.deps, song, 'song');
+  await settle();
+  await click('Performance');
+  expect(pressed('Performance')).toBe(true);
+}
+
+describe('rule 5 in performance mode', () => {
+  it('a whole performance run (every press, flash and wrong note) renders React only when it ends', async () => {
+    const h = harness();
+    await h.midi.connect('fake-keyboard');
+    await startPerformance(h, twinkle);
+    // perform() checks the commit count after every press and frame.
+    await perform(h, twinkle, twinklePresses());
+    expect(text()).toContain('Performance results');
+    expect(contexts.at(-1)?.ops.length).toBeGreaterThan(0); // the keyboard kept drawing
+  });
+});
+
+describe('song overview', () => {
+  it('opens on the song: scale, chords, the two ways to practise and no sessions yet', async () => {
+    const h = harness();
+    await render(h.deps, undefined, 'song');
+    await settle();
+    const chips = (name: string) =>
+      [...container.querySelectorAll(`[data-overview=${name}] .chip`)].map((chip) => chip.textContent);
+    expect(chips('scale')).toEqual(['G', 'A', 'B', 'C', 'D', 'E', 'F#']);
+    expect(chips('chords')).toEqual(['G', 'C', 'D']);
+    expect(text()).toContain('Nothing yet');
+    expect(text()).not.toContain('See last performance');
+    expect(container.querySelector('[aria-label=Practice]')).toBeNull();
+
+    await click('Frère Jacques');
+    await settle();
+    expect(chips('scale')).toEqual(['F', 'G', 'A', 'Bb', 'C', 'D', 'E']);
+    expect(text()).toContain('This song has no chords');
+
+    await click('Start training');
+    expect(pressed('Training')).toBe(true);
+    await click('Back to song');
+    expect(container.querySelector('[aria-label="Song overview"]')).not.toBeNull();
+  });
+});
+
+describe('performance', () => {
+  it.each(FIXTURES)('a run of $name ends on Results with the hand-checked numbers', async (fixture) => {
+    const h = harness();
+    await h.midi.connect('fake-keyboard');
+    await startPerformance(h, fixture.song);
+    expect(readout('waiting')).toBe('Press Play. After the count-in, play straight through.');
+    await perform(h, fixture.song, fixture.presses);
+
+    expect(text()).toContain('Performance results');
+    expect(text()).toContain('Both hands · 100% tempo · full song');
+    for (const [name, value] of Object.entries(fixture.numbers)) expect(result(name), name).toBe(value);
+    expect(result('right-hand')).toBe(fixture.hands.right);
+    expect(result('left-hand')).toBe(fixture.hands.left);
+    expect(text()).toContain(fixture.inTime);
+    for (const [label, value] of Object.entries(fixture.sections)) {
+      expect(sectionAccuracy(label), label).toBe(value);
+    }
+
+    const spots = [...container.querySelectorAll<HTMLElement>('[data-trouble]')];
+    expect(spots.map((spot) => spot.dataset.trouble)).toEqual([fixture.trouble.id]);
+    expect(spots[0]?.textContent).toContain(fixture.trouble.title);
+    expect(spots[0]?.textContent).toContain(fixture.trouble.detail);
+
+    expect(histogram()).toEqual({ all: fixture.histogram.all, inside: fixture.histogram.inside });
+    await click('Right');
+    expect(histogram().all).toBe(fixture.histogram.right);
+    await click('Left');
+    expect(histogram().all).toBe(fixture.histogram.left);
+    // The keyboard and latency panels are out of the way, but still mounted.
+    expect(container.querySelector('[aria-labelledby=midi-title]')?.closest('[hidden]')).not.toBeNull();
+  });
+
+  it('locks the run, and Finish ends it early with the notes that were due', async () => {
+    const h = harness();
+    await h.midi.connect('fake-keyboard');
+    await startPerformance(h, twinkle);
+    await click('Play');
+    expect(button('Slower').disabled).toBe(true);
+    expect(button('Training').disabled).toBe(true);
+    expect(container.querySelector<HTMLInputElement>('input[type=range]')?.disabled).toBe(true);
+    const lead = countIn(twinkle);
+    act(() => {
+      for (const note of twinkle.notes.filter((n) => n.start < 2.4 && n.hand === 'right')) {
+        h.transport.advanceTo(lead + note.start);
+        h.midi.emitNoteOn(note.midi, { time: h.transport.audioTime });
+        h.midi.emitNoteOff(note.midi, { time: h.transport.audioTime });
+      }
+      h.transport.advanceTo(lead + 2.3);
+      h.frames.step();
+    });
+    expect(readout('steps')).toBe('4 in time · 0 wrong');
+    await click('Finish');
+    await settle();
+    expect(h.transport.state).toBe('stopped');
+    // Bar 1 was due: four right-hand notes hit, the opening bass note missed.
+    expect(text()).toContain('4 of 5 notes in time');
+    expect(result('left-hand')).toBe('0%');
+  });
+
+  it('says a run is too short to score when it ends in the count-in', async () => {
+    const h = harness();
+    await h.midi.connect('fake-keyboard');
+    await startPerformance(h, twinkle);
+    await click('Play');
+    act(() => h.transport.advanceTo(1));
+    await click('Finish');
+    await settle();
+    expect(text()).toContain('Too short to score');
+    expect(container.querySelector('.histogram')).toBeNull();
+  });
+
+  it('loops a trouble spot in training, lists the run, reopens it and plays again', async () => {
+    const h = harness();
+    await h.midi.connect('fake-keyboard');
+    await startPerformance(h, twinkle);
+    await perform(h, twinkle, twinklePresses());
+
+    await click('Loop bars 3–4 in training');
+    expect(pressed('Training')).toBe(true);
+    expect(pressed('Loop bars 3–4')).toBe(true);
+    expect(container.querySelector<HTMLSelectElement>('select[aria-label="Loop from"]')?.value).toBe('3');
+
+    await click('Back to song');
+    await settle();
+    const rows = [...container.querySelectorAll('[data-session]')];
+    expect(rows).toHaveLength(1);
+    expect(rows[0]?.textContent).toContain('Performance');
+    expect(rows[0]?.textContent).toContain('66');
+    expect(rows[0]?.textContent).toContain('100% tempo, both hands');
+
+    await click('See last performance');
+    expect(result('score')).toBe('66');
+    await click('Play again');
+    expect(pressed('Performance')).toBe(true);
+    expect(readout('waiting')).toBe('Press Play. After the count-in, play straight through.');
+  });
+
+  it('keeps a training run as a session too', async () => {
+    const h = harness();
+    await h.midi.connect('fake-keyboard');
+    await render(h.deps, undefined, 'song');
+    await settle();
+    await click('Start training');
+    await click('Right hand');
+    await click('Play');
+    act(() => {
+      h.transport.advanceBy(0.1);
+      h.frames.step();
+    });
+    expect(readout('waiting')).toBe('Waiting for G4');
+    act(() => h.midi.emitNoteOn(67, { time: h.transport.audioTime }));
+    act(() => h.midi.emitNoteOff(67, { time: h.transport.audioTime }));
+    await click('Stop');
+    await click('Back to song');
+    await settle();
+    const row = container.querySelector('[data-session=training]');
+    expect(row?.textContent).toContain('Training');
+    expect(row?.textContent).toContain('1 of 1 right first time');
+    expect(text()).not.toContain('See last performance'); // a training run has no result page
+  });
+
+  it('a performance left half way is not kept', async () => {
+    const h = harness();
+    await h.midi.connect('fake-keyboard');
+    await startPerformance(h, twinkle);
+    await click('Play');
+    act(() => h.transport.advanceTo(4));
+    await click('Back to song');
+    await settle();
+    expect(h.transport.state).toBe('stopped');
+    expect(container.querySelectorAll('[data-session]')).toHaveLength(0);
+  });
+});
+
+describe('kept on this device', () => {
+  function memoryStorage() {
+    const items = new Map<string, string>();
+    return {
+      getItem: (key: string) => items.get(key) ?? null,
+      setItem: (key: string, value: string) => void items.set(key, value),
+    };
+  }
+
+  it('remembers the keyboard size, "play my notes" and the last keyboard after a reload', async () => {
+    const storage = memoryStorage();
+    const first = harness({ settings: new LocalSettingsStore(() => storage) });
+    await render(first.deps);
+    await click('49 keys');
+    await click("My keyboard's sound");
+    await click('Find my keyboard');
+    await act(async () => {
+      container.querySelector<HTMLInputElement>('input[type=radio]')?.click();
+    });
+    expect(first.midi.connectedDeviceId).toBe('fake-keyboard');
+
+    const second = harness({ settings: new LocalSettingsStore(() => storage) });
+    await reload(second.deps, 'practice');
+    expect(pressed('49 keys')).toBe(true);
+    expect(pressed("My keyboard's sound")).toBe(true);
+    // The keyboard from last time is connected as soon as a scan finds it.
+    await click('Find my keyboard');
+    expect(second.midi.connectedDeviceId).toBe('fake-keyboard');
+    expect(text()).toContain('Connected');
+  });
+
+  it('keeps sessions in IndexedDB across a reload', async () => {
+    const database = new IDBFactory();
+    const first = harness({ sessions: new IndexedDbSessionStore(() => database) });
+    await first.midi.connect('fake-keyboard');
+    await startPerformance(first, frere);
+    await perform(first, frere, FRERE_PRESSES);
+    expect(text()).not.toContain("couldn't save");
+
+    const second = harness({ sessions: new IndexedDbSessionStore(() => database) });
+    await reload(second.deps);
+    await click('Frère Jacques');
+    await settle();
+    const rows = [...container.querySelectorAll('[data-session=performance]')];
+    expect(rows).toHaveLength(1);
+    expect(rows[0]?.textContent).toContain('60');
+    await click('See last performance');
+    expect(result('score')).toBe('60');
+    expect(sectionAccuracy('Bars 1–2')).toBe('60%');
+  });
+
+  it('still works when localStorage and IndexedDB throw (private mode), and says nothing is saved', async () => {
+    const denied = (): never => {
+      throw new DOMException('The operation is insecure.', 'SecurityError');
+    };
+    const h = harness({
+      settings: new LocalSettingsStore(denied),
+      sessions: new ResilientSessionStore(new IndexedDbSessionStore(denied)),
+    });
+    await h.midi.connect('fake-keyboard');
+    await startPerformance(h, frere);
+    await click('49 keys');
+    expect(pressed('49 keys')).toBe(true); // the choice holds for the visit
+    await perform(h, frere, FRERE_PRESSES);
+    expect(result('score')).toBe('60');
+    expect(text()).toContain("Isai couldn't save this result on this browser");
+
+    await click('Back to song');
+    await settle();
+    expect(container.querySelectorAll('[data-session=performance]')).toHaveLength(1);
+    expect(text()).toContain("Isai can't save on this browser");
+  });
+});
+
+describe('latency card', () => {
+  const PERIOD = 60 / CALIBRATION.bpm;
+  const ALL_CLICKS = Array.from({ length: CALIBRATION.clicks }, (_, i) => i);
+
+  async function connectKeyboard() {
+    await click('Find my keyboard');
+    await act(async () => {
+      container.querySelector<HTMLInputElement>('input[type=radio]')?.click();
+    });
+  }
+
+  /** Tap `late` seconds after each listed click (transport position 0 is heard first). */
+  function tap(h: ReturnType<typeof harness>, clicks: number[], late: number) {
+    for (const i of clicks) {
+      act(() => {
+        h.transport.advanceTo(CALIBRATION.start + i * PERIOD + late);
+        h.midi.emitNoteOn(60, { time: h.transport.audioTime });
+        h.midi.emitNoteOff(60, { time: h.transport.audioTime });
+      });
+    }
+  }
+
+  async function runOut(h: ReturnType<typeof harness>) {
+    await act(async () => {
+      h.transport.advanceTo(CALIBRATION.start + CALIBRATION.clicks * PERIOD + 0.1);
+    });
+  }
+
+  it('calibrates the connected keyboard, and the offset is taken off a performance', async () => {
+    const h = harness();
+    await render(h.deps, frere, 'song');
+    await settle();
+    expect(button('Calibrate').disabled).toBe(true);
+    expect(text()).toContain('Connect your keyboard above to calibrate it');
+    await connectKeyboard();
+    expect(button('Calibrate').disabled).toBe(false);
+
+    await click('Calibrate');
+    expect(text()).toContain('Tap any key in time with the clicks');
+    tap(h, ALL_CLICKS, 0.03);
+    await runOut(h);
+    expect(readout('offset')).toBe('+30 ms');
+    expect(text()).toContain('Set to +30 ms, from 12 taps.'); // the four lead-in clicks don't count
+    expect(onsOf(h.metronome)).toHaveLength(CALIBRATION.clicks);
+    expect(h.transport.state).toBe('stopped');
+
+    // Every press 30 ms late is on time once the offset is taken off.
+    await click('Performance');
+    await perform(
+      h,
+      frere,
+      frere.notes.map((n) => ({ at: n.start + 0.03, midi: n.midi })),
+    );
+    expect(result('score')).toBe('100');
+    expect(result('timing')).toBe('0 ms');
+    expect(result('timing-words')).toBe('on the beat, steady');
+  });
+
+  it('keeps Play off while the clicks run', async () => {
+    const h = harness();
+    await render(h.deps, frere);
+    await connectKeyboard();
+    await click('Calibrate');
+    expect(button('Play').disabled).toBe(true);
+    await click('Stop the clicks');
+    expect(button('Play').disabled).toBe(false);
+    expect(h.transport.state).toBe('stopped');
+  });
+
+  it('says so when it hears too few steady taps, and keeps the old offset', async () => {
+    const h = harness();
+    await render(h.deps, frere, 'song');
+    await connectKeyboard();
+    await click('Calibrate');
+    tap(h, [4, 5, 6], 0.03);
+    await runOut(h);
+    expect(container.querySelector('[role=alert]')?.textContent).toContain("couldn't hear enough steady taps");
+    expect(readout('offset')).toBe('0 ms');
+  });
+
+  it('"Play any key to test" shows the offset of each tap until the clicks are stopped', async () => {
+    const h = harness();
+    await render(h.deps, frere, 'song');
+    await connectKeyboard();
+    await click('Play any key to test');
+    expect(readout('tap')).toBe('–');
+    const before = commits;
+    tap(h, [0], 0.02);
+    expect(readout('tap')).toBe('+20 ms');
+    tap(h, [1], -0.015);
+    expect(readout('tap')).toBe('−15 ms');
+    expect(commits).toBe(before); // each tap is written through a ref (rule 5)
+    await click('Stop the clicks');
+    expect(h.transport.state).toBe('stopped');
+    expect(container.querySelector('[data-readout=tap]')).toBeNull();
+    expect(readout('offset')).toBe('0 ms'); // testing never changes the offset
   });
 });

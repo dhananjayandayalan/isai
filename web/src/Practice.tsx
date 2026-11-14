@@ -168,10 +168,10 @@ export function Practice(props: PracticeProps) {
   /** The run in progress, and the one that has just stopped (a result arrives after the stop). */
   const run = useRef<{ startedAt: string; clockStart: number } | null>(null);
   const ended = useRef<{ startedAt: string; clockStart: number } | null>(null);
-  const callbacks = useRef({ onSession, now });
+  const callbacks = useRef({ onSession, now, onPlayingChange });
   useEffect(() => {
-    callbacks.current = { onSession, now };
-  }, [onSession, now]);
+    callbacks.current = { onSession, now, onPlayingChange };
+  }, [onSession, now, onPlayingChange]);
 
   useEffect(() => {
     alive.current = true;
@@ -183,10 +183,6 @@ export function Practice(props: PracticeProps) {
       engineRef.current = null;
     };
   }, []);
-
-  useEffect(() => {
-    onPlayingChange?.(state === 'playing');
-  }, [state, onPlayingChange]);
 
   /** Follow play and stop to date a run, and record a training run when it stops. */
   function follow(current: PracticeEngine, next: PracticeState) {
@@ -234,6 +230,8 @@ export function Practice(props: PracticeProps) {
     created.onStateChange((next) => {
       follow(created, next);
       setState(next);
+      // In the same event as setState, so the app's update lands in the same commit.
+      callbacks.current.onPlayingChange?.(next === 'playing');
     });
     // A performance ended (by itself or through Finish): hand the result on, once.
     created.onResult((result) => {
