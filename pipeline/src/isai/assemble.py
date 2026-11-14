@@ -7,9 +7,11 @@ from dataclasses import dataclass
 from typing import Any
 
 from isai import __version__
+from isai.harmony.types import Segment
 from isai.ingest.types import Ingested
 from isai.rhythm.types import Rhythm
 from isai.schema import current_version, validate_song
+from isai.theory.chords import label, uses_flats
 from isai.tonality import Tonality
 from isai.transcribe.types import TNote
 
@@ -32,8 +34,36 @@ def _times(values: Any, offset: float) -> list[float]:
     return [round(float(v) + offset, _DECIMALS) for v in values]
 
 
+def _chords(
+    segments: Sequence[Segment], offset: float, duration: float, flats: bool
+) -> list[dict[str, Any]]:
+    """Song chords on the original timeline, inside the song; empty ones dropped."""
+    out: list[dict[str, Any]] = []
+    for segment in segments:
+        start = round(segment.start + offset, _DECIMALS)
+        end = min(round(segment.end + offset, _DECIMALS), duration)
+        if end <= start:
+            continue
+        chord = segment.chord
+        entry: dict[str, Any] = {
+            "start": start,
+            "end": end,
+            "root": chord.root,
+            "quality": chord.quality,
+            "label": label(chord, flats),
+        }
+        if chord.bass is not None and chord.bass != chord.root:
+            entry["bass"] = chord.bass
+        out.append(entry)
+    return out
+
+
 def _notes(
-    notes: Sequence[TNote], hands: Sequence[str], offset: float, duration: float
+    notes: Sequence[TNote],
+    hands: Sequence[str],
+    offset: float,
+    duration: float,
+    source: str = "transcribed",
 ) -> list[dict[str, Any]]:
     """Song notes on the original timeline, inside the song, sorted; zero-length ones dropped."""
     out: list[dict[str, Any]] = []
@@ -49,7 +79,7 @@ def _notes(
                 "midi": int(min(127, max(0, note.midi))),
                 "velocity": int(min(127, max(1, note.velocity))),
                 "hand": hand,
-                "source": "transcribed",
+                "source": source,
             }
         )
     out.sort(key=lambda n: (n["start"], n["midi"], n["hand"]))
@@ -64,6 +94,9 @@ def assemble(
     notes: Sequence[TNote] = (),
     hands: Sequence[str] = (),
     notes_confidence: float | None = None,
+    chords: Sequence[Segment] = (),
+    chords_confidence: float = 0.0,
+    source: str = "transcribed",
 ) -> dict[str, Any]:
     """The Song (newest schema version), validated. Stage times move back by the trimmed offset."""
     offset = ingested.offset_sec
@@ -79,15 +112,15 @@ def assemble(
         "tempo": {"bpm": rhythm.bpm, "beats": beats, "downbeats": downbeats},
         "timeSignature": {"num": rhythm.beats_per_bar, "den": 4},
         "tonality": {"key": tonality.key, "mode": tonality.mode, "scale": list(tonality.scale)},
-        "chords": [],
-        "notes": _notes(notes, hands, offset, duration),
+        "chords": _chords(chords, offset, duration, uses_flats(tonality.key, tonality.mode)),
+        "notes": _notes(notes, hands, offset, duration, source),
         "meta": {
             "pipelineVersion": __version__,
             "createdAt": info.created_at,
             "confidence": {
                 "key": round(tonality.confidence, 4),
                 "tempo": round(rhythm.confidence, 4),
-                "chords": 0.0,
+                "chords": round(chords_confidence, 4),
             },
         },
     }

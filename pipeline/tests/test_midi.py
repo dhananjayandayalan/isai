@@ -88,3 +88,23 @@ def test_the_beats_are_heard_where_the_song_has_them() -> None:
     for beat in beats[:-1]:
         assert heard[tempo_map.ticks(beat)] == pytest.approx(beat, abs=1e-3)
     assert tempo_map.ticks(beats[0]) == 240  # half a beat of lead-in before the first beat
+
+
+def test_chord_names_are_markers_on_the_beats() -> None:
+    midi = read(
+        song_midi(
+            beats=[0.0, 0.5, 1.0, 1.5],
+            bpm=120,
+            beats_per_bar=4,
+            key="C",
+            mode="major",
+            chords=[(0.0, "C"), (1.0, "G/B")],
+        )
+    )
+    markers: list[tuple[int, str]] = []
+    now = 0
+    for message in midi.tracks[0]:
+        now += message.time
+        if message.type == "marker":
+            markers.append((now, message.text))
+    assert markers == [(0, "C"), (2 * TICKS_PER_BEAT, "G/B")]

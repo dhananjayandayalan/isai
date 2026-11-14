@@ -54,19 +54,34 @@ def test_analyse_writes_a_valid_song_and_a_midi_file(song_file: Path, tmp_path: 
     # Times are on the original audio: the first beat is after the second of silence.
     assert song["tempo"]["beats"][0] == pytest.approx(1.0, abs=0.05)
     assert set(song["tempo"]["downbeats"]) <= set(song["tempo"]["beats"])
-    # A full mix gives the (fake) vocal melody, all in the right hand.
+    # A full mix gives the (fake) vocal melody in the right hand over chords in the left.
     notes = song["notes"]
-    assert notes and {n["hand"] for n in notes} == {"right"}
-    assert {n["source"] for n in notes} == {"transcribed"}
-    assert notes[0]["start"] >= 0.9  # on the original timeline, after the silence
-    assert song["chords"] == []
+    assert {n["hand"] for n in notes} == {"left", "right"}
+    assert {n["source"] for n in notes} == {"arranged"}
+    assert min(n["start"] for n in notes) >= 0.9  # on the original timeline
+    chords = song["chords"]
+    assert chords and {c["label"] for c in chords} <= {
+        "G",
+        "C",
+        "D",
+        "Em",
+        "Am",
+        "Bm",
+        "D7",
+        "G/B",
+        "C/E",
+        "D/F#",
+    }
+    assert chords[0]["start"] >= 0.0 and chords[-1]["end"] <= song["durationSec"]
     confidence = song["meta"]["confidence"]
-    assert confidence["key"] > 0 and confidence["tempo"] > 0 and confidence["chords"] == 0
+    assert confidence["key"] > 0 and confidence["tempo"] > 0 and confidence["chords"] > 0
     assert confidence["notes"] == pytest.approx(0.9)
     midi = mido.MidiFile(file=io.BytesIO((tmp_path / "out" / "cadence.mid").read_bytes()))
     assert [t.name for t in midi.tracks[1:]] == ["Right hand", "Left hand"]
     right = [m for m in midi.tracks[1] if m.type == "note_on" and m.velocity > 0]
-    assert len(right) == len(notes)
+    left = [m for m in midi.tracks[2] if m.type == "note_on" and m.velocity > 0]
+    assert len(right) + len(left) == len(notes)
+    assert [m.text for m in midi.tracks[0] if m.type == "marker"] == [c["label"] for c in chords]
 
 
 @needs_ffmpeg
@@ -100,7 +115,7 @@ def test_the_cache_skips_finished_stages_and_no_cache_runs_them(
         song_file, info, Options(source_type="full-mix", cache_root=cache, from_stage="tonality")
     )
     cached = lambda result: {r.name: r.cached for r in result.records}  # noqa: E731
-    stages = ("separate", "rhythm", "tonality", "melody", "bass")
+    stages = ("separate", "rhythm", "tonality", "melody", "bass", "harmony")
 
     def every(value: bool) -> dict[str, bool]:
         return {"ingest": False} | dict.fromkeys(stages, value)
@@ -126,7 +141,7 @@ def test_an_ingest_change_reruns_the_stages_after_it(
     changed = run(song_file, info, Options(source_type="full-mix", cache_root=cache))
     fresh = run(song_file, info, Options(source_type="full-mix", cache_root=None))
     assert not any(r.cached for r in changed.records)
-    assert len(changed.records) == 6  # ingest, separate, rhythm, tonality, melody, bass
+    assert len(changed.records) == 7  # ingest ... bass, harmony
     assert changed.song == fresh.song
 
 
@@ -143,6 +158,7 @@ def test_logs_each_stage_as_a_json_line(
         "tonality",
         "melody",
         "bass",
+        "harmony",
     ]
     assert all(line["event"] == "stage" and line["seconds"] >= 0 for line in lines)
     rhythm, tonality = lines[2]["detail"], lines[3]["detail"]

@@ -20,9 +20,16 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, TextIO
 
+from isai.arrange import arrange
 from isai.arrange.hands import assign_hands
+from isai.arrange.melody import Level
 from isai.assemble import SongInfo, assemble
 from isai.device import Device, DeviceChoice, resolve
+from isai.harmony.chroma import audio_chroma, bass_per_beat, beat_edges, notes_chroma
+from isai.harmony.chroma import blend as blend_chroma
+from isai.harmony.from_melody import chords_from_melody, coverage
+from isai.harmony.recognise import recognise
+from isai.harmony.types import Harmony
 from isai.ingest import INGEST_VERSION, IngestLimits, ingest
 from isai.ingest.types import LOW_RATE, RATE, Ingested
 from isai.midi_out import MidiNote, song_midi
@@ -40,9 +47,12 @@ from isai.transcribe.types import Notes, TNote
 
 SUPPORTED_TYPES = ("piano-solo", "full-mix", "a-cappella")
 LATER_TYPES = ("carnatic",)
-STAGES = ("separate", "rhythm", "tonality", "piano", "melody", "bass")
+STAGES = ("separate", "rhythm", "tonality", "piano", "melody", "bass", "harmony")
 
 PIANO_VERSION = "1"
+HARMONY_VERSION = "1"
+# How much the transcribed notes count against the audio chroma for piano-solo chords.
+NOTE_CHROMA_WEIGHT = 0.5
 MELODY_VERSION = "1"
 # The bass line: the same tracker and segmentation, limited to bass notes.
 BASS_SEGMENT = SegmentOptions(midi_range=(28, 64), min_note_sec=0.1)
@@ -90,6 +100,10 @@ class Options:
     models: Models | None = None
     keep_stems: Path | None = None
     """`--keep-stems`: write the stems as WAVs here (full-mix only). Never set by the worker."""
+    levels: tuple[Level, ...] = ("medium",)
+    """Arrangement levels to write (the first is `Result.song`)."""
+    simplify: Level | None = None
+    """piano-solo: arrange the transcription at this level instead of keeping it."""
 
 
 @dataclass
@@ -98,6 +112,8 @@ class Result:
     midi: bytes
     records: list[StageRecord]
     stem_files: list[Path] = field(default_factory=lambda: [])
+    arrangements: dict[str, tuple[dict[str, Any], bytes]] = field(default_factory=lambda: {})
+    """Song and MIDI per level ("transcribed" for an unsimplified piano-solo)."""
 
 
 def ingest_key(ingested: Ingested, limits: IngestLimits) -> dict[str, Any]:
@@ -138,6 +154,14 @@ def stems_detail(stems: Stems) -> dict[str, Any]:
 
 def notes_detail(notes: Notes) -> dict[str, Any]:
     return {"notes": int(notes.start.size), "confidence": notes.confidence}
+
+
+def harmony_detail(harmony: Harmony) -> dict[str, Any]:
+    return {
+        "recogniser": harmony.recogniser,
+        "chords": int(harmony.start.size),
+        "confidence": harmony.confidence,
+    }
 
 
 def melody_detail(melody: Melody) -> dict[str, Any]:
@@ -211,6 +235,7 @@ def run(source: Path, info: SongInfo, options: Options) -> Result:
 
     notes: list[TNote]
     notes_confidence: float
+    bass_line: Melody | None = None
     if kind == "piano-solo":
         piano = runner.stage(
             "piano",
@@ -233,7 +258,7 @@ def run(source: Path, info: SongInfo, options: Options) -> Result:
         )
         if stems is not None:
             bass_stem = stems.bass
-            runner.stage(  # cached for P5's left hand; not in the Song yet
+            bass_line = runner.stage(  # the slash-chord bass under the chords
                 "bass",
                 MELODY_VERSION,
                 Melody,
@@ -248,9 +273,91 @@ def run(source: Path, info: SongInfo, options: Options) -> Result:
 
     if kind != "a-cappella":
         tonality = refine(tonality, notes)
-    hands = assign_hands(notes, beats, melody_only=kind != "piano-solo")
-    song = assemble(info, ingested, rhythm, tonality, notes, hands, notes_confidence)
-    midi = song_midi(
+
+    end = ingested.samples_low.size / LOW_RATE  # the trimmed audio's length
+    downbeats = [float(d) for d in rhythm.downbeats]
+    harmony = runner.stage(
+        "harmony",
+        HARMONY_VERSION,
+        Harmony,
+        lambda: _harmony(kind, notes, bass_line, beats, downbeats, rhythm, tonality, harmonic, end),
+        {"type": kind, "key": [tonality.tonic, tonality.mode]},
+        harmony_detail,
+    )
+    segments = harmony.segments()
+
+    arrangements: dict[str, tuple[dict[str, Any], bytes]] = {}
+    if kind == "piano-solo" and options.simplify is None:
+        hands = assign_hands(notes, beats, melody_only=False)
+        song = assemble(
+            info, ingested, rhythm, tonality, notes, hands, notes_confidence,
+            segments, harmony.confidence, "transcribed",
+        )  # fmt: skip
+        arrangements["transcribed"] = (song, _midi(song))
+    else:
+        levels = (options.simplify,) if options.simplify is not None else options.levels
+        melody_line = notes
+        for level in levels:
+            arranged = arrange(
+                melody_line, segments, beats, downbeats, rhythm.beats_per_bar, rhythm.bpm,
+                level, end,
+            )  # fmt: skip
+            song = assemble(
+                info,
+                ingested,
+                rhythm,
+                tonality,
+                [TNote(n.start, n.end, n.midi, n.velocity) for n in arranged],
+                [n.hand for n in arranged],
+                notes_confidence,
+                segments,
+                harmony.confidence,
+                "arranged",
+            )
+            arrangements[level] = (song, _midi(song))
+    first_song, first_midi = next(iter(arrangements.values()))
+    return Result(
+        song=first_song,
+        midi=first_midi,
+        records=runner.records,
+        stem_files=stem_files,
+        arrangements=arrangements,
+    )
+
+
+def _harmony(
+    kind: str,
+    notes: list[TNote],
+    bass_line: Melody | None,
+    beats: list[float],
+    downbeats: list[float],
+    rhythm: Rhythm,
+    tonality: Tonality,
+    harmonic: Any,
+    end: float,
+) -> Harmony:
+    """Chords: suggested from the melody (a-cappella), else recognised from the audio
+    (blended with the transcription's pitch classes for piano-solo)."""
+    if kind == "a-cappella":
+        segments = chords_from_melody(
+            notes, beats, downbeats, rhythm.beats_per_bar, rhythm.bpm,
+            tonality.tonic, tonality.mode, end,
+        )  # fmt: skip
+        return Harmony.build(segments, coverage(notes, segments), "from-melody-1")
+    edges = beat_edges(beats, end)
+    chroma, energy = audio_chroma(harmonic, LOW_RATE, edges, tonality.tuning_cents)
+    if kind == "piano-solo":
+        from_notes, _ = notes_chroma(notes, edges)
+        chroma = blend_chroma(chroma, from_notes, NOTE_CHROMA_WEIGHT)
+        bass = bass_per_beat(notes, edges)
+    else:
+        bass = bass_per_beat(bass_line.notes(), edges) if bass_line is not None else None
+    segments, confidence = recognise(chroma, energy, edges, tonality.tonic, tonality.mode, bass)
+    return Harmony.build(segments, confidence, "templates-1")
+
+
+def _midi(song: dict[str, Any]) -> bytes:
+    return song_midi(
         beats=song["tempo"]["beats"],
         bpm=song["tempo"]["bpm"],
         beats_per_bar=song["timeSignature"]["num"],
@@ -260,8 +367,8 @@ def run(source: Path, info: SongInfo, options: Options) -> Result:
             MidiNote(n["start"], n["end"], n["midi"], n["velocity"], n["hand"])
             for n in song["notes"]
         ],
+        chords=[(c["start"], c["label"]) for c in song["chords"]],
     )
-    return Result(song=song, midi=midi, records=runner.records, stem_files=stem_files)
 
 
 def _with_tonic(tonality: Tonality, hz: float | None) -> Tonality:

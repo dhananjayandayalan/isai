@@ -38,14 +38,20 @@ def test_piano_solo_gives_a_two_hand_song(song: Path) -> None:
     assert result.song["meta"]["confidence"]["notes"] == 0.75
     assert "tonicHz" not in result.song["tonality"]
     assert (separator.calls, piano.calls, pitch.calls) == (0, 1, 0)
-    assert [r.name for r in result.records] == ["ingest", "rhythm", "tonality", "piano"]
+    assert [r.name for r in result.records] == ["ingest", "rhythm", "tonality", "piano", "harmony"]
+    # The transcription is kept by default, with chords recognised under it.
+    assert {n["source"] for n in notes} == {"transcribed"}
+    assert result.song["chords"] and result.song["chords"][0]["label"] == "C"
+    assert list(result.arrangements) == ["transcribed"]
 
 
-def test_a_cappella_gives_a_right_hand_melody_and_the_singers_tonic(song: Path) -> None:
+def test_a_cappella_gets_chords_from_its_melody_and_the_singers_tonic(song: Path) -> None:
     models, separator, piano, pitch = fake_models()
     result = run(song, info("a-cappella"), Options("a-cappella", cache_root=None, models=models))
     validate_song(result.song)
-    assert {n["hand"] for n in result.song["notes"]} == {"right"}
+    assert {n["hand"] for n in result.song["notes"]} == {"left", "right"}
+    chords = result.song["chords"]
+    assert chords and chords[-1]["label"] == "G"  # the last phrase ends on the tonic
     tonality = result.song["tonality"]
     assert tonality["key"] == "G"
     assert tonality["tonicHz"] == pytest.approx(392.0, abs=0.5)  # the fake sings G4
@@ -56,7 +62,7 @@ def test_full_mix_separates_and_tracks_the_vocals_and_the_bass(song: Path) -> No
     models, separator, piano, pitch = fake_models()
     result = run(song, info("full-mix"), Options("full-mix", cache_root=None, models=models))
     validate_song(result.song)
-    assert {n["hand"] for n in result.song["notes"]} == {"right"}
+    assert {n["hand"] for n in result.song["notes"]} == {"left", "right"}
     assert (separator.calls, piano.calls, pitch.calls) == (1, 0, 2)  # vocals and bass
     assert result.stem_files == []
 
@@ -149,3 +155,55 @@ def test_real_models_give_byte_identical_output_on_cpu(song: Path, kind: str) ->
     validate_song(first.song)
     assert first.song == second.song
     assert first.midi == second.midi
+
+
+def test_every_level_and_a_simplified_piano(song: Path) -> None:
+    from isai.arrange.constraints import ANote, check
+
+    options = Options(
+        "full-mix", cache_root=None, models=fake_models()[0], levels=("easy", "medium", "full")
+    )
+    result = run(song, info("full-mix"), options)
+    assert list(result.arrangements) == ["easy", "medium", "full"]
+    counts = []
+    for level, (doc, midi) in result.arrangements.items():
+        validate_song(doc)
+        notes = [
+            ANote(n["start"], n["end"], n["midi"], n["velocity"], n["hand"]) for n in doc["notes"]
+        ]
+        assert check(notes, 60 / doc["tempo"]["bpm"] / 4 - 0.002) == [], level
+        counts.append(len({n.start for n in notes if n.hand == "left"}))  # left-hand onsets
+        assert midi
+    assert counts[0] <= counts[1] < counts[2]  # full is the busiest rhythm
+    simple = run(
+        song,
+        info("piano-solo"),
+        Options("piano-solo", cache_root=None, models=fake_models()[0], simplify="easy"),
+    )
+    assert list(simple.arrangements) == ["easy"]
+    assert {n["source"] for n in simple.song["notes"]} == {"arranged"}
+
+
+def test_level_all_writes_a_song_per_level(song: Path, tmp_path: Path) -> None:
+    out = tmp_path / "out"
+    assert (
+        main(
+            [
+                "analyse",
+                str(song),
+                "--type",
+                "a-cappella",
+                "--out",
+                str(out),
+                "--no-cache",
+                "--level",
+                "all",
+            ]
+        )
+        == 0
+    )
+    assert files_under(out) == sorted(
+        f"song.{level}.{ext}"
+        for level in ("easy", "medium", "full")
+        for ext in ("mid", "song.json")
+    )

@@ -15,10 +15,12 @@ import uuid
 from collections.abc import Sequence
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 from jsonschema import FormatChecker
 
 from isai import __version__, models
+from isai.arrange import LEVELS
 from isai.assemble import SongInfo
 from isai.errors import ExitCode, ModelMissingError, PipelineError
 from isai.models import fetch as fetch_model
@@ -26,16 +28,31 @@ from isai.pipeline import LATER_TYPES, STAGES, SUPPORTED_TYPES, Options, Result,
 from isai.schema import SchemaNotFoundError, SongValidationError
 
 
-def write_outputs(result: Result, out_dir: Path, stem: str) -> tuple[Path, Path]:
-    """Write the Song JSON and the MIDI file; return their paths."""
+def _write(song: dict[str, Any], midi: bytes, out_dir: Path, stem: str) -> tuple[Path, Path]:
     out_dir.mkdir(parents=True, exist_ok=True)
     song_path = out_dir / f"{stem}.song.json"
     with song_path.open("w", encoding="utf-8", newline="\n") as f:
-        json.dump(result.song, f, indent=2, ensure_ascii=False)
+        json.dump(song, f, indent=2, ensure_ascii=False)
         f.write("\n")
     midi_path = out_dir / f"{stem}.mid"
-    midi_path.write_bytes(result.midi)
+    midi_path.write_bytes(midi)
     return song_path, midi_path
+
+
+def write_outputs(result: Result, out_dir: Path, stem: str) -> list[tuple[Path, Path]]:
+    """Write each arrangement's Song JSON and MIDI file; return their paths.
+
+    One arrangement is `<stem>.song.json`; several (`--level all`) are
+    `<stem>.<level>.song.json`.
+    """
+    arrangements = result.arrangements or {"": (result.song, result.midi)}
+    if len(arrangements) == 1:
+        song, midi = next(iter(arrangements.values()))
+        return [_write(song, midi, out_dir, stem)]
+    return [
+        _write(song, midi, out_dir, f"{stem}.{level}")
+        for level, (song, midi) in arrangements.items()
+    ]
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -74,6 +91,17 @@ def _parser() -> argparse.ArgumentParser:
         choices=["auto", "cpu", "cuda"],
         default="auto",
         help="where the models run (default: auto, the GPU when torch sees one)",
+    )
+    analyse.add_argument(
+        "--level",
+        choices=[*LEVELS, "all"],
+        default="medium",
+        help="arrangement level (default: medium); all writes one Song per level",
+    )
+    analyse.add_argument(
+        "--simplify",
+        choices=["easy", "medium"],
+        help="piano-solo: arrange the transcription at this level instead of keeping it",
     )
     analyse.add_argument(
         "--keep-stems",
@@ -156,6 +184,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         log_json=args.log_json,
         device=args.device,
         keep_stems=args.out / "stems" if args.keep_stems else None,
+        levels=LEVELS if args.level == "all" else (args.level,),
+        simplify=args.simplify if args.type == "piano-solo" else None,
     )
     try:
         result = run(source, info, options)
@@ -169,8 +199,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     except SongValidationError as e:
         print(f"isai: {e}", file=sys.stderr)
         return ExitCode.INVALID_SONG
-    song_path, midi_path = write_outputs(result, args.out, source.stem)
-    print(f"Wrote {song_path} and {midi_path}")
+    for song_path, midi_path in write_outputs(result, args.out, source.stem):
+        print(f"Wrote {song_path} and {midi_path}")
     if result.stem_files:
         print(f"Wrote {len(result.stem_files)} stems to {result.stem_files[0].parent}")
     return ExitCode.OK

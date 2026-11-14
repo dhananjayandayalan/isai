@@ -94,8 +94,13 @@ def song_midi(
     key: str,
     mode: str,
     notes: Sequence[MidiNote] = (),
+    chords: Sequence[tuple[float, str]] = (),
 ) -> bytes:
-    """The MIDI file as bytes. The same input always gives the same bytes."""
+    """The MIDI file as bytes. The same input always gives the same bytes.
+
+    `chords` (start in seconds, label) become marker events on track 0, so a DAW shows
+    the chord names above the bars.
+    """
     tempo = TempoMap(beats, bpm)
     meta: list[tuple[int, Any]] = [
         (0, mido.MetaMessage("time_signature", numerator=beats_per_bar, denominator=4, time=0)),  # pyright: ignore[reportUnknownMemberType]
@@ -103,6 +108,8 @@ def song_midi(
     ]
     for tick, micros in tempo.tempo_changes():
         meta.append((tick, mido.MetaMessage("set_tempo", tempo=micros, time=0)))  # pyright: ignore[reportUnknownMemberType]
+    for start, text in chords:
+        meta.append((tempo.ticks(start), mido.MetaMessage("marker", text=text, time=0)))  # pyright: ignore[reportUnknownMemberType]
     hands: dict[str, list[tuple[int, Any]]] = {"right": [], "left": []}
     for note in notes:
         channel = 0 if note.hand == "right" else 1
