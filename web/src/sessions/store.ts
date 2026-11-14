@@ -47,6 +47,15 @@ function settle<T>(request: IDBRequest<T>): Promise<T> {
   });
 }
 
+/** Resolves once a transaction has committed; rejects if it fails or is aborted (quota, for one). */
+function committed(transaction: IDBTransaction): Promise<void> {
+  return new Promise((resolve, reject) => {
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = () => reject(transaction.error ?? new Error('IndexedDB transaction failed'));
+    transaction.onabort = () => reject(transaction.error ?? new Error('IndexedDB transaction aborted'));
+  });
+}
+
 /**
  * Sessions in IndexedDB. `factory` is a function because reaching `indexedDB` can itself
  * throw; the database is opened on first use and any failure rejects the call.
@@ -63,8 +72,9 @@ export class IndexedDbSessionStore implements SessionStore {
   }
 
   async add(session: NewSession): Promise<Session> {
-    const store = (await this.open()).transaction(STORE, 'readwrite').objectStore(STORE);
-    const id = await settle(store.add(session));
+    const transaction = (await this.open()).transaction(STORE, 'readwrite');
+    // A session only counts as saved once its transaction has committed.
+    const [id] = await Promise.all([settle(transaction.objectStore(STORE).add(session)), committed(transaction)]);
     return { ...session, id: Number(id) };
   }
 
@@ -97,6 +107,9 @@ export class IndexedDbSessionStore implements SessionStore {
  * Uses `primary` while it works. The first time it fails (private mode, no disk space),
  * sessions move to memory for the rest of the visit and `persistent` turns false, so the
  * page can say so. Nothing here throws.
+ *
+ * After a failure, `list` only shows this visit's sessions: the ones already in IndexedDB
+ * are not lost, but they aren't read again until the next visit.
  */
 export class ResilientSessionStore implements SessionStore {
   private readonly primary: SessionStore;

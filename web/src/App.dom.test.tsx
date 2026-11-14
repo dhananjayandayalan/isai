@@ -1013,6 +1013,15 @@ describe('song overview', () => {
     await click('Back to song');
     expect(container.querySelector('[aria-label="Song overview"]')).not.toBeNull();
   });
+
+  it('spells the scale the way the key signature does (D minor has a B flat)', async () => {
+    const h = harness();
+    const dMinor = { ...twinkle, tonality: { key: 'D', mode: 'minor', scale: [2, 4, 5, 7, 9, 10, 0] } };
+    await render(h.deps, dMinor, 'song');
+    await settle();
+    const scale = [...container.querySelectorAll('[data-overview=scale] .chip')].map((chip) => chip.textContent);
+    expect(scale).toEqual(['D', 'E', 'F', 'G', 'A', 'Bb', 'C']);
+  });
 });
 
 describe('performance', () => {
@@ -1175,8 +1184,12 @@ describe('kept on this device', () => {
     await reload(second.deps, 'practice');
     expect(pressed('49 keys')).toBe(true);
     expect(pressed("My keyboard's sound")).toBe(true);
-    // The keyboard from last time is connected as soon as a scan finds it.
-    await click('Find my keyboard');
+    // The keyboard from last time is connected as soon as a scan finds it, and sound
+    // starts inside the click, not after the scan's await (ADR 0004).
+    const find = button('Find my keyboard');
+    act(() => find.click());
+    expect(second.resume).toHaveBeenCalledTimes(1);
+    await settle();
     expect(second.midi.connectedDeviceId).toBe('fake-keyboard');
     expect(text()).toContain('Connected');
   });
@@ -1199,6 +1212,26 @@ describe('kept on this device', () => {
     await click('See last performance');
     expect(result('score')).toBe('60');
     expect(sectionAccuracy('Bars 1–2')).toBe('60%');
+  });
+
+  it('copes with a session store that rejects: no history, and the result says it was not saved', async () => {
+    const log = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const failing: SessionStore = {
+      persistent: true,
+      add: () => Promise.reject(new Error('quota exceeded')),
+      list: () => Promise.reject(new Error('database closed')),
+    };
+    const h = harness({ sessions: failing });
+    await h.midi.connect('fake-keyboard');
+    await startPerformance(h, frere);
+    await click('Back to song');
+    expect(text()).toContain('Nothing yet'); // not a skeleton for ever
+    await click('Performance');
+    await perform(h, frere, FRERE_PRESSES);
+    expect(result('score')).toBe('60');
+    expect(text()).toContain("Isai couldn't save this result on this browser");
+    expect(log).toHaveBeenCalled();
+    log.mockRestore();
   });
 
   it('still works when localStorage and IndexedDB throw (private mode), and says nothing is saved', async () => {

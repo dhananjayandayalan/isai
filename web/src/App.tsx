@@ -103,11 +103,20 @@ export default function App({ source, deps, view: firstView = 'song' }: AppProps
   useEffect(() => {
     if (songId === null) return undefined;
     let current = true;
-    void sessionStore.list(songId).then((list) => {
-      if (!current) return;
-      setHistory({ songId, list });
-      setSessionsSaved(sessionStore.persistent);
-    });
+    sessionStore.list(songId).then(
+      (list) => {
+        if (!current) return;
+        setHistory({ songId, list });
+        setSessionsSaved(sessionStore.persistent);
+      },
+      (error: unknown) => {
+        // A store that can't be read is a store that doesn't keep anything: say so.
+        console.error('Isai: past sessions could not be read.', error);
+        if (!current) return;
+        setHistory({ songId, list: [] });
+        setSessionsSaved(false);
+      },
+    );
     return () => {
       current = false;
     };
@@ -199,10 +208,16 @@ export default function App({ source, deps, view: firstView = 'song' }: AppProps
         setShown(record);
         setView('results');
       }
-      void sessionStore.add(record).then(() => {
-        setSessionsSaved(sessionStore.persistent);
-        setRecorded((n) => n + 1);
-      });
+      sessionStore.add(record).then(
+        () => {
+          setSessionsSaved(sessionStore.persistent);
+          setRecorded((n) => n + 1);
+        },
+        (error: unknown) => {
+          console.error('Isai: the session could not be saved.', error);
+          setSessionsSaved(false);
+        },
+      );
     },
     [song, sessionStore],
   );

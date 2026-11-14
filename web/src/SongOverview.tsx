@@ -1,6 +1,6 @@
 import type { PerformanceSession, Session } from './sessions/types';
 import type { Song } from './song';
-import { FLAT_NAMES, SHARP_NAMES } from './theory/pitch';
+import { keySpelling, pitchClassName } from './theory/keys';
 
 export interface SongOverviewProps {
   song: Song;
@@ -17,10 +17,10 @@ export interface SongOverviewProps {
 const HANDS_LABEL = { right: 'right hand', left: 'left hand', both: 'both hands' } as const;
 const SHOWN_SESSIONS = 5;
 
-/** Flat names for flat keys (F, Bb, Eb ...), sharps otherwise. */
+/** The scale's notes, spelled as the key signature spells them. */
 function scaleNames(song: Song): string[] {
-  const names = song.tonality.key.includes('b') || song.tonality.key === 'F' ? FLAT_NAMES : SHARP_NAMES;
-  return song.tonality.scale.map((pitchClass) => names[((pitchClass % 12) + 12) % 12] ?? '?');
+  const spelling = keySpelling(song.tonality.key, song.tonality.mode);
+  return song.tonality.scale.map((pitchClass) => pitchClassName(pitchClass, spelling));
 }
 
 /** Each chord of the song once, in the order they first appear. */

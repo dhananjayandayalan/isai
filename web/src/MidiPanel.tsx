@@ -71,6 +71,9 @@ export function MidiPanel(props: MidiPanelProps) {
   };
 
   async function scan() {
+    // The keyboard from last time may be connected once the scan returns, after an await.
+    // Start audio now, inside the click, as ADR 0004 asks.
+    if (preferredDeviceId) onConnect();
     setStatus({ kind: 'scanning', firstTime: !scanned });
     try {
       const list = await midi.listDevices();

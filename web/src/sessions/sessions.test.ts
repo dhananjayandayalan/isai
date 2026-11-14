@@ -79,6 +79,16 @@ describe('IndexedDB session store', () => {
     available = true;
     expect(await store.list('song-a')).toEqual([]);
   });
+
+  it('rejects a session whose transaction does not commit, and keeps nothing of it', async () => {
+    const database = new IDBFactory();
+    const store = new IndexedDbSessionStore(() => database);
+    const saved = await store.add(training('song-a', '2026-11-10T09:00:00.000Z'));
+    // Same key again: the request fails and the transaction aborts.
+    const clash = { ...training('song-a', '2026-11-11T09:00:00.000Z'), id: saved.id } as unknown as NewSession;
+    await expect(store.add(clash)).rejects.toThrow();
+    expect((await store.list('song-a')).map((s) => s.startedAt)).toEqual(['2026-11-10T09:00:00.000Z']);
+  });
 });
 
 describe('resilient session store', () => {
