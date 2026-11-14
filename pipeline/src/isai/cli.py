@@ -1,7 +1,8 @@
 """`isai` command line.
 
-P0: `isai analyse` is a stub. It checks the input exists and writes a placeholder Song
-copied from a schema example. No audio is read.
+`isai analyse song.mp3 --type full-mix --out out/` writes `out/song.song.json` and
+`out/song.mid`. Exit codes: 0 done, 1 invalid Song, 2 input missing or bad arguments,
+3 schema not found, 4 decode failed, 5 too long, 6 silent.
 """
 
 from __future__ import annotations
@@ -13,41 +14,24 @@ import uuid
 from collections.abc import Sequence
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
 
 from isai import __version__
-from isai.schema import (
-    SchemaNotFoundError,
-    SongValidationError,
-    examples_dir,
-    load_json,
-    validate_song,
-)
-
-PLACEHOLDER_EXAMPLE = "twinkle-g-major.json"
+from isai.assemble import SongInfo
+from isai.errors import ExitCode, PipelineError
+from isai.pipeline import LATER_TYPES, STAGES, SUPPORTED_TYPES, Options, Result, run
+from isai.schema import SchemaNotFoundError, SongValidationError
 
 
-def build_placeholder_song(source: Path, title: str | None = None) -> dict[str, Any]:
-    song: dict[str, Any] = load_json(examples_dir() / PLACEHOLDER_EXAMPLE)
-    song["id"] = uuid.uuid4().hex
-    song["title"] = title or source.stem
-    song["meta"]["pipelineVersion"] = __version__
-    song["meta"]["createdAt"] = datetime.now(UTC).isoformat(timespec="seconds")
-    validate_song(song)
-    return song
-
-
-def analyse(source: Path, out_dir: Path, title: str | None = None) -> Path:
-    """Write `<out_dir>/<stem>.song.json` for `source` and return its path."""
-    if not source.is_file():
-        raise FileNotFoundError(f"input file not found: {source}")
-    song = build_placeholder_song(source, title)
+def write_outputs(result: Result, out_dir: Path, stem: str) -> tuple[Path, Path]:
+    """Write the Song JSON and the MIDI file; return their paths."""
     out_dir.mkdir(parents=True, exist_ok=True)
-    out_path = out_dir / f"{source.stem}.song.json"
-    with out_path.open("w", encoding="utf-8", newline="\n") as f:
-        json.dump(song, f, indent=2, ensure_ascii=False)
+    song_path = out_dir / f"{stem}.song.json"
+    with song_path.open("w", encoding="utf-8", newline="\n") as f:
+        json.dump(result.song, f, indent=2, ensure_ascii=False)
         f.write("\n")
-    return out_path
+    midi_path = out_dir / f"{stem}.mid"
+    midi_path.write_bytes(result.midi)
+    return song_path, midi_path
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -55,30 +39,83 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--version", action="version", version=f"isai {__version__}")
     commands = parser.add_subparsers(dest="command", required=True)
 
-    analyse_cmd = commands.add_parser("analyse", help="analyse one song into Song JSON")
-    analyse_cmd.add_argument("file", type=Path, help="audio file to analyse")
-    analyse_cmd.add_argument("--out", type=Path, required=True, help="output directory")
-    analyse_cmd.add_argument("--title", help="song title (default: file name)")
+    analyse = commands.add_parser("analyse", help="analyse one song into Song JSON and MIDI")
+    analyse.add_argument("file", type=Path, help="audio file to analyse")
+    analyse.add_argument(
+        "--type",
+        required=True,
+        choices=[*SUPPORTED_TYPES, *LATER_TYPES],
+        help="what the recording is: solo piano, a full mix, or unaccompanied voice",
+    )
+    analyse.add_argument("--out", type=Path, required=True, help="output directory")
+    analyse.add_argument("--title", help="song title (default: file name)")
+    analyse.add_argument("--id", dest="song_id", help="Song id (default: a new random id)")
+    analyse.add_argument(
+        "--created-at", help="creation time, ISO 8601 (default: now); fix it for repeatable output"
+    )
+    analyse.add_argument(
+        "--cache-dir", type=Path, default=Path(".cache"), help="stage cache (default: .cache)"
+    )
+    analyse.add_argument("--no-cache", action="store_true", help="run every stage afresh")
+    analyse.add_argument(
+        "--from-stage", choices=STAGES, help="re-run this stage and the ones after it"
+    )
+    analyse.add_argument(
+        "--log-json", action="store_true", help="log each stage as a JSON line on stderr"
+    )
     return parser
+
+
+def _created_at(value: str | None) -> str:
+    if value is None:
+        return datetime.now(UTC).isoformat(timespec="seconds")
+    try:
+        datetime.fromisoformat(value)
+    except ValueError as e:
+        raise ValueError(f"--created-at must be an ISO 8601 date and time, got {value!r}") from e
+    return value
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = _parser().parse_args(argv)
-    if args.command == "analyse":
-        try:
-            out_path = analyse(args.file, args.out, args.title)
-        except SchemaNotFoundError as e:
-            # A broken install, not a user mistake: say so and how to fix it.
-            print(f"isai: {e}. Is the repo's schema/ folder present?", file=sys.stderr)
-            return 3
-        except FileNotFoundError as e:
-            print(f"isai: {e}", file=sys.stderr)
-            return 2
-        except SongValidationError as e:
-            print(f"isai: {e}", file=sys.stderr)
-            return 1
-        print(f"Wrote {out_path}")
-    return 0
+    source: Path = args.file
+    if args.type in LATER_TYPES:
+        print(f"isai: {args.type} songs are coming in a later version", file=sys.stderr)
+        return ExitCode.INPUT_MISSING
+    if not source.is_file():
+        print(f"isai: input file not found: {source}", file=sys.stderr)
+        return ExitCode.INPUT_MISSING
+    try:
+        info = SongInfo(
+            song_id=args.song_id or uuid.uuid4().hex,
+            title=args.title or source.stem,
+            source_type=args.type,
+            created_at=_created_at(args.created_at),
+        )
+    except ValueError as e:
+        print(f"isai: {e}", file=sys.stderr)
+        return ExitCode.INPUT_MISSING
+    options = Options(
+        source_type=args.type,
+        cache_root=None if args.no_cache else args.cache_dir,
+        from_stage=args.from_stage,
+        log_json=args.log_json,
+    )
+    try:
+        result = run(source, info, options)
+    except SchemaNotFoundError as e:
+        # A broken install, not a user mistake: say so and how to fix it.
+        print(f"isai: {e}. Is the repo's schema/ folder present?", file=sys.stderr)
+        return ExitCode.SCHEMA_NOT_FOUND
+    except PipelineError as e:
+        print(f"isai: {e}", file=sys.stderr)
+        return e.exit_code
+    except SongValidationError as e:
+        print(f"isai: {e}", file=sys.stderr)
+        return ExitCode.INVALID_SONG
+    song_path, midi_path = write_outputs(result, args.out, source.stem)
+    print(f"Wrote {song_path} and {midi_path}")
+    return ExitCode.OK
 
 
 if __name__ == "__main__":
