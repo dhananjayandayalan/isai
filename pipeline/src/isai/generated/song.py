@@ -12,6 +12,10 @@ class Beat(RootModel[float]):
     root: Annotated[float, Field(ge=0.0)]
 
 
+class Downbeat(RootModel[float]):
+    root: Annotated[float, Field(ge=0.0)]
+
+
 class Tempo(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -23,6 +27,10 @@ class Tempo(BaseModel):
     beats: list[Beat]
     """
     Beat times in seconds from the start of the audio.
+    """
+    downbeats: list[Downbeat] | None = None
+    """
+    Times in seconds of the first beat of each bar, from the start of the audio. Optional; added in 0.2.0.
     """
 
 
@@ -156,9 +164,9 @@ class Song(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    schemaVersion: Literal["0.1.0"]
+    schemaVersion: Literal["0.1.0", "0.2.0"]
     """
-    Version of this schema the file was written against.
+    Version of this schema the file was written against. Every supported version is listed, newest last; the pipeline writes the newest (ADR 0008).
     """
     id: Annotated[str, Field(min_length=1)]
     """

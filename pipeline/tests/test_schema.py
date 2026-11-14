@@ -10,21 +10,64 @@ from isai.schema import (
     SchemaNotFoundError,
     SongValidationError,
     _validator,  # pyright: ignore[reportPrivateUsage]
+    current_version,
     examples_dir,
+    frozen_examples_dir,
     load_json,
     load_schema,
     schema_dir,
+    schema_versions,
     song_errors,
     validate_song,
 )
 
 VALID = sorted(p for p in examples_dir().glob("*.json") if not p.name.startswith("invalid-"))
 INVALID = sorted(examples_dir().glob("invalid-*.json"))
+FROZEN = sorted(frozen_examples_dir().glob("*/*.json"))
 
 
 def test_schema_is_valid_draft_2020_12() -> None:
     Draft202012Validator.check_schema(load_schema())
-    assert load_schema()["properties"]["schemaVersion"]["const"] == "0.1.0"
+
+
+def test_lists_every_supported_version_and_writes_the_newest() -> None:
+    assert schema_versions() == ["0.1.0", "0.2.0"]
+    assert current_version() == "0.2.0"
+    for path in VALID:
+        assert load_json(path)["schemaVersion"] == current_version(), path.name
+
+
+@pytest.mark.parametrize("path", FROZEN, ids=lambda p: f"{p.parent.name}/{p.name}")
+def test_frozen_examples_of_past_versions_still_load(path: Path) -> None:
+    doc = load_json(path)
+    assert doc["schemaVersion"] == path.parent.name
+    assert doc["schemaVersion"] in schema_versions()
+    validate_song(doc)
+
+
+def test_every_past_version_has_a_frozen_example() -> None:
+    frozen = {p.parent.name for p in FROZEN}
+    assert frozen == set(schema_versions()[:-1])
+
+
+def test_downbeats_are_optional_and_must_lie_within_the_song() -> None:
+    doc = load_json(examples_dir() / "twinkle-g-major.json")
+    assert doc["tempo"]["downbeats"] == [0.0, 2.4, 4.8, 7.2]
+    validate_song(doc)
+    del doc["tempo"]["downbeats"]
+    validate_song(doc)
+    doc["tempo"]["downbeats"] = [0.0, 12.0]
+    with pytest.raises(SongValidationError) as exc:
+        validate_song(doc)
+    assert any("tempo.downbeats[1]" in e for e in exc.value.errors)
+    doc["tempo"]["downbeats"] = [-1.0]
+    assert any("downbeats" in e for e in song_errors(doc))
+
+
+def test_an_unknown_version_is_rejected() -> None:
+    doc = load_json(examples_dir() / "twinkle-g-major.json")
+    doc["schemaVersion"] = "9.9.9"
+    assert any("schemaVersion" in e for e in song_errors(doc))
 
 
 def test_there_are_examples_of_both_kinds() -> None:

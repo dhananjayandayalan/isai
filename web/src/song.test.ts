@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest';
 import frere from '../../schema/examples/frere-jacques-a-cappella.json';
 import invalid from '../../schema/examples/invalid-out-of-range.json';
 import twinkle from '../../schema/examples/twinkle-g-major.json';
+import frere010 from '../../schema/examples/versions/0.1.0/frere-jacques-a-cappella.json';
+import twinkle010 from '../../schema/examples/versions/0.1.0/twinkle-g-major.json';
+import schema from '../../schema/song.schema.json';
 import { parseSong, SongParseError, type Song } from './song';
 
 describe('parseSong', () => {
@@ -10,8 +13,23 @@ describe('parseSong', () => {
     ['frere-jacques-a-cappella', frere],
   ])('accepts the %s example', (_name, json) => {
     const song: Song = parseSong(json);
-    expect(song.schemaVersion).toBe('0.1.0');
+    expect(song.schemaVersion).toBe('0.2.0');
     expect(song.notes.length).toBeGreaterThan(0);
+  });
+
+  it.each([
+    ['twinkle-g-major', twinkle010],
+    ['frere-jacques-a-cappella', frere010],
+  ])('still accepts the frozen 0.1.0 %s example (ADR 0008)', (_name, json) => {
+    const song = parseSong(json);
+    expect(song.schemaVersion).toBe('0.1.0');
+    expect(song.tempo.downbeats).toBeUndefined();
+  });
+
+  it('reads every version the schema lists, and no other', () => {
+    expect(schema.properties.schemaVersion.enum).toEqual(['0.1.0', '0.2.0']);
+    expect(parseSong(twinkle).tempo.downbeats).toEqual([0, 2.4, 4.8, 7.2]);
+    expect(() => parseSong({ ...twinkle, schemaVersion: '9.9.9' })).toThrow(SongParseError);
   });
 
   it('gives typed access to fields', () => {

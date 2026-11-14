@@ -674,7 +674,7 @@ describe('practice screen', () => {
 
   it('loops by time when the song has no beats', async () => {
     const h = harness();
-    await render(h.deps, { ...twinkle, tempo: { ...twinkle.tempo, beats: [] } });
+    await render(h.deps, { ...twinkle, tempo: { bpm: twinkle.tempo.bpm, beats: [] } }); // no beats or downbeats
     await click('Loop 0:00–0:08');
     const options = [...container.querySelectorAll('select[aria-label="Loop to"] option')];
     expect(options.map((o) => o.textContent)).toEqual(['0:02', '0:04', '0:06', '0:08', '0:09']);

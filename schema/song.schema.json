@@ -20,8 +20,8 @@
   ],
   "properties": {
     "schemaVersion": {
-      "description": "Version of this schema the file was written against.",
-      "const": "0.1.0"
+      "description": "Version of this schema the file was written against. Every supported version is listed, newest last; the pipeline writes the newest (ADR 0008).",
+      "enum": ["0.1.0", "0.2.0"]
     },
     "id": {
       "description": "Stable identifier of the song analysis.",
@@ -72,6 +72,11 @@
         },
         "beats": {
           "description": "Beat times in seconds from the start of the audio.",
+          "type": "array",
+          "items": { "type": "number", "minimum": 0 }
+        },
+        "downbeats": {
+          "description": "Times in seconds of the first beat of each bar, from the start of the audio. Optional; added in 0.2.0.",
           "type": "array",
           "items": { "type": "number", "minimum": 0 }
         }

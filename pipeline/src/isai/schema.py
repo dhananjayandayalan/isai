@@ -53,6 +53,11 @@ def examples_dir() -> Path:
     return schema_dir() / "examples"
 
 
+def frozen_examples_dir() -> Path:
+    """One frozen example per past schema version, in `versions/<version>/` (ADR 0008)."""
+    return examples_dir() / "versions"
+
+
 def load_json(path: Path) -> Any:
     with path.open(encoding="utf-8") as f:
         return json.load(f)
@@ -62,6 +67,17 @@ def load_json(path: Path) -> Any:
 def load_schema() -> dict[str, Any]:
     schema: dict[str, Any] = load_json(schema_path())
     return schema
+
+
+def schema_versions() -> list[str]:
+    """Every Song version this code reads, oldest first, from the schema itself (ADR 0008)."""
+    versions: list[str] = load_schema()["properties"]["schemaVersion"]["enum"]
+    return list(versions)
+
+
+def current_version() -> str:
+    """The version the pipeline writes: the newest supported one."""
+    return schema_versions()[-1]
 
 
 @cache
@@ -83,7 +99,8 @@ def time_errors(doc: dict[str, Any]) -> list[str]:
     """Check the timing rules JSON Schema can't express (ADR 0002).
 
     Every note, chord and section ends after it starts and within `durationSec`; every
-    beat lies within `durationSec`. Expects a document that already matches the schema.
+    beat and downbeat lies within `durationSec`. Expects a document that already matches
+    the schema.
     """
     duration: float = doc["durationSec"]
     limit = duration + TIME_TOLERANCE_SEC
@@ -97,10 +114,11 @@ def time_errors(doc: dict[str, Any]) -> list[str]:
                 errors.append(f"$.{field}[{i}]: end ({end}) must be after start ({start})")
             if end > limit:
                 errors.append(f"$.{field}[{i}]: end ({end}) is past durationSec ({duration})")
-    beats: list[float] = doc["tempo"]["beats"]
-    for i, beat in enumerate(beats):
-        if beat > limit:
-            errors.append(f"$.tempo.beats[{i}]: {beat} is past durationSec ({duration})")
+    for field in ("beats", "downbeats"):
+        times: list[float] = doc["tempo"].get(field) or []
+        for i, time in enumerate(times):
+            if time > limit:
+                errors.append(f"$.tempo.{field}[{i}]: {time} is past durationSec ({duration})")
     return errors
 
 

@@ -4,16 +4,30 @@ import pytest
 from pydantic import ValidationError
 
 from isai.generated.song import Song
-from isai.schema import examples_dir, load_json
+from isai.schema import current_version, examples_dir, frozen_examples_dir, load_json
 
 VALID = sorted(p for p in examples_dir().glob("*.json") if not p.name.startswith("invalid-"))
+FROZEN = sorted(frozen_examples_dir().glob("*/*.json"))
 
 
 @pytest.mark.parametrize("path", VALID, ids=lambda p: p.name)
 def test_examples_load_into_generated_model(path: Path) -> None:
     song = Song.model_validate(load_json(path))
-    assert song.schemaVersion == "0.1.0"
+    assert song.schemaVersion == current_version()
     assert song.notes
+
+
+@pytest.mark.parametrize("path", FROZEN, ids=lambda p: f"{p.parent.name}/{p.name}")
+def test_frozen_examples_load_into_generated_model(path: Path) -> None:
+    song = Song.model_validate(load_json(path))
+    assert song.schemaVersion == path.parent.name
+    assert song.tempo.downbeats is None  # 0.1.0 had no downbeats
+
+
+def test_downbeats_are_typed() -> None:
+    song = Song.model_validate(load_json(examples_dir() / "twinkle-g-major.json"))
+    assert song.tempo.downbeats is not None
+    assert [d.root for d in song.tempo.downbeats] == [0.0, 2.4, 4.8, 7.2]
 
 
 def test_typed_fields_are_readable() -> None:
