@@ -2,7 +2,7 @@
 id: spec-p07-notation-settings
 phase: P7
 title: Notation, display and settings — names, swaras, Roman numerals, staff, falling notes, pedal
-status: ready
+status: in-progress
 track: web
 depends_on: [spec-p02-training]
 ---

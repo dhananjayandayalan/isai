@@ -1,7 +1,7 @@
 ---
 id: adr-0007
 title: MidiInput gains sustain-pedal and device-change events
-status: proposed
+status: accepted
 date: 2026-11-14
 phase: P7
 supersedes: null
