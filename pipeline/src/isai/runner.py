@@ -32,6 +32,8 @@ class StageRecord:
     version: str
     seconds: float
     cached: bool
+    detail: Mapping[str, Any] = field(default_factory=lambda: {})
+    """What the stage found, for the log and the golden report (bpm, stability, key)."""
 
 
 @dataclass
@@ -59,8 +61,12 @@ class Runner:
         cls: type[A],
         compute: Callable[[], A],
         options: Mapping[str, Any] | None = None,
+        detail: Callable[[A], Mapping[str, Any]] | None = None,
     ) -> A:
-        """Return the stage's artifact: from the cache if it is there and allowed, else computed."""
+        """Return the stage's artifact: from the cache if it is there and allowed, else computed.
+
+        `detail` picks what the log line reports about the artifact.
+        """
         key = self._key(name, version, options or {})
         if self.from_stage == name:
             self._rerun = True
@@ -73,7 +79,11 @@ class Runner:
             if directory is not None:
                 cache.save(directory, artifact)
         record = StageRecord(
-            name=name, version=version, seconds=self.clock() - started, cached=cached
+            name=name,
+            version=version,
+            seconds=self.clock() - started,
+            cached=cached,
+            detail=detail(artifact) if detail is not None else {},
         )
         self.records.append(record)
         self._log(record)
@@ -112,11 +122,13 @@ class Runner:
     def _log(self, record: StageRecord) -> None:
         if not self.log_json:
             return
-        line = {
+        line: dict[str, Any] = {
             "event": "stage",
             "stage": record.name,
             "version": record.version,
             "seconds": round(record.seconds, 4),
             "cached": record.cached,
         }
+        if record.detail:
+            line["detail"] = dict(record.detail)
         self.log_stream.write(json.dumps(line) + "\n")

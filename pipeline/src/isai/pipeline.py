@@ -57,6 +57,25 @@ def ingest_key(ingested: Ingested, limits: IngestLimits) -> dict[str, Any]:
     }
 
 
+def rhythm_detail(rhythm: Rhythm) -> dict[str, Any]:
+    return {
+        "tracker": rhythm.tracker,
+        "bpm": rhythm.bpm,
+        "beatsPerBar": rhythm.beats_per_bar,
+        "stability": round(rhythm.stability, 4),
+        "stable": rhythm.stable,
+    }
+
+
+def tonality_detail(tonality: Tonality) -> dict[str, Any]:
+    return {
+        "key": tonality.key,
+        "mode": tonality.mode,
+        "confidence": round(tonality.confidence, 4),
+        "tuningCents": tonality.tuning_cents,
+    }
+
+
 def run(source: Path, info: SongInfo, options: Options) -> Result:
     """Analyse `source` into a Song and its MIDI file."""
     if options.source_type not in SUPPORTED_TYPES:
@@ -82,6 +101,7 @@ def run(source: Path, info: SongInfo, options: Options) -> Result:
         Rhythm,
         lambda: analyse_rhythm(ingested.samples_low, LOW_RATE, tracker),
         {"tracker": f"{tracker.name}-{tracker.version}", "type": options.source_type},
+        rhythm_detail,
     )
     beats = [float(b) for b in rhythm.beats]
     tonality = runner.stage(
@@ -90,6 +110,7 @@ def run(source: Path, info: SongInfo, options: Options) -> Result:
         Tonality,
         lambda: analyse_tonality(ingested.samples_low, LOW_RATE, beats),
         {"type": options.source_type},
+        tonality_detail,
     )
     song = assemble(info, ingested, rhythm, tonality)
     midi = song_midi(

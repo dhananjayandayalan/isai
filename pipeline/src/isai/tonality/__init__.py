@@ -26,7 +26,7 @@ class Tonality:
     tonic: int
     key: str
     """The tonic as the Song writes it ("G", "Bb")."""
-    mode: str
+    mode: KeyMode
     scale: list[int]
     confidence: float
     """`confidence.key` in the Song."""

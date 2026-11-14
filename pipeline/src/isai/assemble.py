@@ -11,8 +11,6 @@ from isai.rhythm.types import Rhythm
 from isai.schema import current_version, validate_song
 from isai.tonality import Tonality
 
-SourceType = str
-
 _DECIMALS = 3
 
 
@@ -22,7 +20,8 @@ class SongInfo:
 
     song_id: str
     title: str
-    source_type: SourceType
+    source_type: str
+    """One of `pipeline.SUPPORTED_TYPES`."""
     created_at: str
     """ISO 8601 date and time."""
 

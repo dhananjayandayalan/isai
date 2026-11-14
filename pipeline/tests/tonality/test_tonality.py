@@ -45,9 +45,12 @@ def test_weights_the_chroma_by_beat_or_by_frame() -> None:
     by_frame = weighted_chroma(audio, RATE, 0.0, [])
     for profile in (by_beat, by_frame):
         assert profile.shape == (12,)
-        # C, E, G (the tonic triad) carry the most weight.
-        assert set(np.argsort(profile)[-3:].tolist()) <= {0, 4, 7, 5, 9, 2, 11}
-        assert int(np.argmax(profile)) in (0, 7)
+        # I-IV-V-I: the tonic leads, then the dominant (in three of the four chords each),
+        # and every note of C major outweighs every note outside it.
+        assert np.argsort(profile)[::-1][:2].tolist() == [0, 7]
+        diatonic = [0, 2, 4, 5, 7, 9, 11]
+        chromatic = [1, 3, 6, 8, 10]
+        assert profile[diatonic].min() > 1.5 * profile[chromatic].max()
 
 
 def test_falls_back_to_c_major_without_pitched_content() -> None:

@@ -8,7 +8,8 @@ from enum import IntEnum
 class ExitCode(IntEnum):
     OK = 0
     INVALID_SONG = 1
-    INPUT_MISSING = 2
+    USAGE = 2
+    """Bad arguments, an input file that isn't there, or a source type not supported yet."""
     SCHEMA_NOT_FOUND = 3
     DECODE_FAILED = 4
     TOO_LONG = 5

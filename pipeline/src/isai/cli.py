@@ -15,6 +15,8 @@ from collections.abc import Sequence
 from datetime import UTC, datetime
 from pathlib import Path
 
+from jsonschema import FormatChecker
+
 from isai import __version__
 from isai.assemble import SongInfo
 from isai.errors import ExitCode, PipelineError
@@ -51,7 +53,9 @@ def _parser() -> argparse.ArgumentParser:
     analyse.add_argument("--title", help="song title (default: file name)")
     analyse.add_argument("--id", dest="song_id", help="Song id (default: a new random id)")
     analyse.add_argument(
-        "--created-at", help="creation time, ISO 8601 (default: now); fix it for repeatable output"
+        "--created-at",
+        help="creation time, ISO 8601 with a UTC offset (default: now); fix it for "
+        "repeatable output",
     )
     analyse.add_argument(
         "--cache-dir", type=Path, default=Path(".cache"), help="stage cache (default: .cache)"
@@ -69,10 +73,12 @@ def _parser() -> argparse.ArgumentParser:
 def _created_at(value: str | None) -> str:
     if value is None:
         return datetime.now(UTC).isoformat(timespec="seconds")
-    try:
-        datetime.fromisoformat(value)
-    except ValueError as e:
-        raise ValueError(f"--created-at must be an ISO 8601 date and time, got {value!r}") from e
+    # The schema's own check (RFC 3339), so a bad value fails here, before the analysis.
+    if not FormatChecker().conforms(value, "date-time"):
+        raise ValueError(
+            "--created-at must be an ISO 8601 date and time with a UTC offset, "
+            f"like 2026-11-14T10:00:00+05:30, got {value!r}"
+        )
     return value
 
 
@@ -81,10 +87,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     source: Path = args.file
     if args.type in LATER_TYPES:
         print(f"isai: {args.type} songs are coming in a later version", file=sys.stderr)
-        return ExitCode.INPUT_MISSING
+        return ExitCode.USAGE
     if not source.is_file():
         print(f"isai: input file not found: {source}", file=sys.stderr)
-        return ExitCode.INPUT_MISSING
+        return ExitCode.USAGE
     try:
         info = SongInfo(
             song_id=args.song_id or uuid.uuid4().hex,
@@ -94,7 +100,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
     except ValueError as e:
         print(f"isai: {e}", file=sys.stderr)
-        return ExitCode.INPUT_MISSING
+        return ExitCode.USAGE
     options = Options(
         source_type=args.type,
         cache_root=None if args.no_cache else args.cache_dir,

@@ -25,11 +25,11 @@ signature, key, mode, scale and confidences; notes and chords come in P4 and P5.
 |---|---|
 | `--type` | required: `piano-solo`, `full-mix` or `a-cappella` (`carnatic` comes later) |
 | `--title` | the Song's title (default: the file name) |
-| `--id`, `--created-at` | fix the Song's id and creation time; with both, the same audio gives byte-identical output |
+| `--id`, `--created-at` | fix the Song's id and creation time (ISO 8601 with a UTC offset, like `2026-11-14T10:00:00+05:30`); with both, the same audio gives byte-identical output |
 | `--cache-dir` | where stage outputs are cached (default `.cache/`, gitignored) |
 | `--no-cache` | run every stage afresh |
 | `--from-stage rhythm\|tonality` | re-run that stage and the ones after it |
-| `--log-json` | one JSON line per stage on stderr, with its timing and whether it came from the cache |
+| `--log-json` | one JSON line per stage on stderr, with its timing, whether it came from the cache, and a `detail` of what it found (rhythm: tracker, bpm, beats per bar, stability, stable; tonality: key, mode, confidence, tuning) |
 
 Exit codes: 0 done, 1 invalid Song, 2 missing input or bad arguments, 3 schema not found,
 4 decode failed (or no ffmpeg), 5 longer than 12 minutes or bigger than 100 MB, 6 silent.

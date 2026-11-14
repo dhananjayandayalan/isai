@@ -127,6 +127,11 @@ def test_logs_each_stage_as_a_json_line(
     lines = [json.loads(line) for line in capsys.readouterr().err.splitlines()]
     assert [line["stage"] for line in lines] == ["ingest", "rhythm", "tonality"]
     assert all(line["event"] == "stage" and line["seconds"] >= 0 for line in lines)
+    rhythm, tonality = lines[1]["detail"], lines[2]["detail"]
+    assert rhythm["tracker"].startswith("librosa")
+    assert rhythm["stable"] is True and rhythm["beatsPerBar"] == 4
+    assert abs(rhythm["bpm"] - 60) < 1
+    assert (tonality["key"], tonality["mode"]) == ("G", "major")
 
 
 def test_type_is_required_and_carnatic_is_for_later(
@@ -152,8 +157,10 @@ def test_missing_input_exits_2(tmp_path: Path, capsys: pytest.CaptureFixture[str
 def test_a_bad_created_at_exits_2(
     song_file: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    assert analyse(song_file, tmp_path / "out", "--created-at", "yesterday") == 2
-    assert "ISO 8601" in capsys.readouterr().err
+    for value in ("yesterday", "2026-11-14", "2026-11-14T10:00:00"):
+        assert analyse(song_file, tmp_path / "out", "--created-at", value) == 2
+        assert "ISO 8601" in capsys.readouterr().err
+    assert not (tmp_path / "out").exists()
 
 
 @needs_ffmpeg
