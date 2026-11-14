@@ -89,9 +89,22 @@ describe('Scorer', () => {
     expect(result.total.meanOffset).toBe(0.08);
     expect(result.total.meanAbsOffset).toBe(0.08);
     expect(result.total.spread).toBe(0);
-    // 80 ms late is the bin from +80 to +100 ms: the 13th of 16.
-    expect(result.histogram.right).toEqual([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 0, 0, 0]);
+    // 17 bins centred on −160, −140 … 0 … +160 ms: 80 ms late is the 13th.
+    expect(result.histogram.right).toEqual([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 0, 0, 0, 0]);
     expect(result.histogram.left.every((n) => n === 0)).toBe(true);
+  });
+
+  it('puts on-time notes in the middle histogram bin, and early and late either side', () => {
+    const offsets = [0, 0.01, -0.01, 0.011, -0.011, 0.029, -0.031, 0.16, -0.16];
+    const notes = offsets.map((_, i) => expected(i, 60));
+    const presses = offsets.map((offset, i): [number, number] => [60, i + offset]);
+    const { histogram } = score({ notes, presses, options: whole(notes, 5) });
+    expect(histogram.binSec).toBe(0.02);
+    expect(histogram.right).toHaveLength(17);
+    // Half way between two centres (±10 ms) goes to the bin nearer 0, on both sides.
+    expect(histogram.right).toEqual([1, 0, 0, 0, 0, 0, 1, 1, 3, 2, 0, 0, 0, 0, 0, 0, 1]);
+    const middle = (histogram.right.length - 1) / 2;
+    expect(histogram.right[middle]).toBe(3);
   });
 
   it('is deterministic under jitter, and jitter inside 45 ms stays perfect', () => {

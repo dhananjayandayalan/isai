@@ -213,14 +213,15 @@ function Timing({ result }: { result: PerformanceResult }) {
   const binMs = Math.round(histogram.binSec * 1000);
   const edgeMs = Math.round(windows.ok * 1000);
   const perfectMs = Math.round(windows.perfect * 1000);
-  // A bin is "in time" when it lies inside the perfect window.
-  const inTime = (index: number) => {
-    const from = -edgeMs + index * binMs;
-    return from >= -perfectMs - binMs / 2 && from + binMs <= perfectMs + binMs / 2;
-  };
-  const inside = counts.reduce((sum, count, i) => (inTime(i) ? sum + count : sum), 0);
-  const early = counts.slice(0, counts.length / 2).reduce((a, b) => a + b, 0);
-  const lean = early * 2 > total ? 'most before the beat' : early * 2 < total ? 'most after the beat' : 'evenly either side';
+  // The bins are centred on multiples of binSec, the middle one on 0 (on the beat).
+  const middle = (counts.length - 1) / 2;
+  const centreMs = (index: number) => (index - middle) * binMs;
+  const inTime = (index: number) => Math.abs(centreMs(index)) <= perfectMs;
+  const sum = (keep: (index: number) => boolean) => counts.reduce((acc, count, i) => (keep(i) ? acc + count : acc), 0);
+  const inside = sum(inTime);
+  const early = sum((i) => i < middle);
+  const late = sum((i) => i > middle);
+  const onBeat = total - early - late;
 
   return (
     <section className="card stack-4" aria-labelledby="timing-title">
@@ -251,7 +252,8 @@ function Timing({ result }: { result: PerformanceResult }) {
         aria-label={
           total === 0
             ? 'Timing histogram: no notes hit.'
-            : `Timing histogram: ${inside} of ${total} notes within ${perfectMs} milliseconds, ${lean}.`
+            : `Timing histogram: ${inside} of ${total} notes within ${perfectMs} milliseconds; ` +
+              `${early} early, ${onBeat} on the beat, ${late} late.`
         }
       >
         {counts.map((count, i) => (

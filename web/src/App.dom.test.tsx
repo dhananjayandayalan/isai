@@ -858,6 +858,9 @@ function histogram(): { all: number; inside: number } {
   return { all: sum(bars), inside: sum(bars.filter((bar) => bar.classList.contains('is-in'))) };
 }
 
+/** What the timing chart says to a screen reader. */
+const histogramLabel = () => container.querySelector('.histogram')?.getAttribute('aria-label') ?? '';
+
 type ExampleSong = typeof twinkle | typeof frere;
 
 /** A performance always counts in one bar. */
@@ -951,6 +954,7 @@ const FIXTURES = [
     sections: { 'Phrase 1': '100%', 'Phrase 2': '45%' },
     trouble: { id: '3-4', title: 'Bars 3–4', detail: '45% in time · 4 of 11 notes missed' },
     histogram: { all: 17, inside: 10, right: 14, left: 3 },
+    label: '10 of 17 notes within 50 milliseconds; 0 early, 10 on the beat, 7 late.',
   },
   {
     name: 'Frère Jacques',
@@ -962,6 +966,7 @@ const FIXTURES = [
     sections: { 'Bars 1–2': '60%' },
     trouble: { id: '1-2', title: 'Bars 1–2', detail: '60% in time · 2 of 8 notes missed' },
     histogram: { all: 6, inside: 4, right: 6, left: 0 },
+    label: '4 of 6 notes within 50 milliseconds; 2 early, 4 on the beat, 0 late.',
   },
 ];
 
@@ -1034,6 +1039,7 @@ describe('performance', () => {
     expect(spots[0]?.textContent).toContain(fixture.trouble.detail);
 
     expect(histogram()).toEqual({ all: fixture.histogram.all, inside: fixture.histogram.inside });
+    expect(histogramLabel()).toBe(`Timing histogram: ${fixture.label}`);
     await click('Right');
     expect(histogram().all).toBe(fixture.histogram.right);
     await click('Left');
@@ -1274,6 +1280,7 @@ describe('latency card', () => {
     expect(result('score')).toBe('100');
     expect(result('timing')).toBe('0 ms');
     expect(result('timing-words')).toBe('on the beat, steady');
+    expect(histogramLabel()).toBe('Timing histogram: 8 of 8 notes within 50 milliseconds; 0 early, 8 on the beat, 0 late.');
   });
 
   it('keeps Play off while the clicks run', async () => {

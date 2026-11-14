@@ -18,7 +18,10 @@ export const WINDOWS: Readonly<Windows> = { perfect: 0.05, good: 0.1, ok: 0.16 }
 export const WEIGHTS = { perfect: 1, good: 0.7, ok: 0.4 } as const;
 /** A wrong note costs this much of a note in the score. */
 export const WRONG_PENALTY = 0.5;
-/** Width of a timing-histogram bin, in seconds. The bins span the ok window. */
+/**
+ * Width of a timing-histogram bin, in seconds. The bins span the ok window and one is
+ * centred on 0, so a note played on time is neither early nor late.
+ */
 export const HISTOGRAM_BIN = 0.02;
 /** A bar range is a trouble spot when its accuracy is below this. */
 export const TROUBLE_BELOW = 0.9;
@@ -98,7 +101,10 @@ export interface PerformanceResult {
   wrongPerMinute: number;
   /** Heard seconds from the start of the song (after the count-in) to the end of the run. */
   durationSec: number;
-  /** Hits per bin of `binSec`, from −ok to +ok, for each hand. */
+  /**
+   * Hits per bin of `binSec` for each hand. The bins are centred on whole multiples of
+   * `binSec` from −ok to +ok; the middle one is centred on 0 (on time).
+   */
   histogram: { binSec: number; left: number[]; right: number[] };
   windows: Windows;
 }
@@ -256,11 +262,14 @@ export class Scorer {
     const raw = total.expected ? (100 * (weighted - WRONG_PENALTY * this.wrongCount)) / total.expected : 0;
     const durationSec = Math.max(0, options.endTime - options.startTime);
 
-    const bins = Math.round((2 * windows.ok) / HISTOGRAM_BIN);
+    const half = Math.round(windows.ok / HISTOGRAM_BIN);
+    const bins = 2 * half + 1;
     const histogram = { binSec: HISTOGRAM_BIN, left: new Array<number>(bins).fill(0), right: new Array<number>(bins).fill(0) };
     for (const note of scored) {
       if (!note.matched) continue;
-      const bin = Math.floor((note.offset + windows.ok) / HISTOGRAM_BIN + EPSILON);
+      // The nearest bin centre; exactly half way goes to the bin nearer 0, on both sides.
+      const steps = note.offset / HISTOGRAM_BIN;
+      const bin = half + Math.sign(steps) * Math.max(0, Math.ceil(Math.abs(steps) - 0.5 - EPSILON));
       const row = histogram[note.hand];
       const index = Math.min(bins - 1, Math.max(0, bin));
       row[index] = (row[index] ?? 0) + 1;
