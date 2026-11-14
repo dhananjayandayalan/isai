@@ -74,3 +74,51 @@ def tempo_confidence(beats: Sequence[float]) -> float:
     steadiness = max(0.0, 1.0 - cv / (4 * STABLE_CV))
     amount = min(1.0, len(beats) / (2 * MIN_BEATS))
     return round(steadiness * amount, 4)
+
+
+# A gap longer than this many beat lengths is a hole in the grid (a missed beat, a
+# free-time intro, an outro the tracker gave up on).
+GAP_BEATS = 1.5
+
+
+def filled_grid(beats: Sequence[float], end: float) -> list[float]:
+    """The beats with holes filled and the ends extended to cover 0..`end`.
+
+    Missing beats are spread evenly across each gap; before the first and after the last
+    beat the median beat length carries on. For laying out chords and patterns only: the
+    Song keeps the beats that were actually detected.
+    """
+    detected = sorted(b for b in beats if 0 <= b < end)
+    gaps = intervals(detected)
+    if not gaps:
+        return detected
+    beat = statistics.median(gaps)
+    out = [detected[0]]
+    for nxt in detected[1:]:
+        gap = nxt - out[-1]
+        if gap > GAP_BEATS * beat:
+            steps = round(gap / beat)
+            out += [out[-1] + gap * k / steps for k in range(1, steps)]
+        out.append(nxt)
+    while out[0] - beat >= 0:
+        out.insert(0, out[0] - beat)
+    while out[-1] + beat < end:
+        out.append(out[-1] + beat)
+    return [round(b, 3) for b in out]
+
+
+def filled_downbeats(
+    grid: Sequence[float], downbeats: Sequence[float], beats_per_bar: int
+) -> list[float]:
+    """Bar starts on a filled grid: the detected ones, carried on every `beats_per_bar`
+    grid beats before the first and after the last (or from the grid's start if none)."""
+    if not grid:
+        return []
+    tolerance = 0.07
+    on_grid = [i for i, b in enumerate(grid) if any(abs(b - d) <= tolerance for d in downbeats)]
+    if not on_grid:
+        return list(grid[::beats_per_bar])
+    marks = set(on_grid)
+    marks |= set(range(on_grid[0], -1, -beats_per_bar))
+    marks |= set(range(on_grid[-1], len(grid), beats_per_bar))
+    return [grid[i] for i in sorted(marks)]

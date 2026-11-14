@@ -99,8 +99,7 @@ def left_hand(
     grid = _grid(beats, end)
     if len(grid) < 2 or not segments:
         return []
-    bar_starts = {round(d, 3) for d in downbeats}
-    first_bar = next((i for i, b in enumerate(grid) if round(b, 3) in bar_starts), 0)
+    positions = _positions(grid, downbeats, beats_per_bar)
     notes: list[TNote] = []
     previous: tuple[int, ...] | None = None
     last_chord: Chord | None = None
@@ -109,12 +108,12 @@ def left_hand(
         if chord is None:
             last_chord = None
             continue
-        position = (i - first_bar) % beats_per_bar
+        position = positions[i]
         changed = chord != last_chord
         last_chord = chord
         length = nxt - t
         bass = bass_note(chord)
-        hold_end = _hold_until(segments, grid, i, beats_per_bar, first_bar)
+        hold_end = _hold_until(segments, grid, i, positions)
 
         if level == "easy":
             if changed or position == 0:
@@ -150,13 +149,31 @@ def left_hand(
     return [TNote(round(n.start, 3), round(n.end, 3), n.midi, n.velocity) for n in notes]
 
 
+def _positions(grid: Sequence[float], downbeats: Sequence[float], beats_per_bar: int) -> list[int]:
+    """Each grid beat's place in its bar (0 = the bar's first beat), counted from the most
+    recent bar start, so a missed beat or an odd bar doesn't shift every bar after it."""
+    starts = [b for b in grid if any(abs(b - d) <= 0.07 for d in downbeats)]
+    out: list[int] = []
+    count = -1
+    first = next((i for i, b in enumerate(grid) if b in starts), 0)
+    for i, b in enumerate(grid):
+        if b in starts:
+            count = 0
+        elif count < 0:
+            count = (i - first) % beats_per_bar  # before the first bar start
+        else:
+            count += 1
+        out.append(count % beats_per_bar)
+    return out
+
+
 def _hold_until(
-    segments: Sequence[Segment], grid: Sequence[float], i: int, beats_per_bar: int, first_bar: int
+    segments: Sequence[Segment], grid: Sequence[float], i: int, positions: Sequence[int]
 ) -> float:
     """The next chord change or bar line after beat `i`."""
     chord = _chord_at(segments, grid[i])
     for j in range(i + 1, len(grid)):
-        if (j - first_bar) % beats_per_bar == 0 or _chord_at(segments, grid[j]) != chord:
+        if positions[j] == 0 or _chord_at(segments, grid[j]) != chord:
             return grid[j]
     return grid[-1]
 

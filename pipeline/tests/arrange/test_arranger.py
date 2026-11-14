@@ -201,3 +201,12 @@ def test_any_input_gives_a_playable_identical_arrangement(
     assert check(first, SIXTEENTH) == []
     assert first == again
     assert all(0 <= x.start < x.end <= end for x in first)
+
+
+def test_left_hand_bars_follow_the_detected_bar_starts_after_a_missed_beat() -> None:
+    # A 3-beat bar (a missed beat) at the start: the next bar still begins on its downbeat.
+    beats = [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5]
+    downbeats = [0.0, 1.5]
+    notes = left_hand(segs([C], beats_each=8), beats, downbeats, 4, "medium", 4.0)
+    starts = sorted({x.start for x in notes})
+    assert 1.5 in starts and 2.5 in starts  # beats 1 and 3 of the bar starting at 1.5
