@@ -235,7 +235,11 @@ The service-role key never reaches the browser, the repo or CI logs.
 | 0005 | One practice engine with training and performance policies (P2) | proposed |
 | 0006 | Performance scoring, latency model and local practice records (P6) | proposed |
 | next | Schema evolution policy (P3, before the first schema change) | expected |
-| next | Analysis models: beats/key (P3), separation, transcription, pitch (P4), chords (P5) | expected, after spikes |
+| 0009 | Beat tracking and key finding (P3) | reserved; waits on the golden audio |
+| 0010 | Source separation: torchaudio Hybrid Demucs (P4) | proposed |
+| 0011 | Piano transcription: ByteDance high-resolution model (P4) | proposed |
+| 0012 | Pitch tracking: torchcrepe without dither (P4) | proposed |
+| next | Analysis models: chords (P5), if a learned recogniser is adopted | expected, after the spike |
 | next | `MidiInput` gains pedal and device-change events (P7, amends 0003) | expected |
 | next | Backend: Supabase, jobs-table queue, auth model, `api/` boundary (P8) | expected |
 | next | Hosting: web host, worker host, sample hosting, error reporting (P9) | expected |
