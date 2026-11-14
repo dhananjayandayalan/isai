@@ -235,7 +235,7 @@ The service-role key never reaches the browser, the repo or CI logs.
 | 0005 | One practice engine with training and performance policies (P2) | proposed |
 | 0006 | Performance scoring, latency model and local practice records (P6) | proposed |
 | next | Schema evolution policy (P3, before the first schema change) | expected |
-| 0009 | Beat tracking and key finding (P3) | reserved; waits on the golden audio |
+| 0009 | Beat tracking (Beat This!) and key finding (P3) | accepted |
 | 0010 | Source separation: torchaudio Hybrid Demucs (P4) | proposed |
 | 0011 | Piano transcription: ByteDance high-resolution model (P4) | proposed |
 | 0012 | Pitch tracking: torchcrepe without dither (P4) | proposed |
