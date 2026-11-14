@@ -18,6 +18,8 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Literal
 
+from isai.theory.scales import ScaleMode, scale
+
 KeyMode = Literal["major", "minor", "modal"]
 
 PROFILES: dict[str, tuple[tuple[float, ...], tuple[float, ...]]] = {
@@ -124,3 +126,28 @@ def key_name(tonic: int, mode: KeyMode) -> str:
     if not 0 <= tonic <= 11:
         raise ValueError(f"tonic pitch class must be 0-11, got {tonic}")
     return (_MINOR_NAMES if mode == "minor" else _MAJOR_NAMES)[tonic]
+
+
+# Scales a modal key may take, tried in this order (ties go to the earlier one).
+MODAL_CANDIDATES: tuple[ScaleMode, ...] = (
+    "dorian",
+    "mixolydian",
+    "phrygian",
+    "lydian",
+    "aeolian",
+    "ionian",
+    "locrian",
+)
+
+
+def modal_scale(chroma: Sequence[float], tonic: int) -> tuple[ScaleMode, list[int]]:
+    """The church mode on `tonic` whose seven notes hold the most of the chroma."""
+    best_name = MODAL_CANDIDATES[0]
+    best_notes = scale(tonic, best_name)
+    best_mass = -1.0
+    for name in MODAL_CANDIDATES:
+        notes = scale(tonic, name)
+        mass = sum(chroma[pc] for pc in notes)
+        if mass > best_mass + 1e-12:
+            best_name, best_notes, best_mass = name, notes, mass
+    return best_name, best_notes

@@ -154,3 +154,14 @@ def test_key_name_rejects_a_bad_pitch_class() -> None:
     with pytest.raises(ValueError):
         key_name(12, "major")
     assert NAMES[key_scores(scale_chroma(4, "minor"))[0].tonic] == "E"  # type: ignore[index]
+
+
+def test_a_modal_key_takes_the_church_mode_that_holds_most_of_the_chroma() -> None:
+    from isai.theory.keyfinding import modal_scale
+
+    dorian = [1.0 if pc in scale(2, "dorian") else 0.0 for pc in range(12)]
+    assert modal_scale(dorian, 2) == ("dorian", scale(2, "dorian"))
+    mixolydian = [1.0 if pc in scale(7, "mixolydian") else 0.1 for pc in range(12)]
+    assert modal_scale(mixolydian, 7)[0] == "mixolydian"
+    # Nothing to choose between: the first candidate.
+    assert modal_scale([1.0] * 12, 0)[0] == "dorian"

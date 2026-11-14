@@ -72,3 +72,30 @@ def click_track(
         t += 60 / tempo
         i += 1
     return out, times
+
+
+def harmonic_note(midi: float, seconds: float, rate: int = 22_050, cents: float = 0.0) -> Audio:
+    """A plucked tone with four decaying partials, `cents` away from equal temperament at A440."""
+    freq = 440 * 2 ** ((midi - 69) / 12) * 2 ** (cents / 1200)
+    t = np.arange(round(seconds * rate)) / rate
+    envelope = np.minimum(1, t / 0.02) * np.exp(-t * 1.5)
+    partials = sum((0.6**k) * np.sin(2 * np.pi * freq * (k + 1) * t) for k in range(4))
+    return np.asarray(partials * envelope, dtype=np.float64)
+
+
+def cadence(
+    tonic: int, mode: str, cents: float = 0.0, cycles: int = 2, rate: int = 22_050
+) -> Audio:
+    """I-IV-V-I in major, or i-iv-V-i in minor (raised leading tone in V), a chord a second.
+
+    Each chord is the root an octave down plus a root-position triad around C3-B3 + tonic.
+    """
+    third = 4 if mode == "major" else 3
+    chords = [(0, third, 7), (5, 5 + third, 12), (7, 11, 14), (0, third, 7)]
+    base = 48 + tonic
+    parts: list[Audio] = []
+    for _ in range(cycles):
+        for root, middle, top in chords:
+            pitches = (base + root - 12, base + root, base + middle, base + top)
+            parts.append(sum((harmonic_note(p, 1.0, rate, cents) for p in pitches), np.zeros(rate)))
+    return np.concatenate(parts) * 0.1
