@@ -24,6 +24,26 @@ export interface MidiNoteEvent {
 
 export type MidiNoteListener = (event: MidiNoteEvent) => void;
 
+/** The sustain pedal (control change 64) on the connected device (ADR 0007). */
+export interface MidiPedalEvent {
+  /** Pedal down: `value >= 64`. */
+  down: boolean;
+  /** 0-127; values in between are half-pedalling. */
+  value: number;
+  channel: number;
+  /** Audio-clock seconds, like note times. */
+  time: number;
+  deviceId: string;
+}
+
+export type MidiPedalListener = (event: MidiPedalEvent) => void;
+
+/** Called with the inputs available now, after one is plugged in or unplugged. */
+export type MidiDevicesListener = (devices: MidiDevice[]) => void;
+
+/** CC 64 counts as down from this value. */
+export const PEDAL_DOWN_AT = 64;
+
 /** Call to stop listening. */
 export type Unsubscribe = () => void;
 
@@ -33,6 +53,13 @@ export interface MidiInput {
   connect(deviceId: string): Promise<void>;
   onNoteOn(listener: MidiNoteListener): Unsubscribe;
   onNoteOff(listener: MidiNoteListener): Unsubscribe;
+  /** The sustain pedal of the connected device. Training and scoring ignore it. */
+  onPedal(listener: MidiPedalListener): Unsubscribe;
+  /**
+   * Inputs plugged in or unplugged, once MIDI access has been granted (by `listDevices`).
+   * If the connected device goes, the new list says so; the caller disconnects.
+   */
+  onDevicesChanged(listener: MidiDevicesListener): Unsubscribe;
   /** Stop receiving notes. Listeners stay registered for the next `connect`. */
   disconnect(): Promise<void>;
 }

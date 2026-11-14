@@ -2,7 +2,16 @@
 // `navigator.requestMIDIAccess`. Converts event timestamps to the audio clock (rule 6).
 
 import type { AudioClock } from './AudioClock';
-import type { MidiDevice, MidiInput, MidiNoteEvent, MidiNoteListener, Unsubscribe } from './MidiInput';
+import {
+  PEDAL_DOWN_AT,
+  type MidiDevice,
+  type MidiDevicesListener,
+  type MidiInput,
+  type MidiNoteEvent,
+  type MidiNoteListener,
+  type MidiPedalListener,
+  type Unsubscribe,
+} from './MidiInput';
 
 /** The parts of the Web MIDI API this adapter uses, so tests can supply fakes. */
 export interface MidiMessageLike {
@@ -22,6 +31,8 @@ export interface MidiInputPortLike {
 
 export interface MidiAccessLike {
   inputs: ReadonlyMap<string, MidiInputPortLike>;
+  /** Fired when any port is plugged in, unplugged, opened or closed. */
+  onstatechange?: ((event: unknown) => void) | null;
 }
 
 export type RequestMidiAccess = (options: { sysex: boolean }) => Promise<MidiAccessLike>;
@@ -39,6 +50,8 @@ export class MidiError extends Error {
 
 const NOTE_OFF = 0x80;
 const NOTE_ON = 0x90;
+const CONTROL_CHANGE = 0xb0;
+const SUSTAIN = 64;
 
 /** Web MIDI as the browser provides it, or undefined (Safari, iOS, Tauri on macOS). */
 export function browserMidiAccess(): RequestMidiAccess | undefined {
@@ -56,6 +69,10 @@ export class WebMidiInput implements MidiInput {
   private port: MidiInputPortLike | null = null;
   private readonly noteOn = new Set<MidiNoteListener>();
   private readonly noteOff = new Set<MidiNoteListener>();
+  private readonly pedal = new Set<MidiPedalListener>();
+  private readonly devicesChanged = new Set<MidiDevicesListener>();
+  /** The device ids last reported, so opening a port (also a state change) isn't reported. */
+  private reported = '';
 
   constructor(clock: AudioClock, requestAccess: RequestMidiAccess | undefined = browserMidiAccess()) {
     this.clock = clock;
@@ -67,10 +84,9 @@ export class WebMidiInput implements MidiInput {
   }
 
   async listDevices(): Promise<MidiDevice[]> {
-    const access = await this.getAccess();
-    return [...access.inputs.values()]
-      .filter((port) => port.state === 'connected')
-      .map(toDevice);
+    const devices = connectedDevices(await this.getAccess());
+    this.reported = idsOf(devices);
+    return devices;
   }
 
   async connect(deviceId: string): Promise<void> {
@@ -107,6 +123,23 @@ export class WebMidiInput implements MidiInput {
     return subscribe(this.noteOff, listener);
   }
 
+  onPedal(listener: MidiPedalListener): Unsubscribe {
+    return subscribe(this.pedal, listener);
+  }
+
+  onDevicesChanged(listener: MidiDevicesListener): Unsubscribe {
+    return subscribe(this.devicesChanged, listener);
+  }
+
+  /** Report the inputs when the set of them has changed. */
+  private stateChanged(access: MidiAccessLike): void {
+    const devices = connectedDevices(access);
+    const ids = idsOf(devices);
+    if (ids === this.reported) return;
+    this.reported = ids;
+    for (const listener of [...this.devicesChanged]) listener(devices);
+  }
+
   private getAccess(): Promise<MidiAccessLike> {
     if (!this.requestAccess) {
       return Promise.reject(
@@ -114,10 +147,18 @@ export class WebMidiInput implements MidiInput {
       );
     }
     if (!this.access) {
-      this.access = this.requestAccess({ sysex: false }).catch((cause: unknown) => {
-        this.access = null; // allow a retry after the learner changes the permission
-        throw toAccessError(cause);
-      });
+      this.access = this.requestAccess({ sysex: false }).then(
+        (access) => {
+          // What is plugged in now is the baseline; later changes are reported against it.
+          this.reported = idsOf(connectedDevices(access));
+          access.onstatechange = () => this.stateChanged(access);
+          return access;
+        },
+        (cause: unknown) => {
+          this.access = null; // allow a retry after the learner changes the permission
+          throw toAccessError(cause);
+        },
+      );
     }
     return this.access;
   }
@@ -131,14 +172,29 @@ export class WebMidiInput implements MidiInput {
     const type = status & 0xf0;
     const isOn = type === NOTE_ON && velocity > 0;
     const isOff = type === NOTE_OFF || (type === NOTE_ON && velocity === 0);
-    if (!isOn && !isOff) return; // CC, pitch bend, clock, SysEx: not part of MidiInput
+    const isPedal = type === CONTROL_CHANGE && note === SUSTAIN;
+    // Other controllers, pitch bend, clock, SysEx: not part of MidiInput.
+    if (!isOn && !isOff && !isPedal) return;
 
     // Some platforms leave timeStamp at 0; then "now" on the audio clock is the best guess.
     const time =
       message.timeStamp > 0 ? this.clock.fromDomTimestamp(message.timeStamp) : this.clock.now();
+    if (isPedal) {
+      const pedal = { down: velocity >= PEDAL_DOWN_AT, value: velocity, channel: status & 0x0f, time, deviceId };
+      for (const listener of [...this.pedal]) listener(pedal);
+      return;
+    }
     const event: MidiNoteEvent = { note, velocity, channel: status & 0x0f, time, deviceId };
     for (const listener of [...(isOn ? this.noteOn : this.noteOff)]) listener(event);
   }
+}
+
+function connectedDevices(access: MidiAccessLike): MidiDevice[] {
+  return [...access.inputs.values()].filter((port) => port.state === 'connected').map(toDevice);
+}
+
+function idsOf(devices: readonly MidiDevice[]): string {
+  return devices.map((d) => d.id).join(' ');
 }
 
 function toDevice(port: MidiInputPortLike): MidiDevice {
@@ -155,7 +211,7 @@ function toAccessError(cause: unknown): MidiError {
   return new MidiError('failed', 'Could not start MIDI', { cause });
 }
 
-function subscribe(listeners: Set<MidiNoteListener>, listener: MidiNoteListener): Unsubscribe {
+function subscribe<T>(listeners: Set<T>, listener: T): Unsubscribe {
   listeners.add(listener);
   return () => {
     listeners.delete(listener);

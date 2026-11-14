@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { AudioClock } from './AudioClock';
-import type { MidiNoteEvent } from './MidiInput';
+import type { MidiDevice, MidiNoteEvent, MidiPedalEvent } from './MidiInput';
 import {
   browserMidiAccess,
   MidiError,
@@ -146,7 +146,8 @@ describe('WebMidiInput notes', () => {
     const { midi, ports, ons, offs } = setup();
     await midi.connect('in-1');
     const port = ports[0];
-    port?.send([0xb0, 64, 127]); // sustain pedal
+    port?.send([0xb0, 1, 127]); // modulation wheel
+    port?.send([0xb0, 66, 127]); // sostenuto pedal
     port?.send([0xe0, 0, 64]); // pitch bend
     port?.send([0xf8]); // clock
     port?.send([0xf0, 0x7e, 0x7f, 0xf7]); // SysEx
@@ -233,5 +234,102 @@ describe('WebMidiInput errors', () => {
     await expectMidiError(midi.connect('in-1'), 'busy');
     expect(midi.connectedDeviceId).toBeNull();
     expect(busy.onmidimessage).toBeNull();
+  });
+});
+
+describe('WebMidiInput sustain pedal (ADR 0007)', () => {
+  it('reports CC 64 as down from 64, with value, channel and audio-clock time', async () => {
+    const { midi, ports, ons } = setup();
+    const pedal: MidiPedalEvent[] = [];
+    midi.onPedal((e) => pedal.push(e));
+    await midi.connect('in-1');
+    ports[0]?.send([0xb0, 64, 127], 2000);
+    ports[0]?.send([0xb3, 64, 63], 2500); // half way, channel 4
+    ports[0]?.send([0xb0, 64, 64]);
+    ports[0]?.send([0xb0, 64, 0], 0); // no timestamp: now
+    expect(pedal).toEqual([
+      { down: true, value: 127, channel: 0, time: 12, deviceId: 'in-1' },
+      { down: false, value: 63, channel: 3, time: 12.5, deviceId: 'in-1' },
+      { down: true, value: 64, channel: 0, time: 11, deviceId: 'in-1' },
+      { down: false, value: 0, channel: 0, time: 99, deviceId: 'in-1' },
+    ]);
+    expect(ons).toHaveLength(0); // the pedal is not a note
+  });
+
+  it('stops delivering the pedal to unsubscribed listeners', async () => {
+    const { midi, ports } = setup();
+    const pedal: MidiPedalEvent[] = [];
+    const off = midi.onPedal((e) => pedal.push(e));
+    await midi.connect('in-1');
+    off();
+    ports[0]?.send([0xb0, 64, 127]);
+    expect(pedal).toHaveLength(0);
+  });
+});
+
+describe('WebMidiInput device changes (ADR 0007)', () => {
+  function plugged() {
+    const first = new FakePort('in-1', 'Digital piano');
+    const second = new FakePort('in-2', 'Stage piano');
+    second.state = 'disconnected';
+    const inputs = new Map([
+      [first.id, first],
+      [second.id, second],
+    ]);
+    const access: MidiAccessLike = { inputs };
+    const midi = new WebMidiInput(clock, () => Promise.resolve(access));
+    const lists: MidiDevice[][] = [];
+    midi.onDevicesChanged((devices) => lists.push(devices));
+    const change = () => access.onstatechange?.({});
+    return { midi, access, first, second, lists, change };
+  }
+
+  it('says nothing until access has been granted', () => {
+    const { access, lists } = plugged();
+    expect(access.onstatechange).toBeUndefined();
+    expect(lists).toEqual([]);
+  });
+
+  it('reports a keyboard plugged in and one unplugged, without another scan', async () => {
+    const { midi, first, second, lists, change } = plugged();
+    expect((await midi.listDevices()).map((d) => d.id)).toEqual(['in-1']);
+    second.state = 'connected';
+    change();
+    expect(lists.at(-1)?.map((d) => d.id)).toEqual(['in-1', 'in-2']);
+    first.state = 'disconnected';
+    change();
+    expect(lists.at(-1)).toEqual([{ id: 'in-2', name: 'Stage piano', manufacturer: 'Acme' }]);
+    expect(lists).toHaveLength(2);
+  });
+
+  it('does not report a state change that leaves the same inputs (a port opening)', async () => {
+    const { midi, lists, change } = plugged();
+    await midi.listDevices();
+    await midi.connect('in-1');
+    change();
+    change();
+    expect(lists).toEqual([]);
+  });
+
+  it('reports the connected device going, and leaves disconnecting to the caller', async () => {
+    const { midi, first, lists, change } = plugged();
+    await midi.connect('in-1');
+    first.state = 'disconnected';
+    change();
+    expect(lists).toEqual([[]]);
+    expect(midi.connectedDeviceId).toBe('in-1');
+    await midi.disconnect();
+    expect(midi.connectedDeviceId).toBeNull();
+  });
+
+  it('stops delivering device changes to unsubscribed listeners', async () => {
+    const { midi, second, change } = plugged();
+    const heard: MidiDevice[][] = [];
+    const off = midi.onDevicesChanged((d) => heard.push(d));
+    await midi.listDevices();
+    off();
+    second.state = 'connected';
+    change();
+    expect(heard).toEqual([]);
   });
 });

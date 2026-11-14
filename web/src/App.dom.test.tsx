@@ -772,6 +772,8 @@ describe('MIDI panel', () => {
       disconnect: () => Promise.resolve(),
       onNoteOn: () => () => undefined,
       onNoteOff: () => () => undefined,
+      onPedal: () => () => undefined,
+      onDevicesChanged: () => () => undefined,
     };
     const h = harness({ midi: failing });
     await render(h.deps);
