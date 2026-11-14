@@ -25,6 +25,7 @@ from isai.assemble import SongInfo
 from isai.errors import ExitCode, ModelMissingError, PipelineError
 from isai.models import fetch as fetch_model
 from isai.pipeline import LATER_TYPES, STAGES, SUPPORTED_TYPES, Options, Result, run
+from isai.rhythm import LibrosaTracker
 from isai.schema import SchemaNotFoundError, SongValidationError
 
 
@@ -91,6 +92,12 @@ def _parser() -> argparse.ArgumentParser:
         choices=["auto", "cpu", "cuda"],
         default="auto",
         help="where the models run (default: auto, the GPU when torch sees one)",
+    )
+    analyse.add_argument(
+        "--beat-tracker",
+        choices=["beat-this", "librosa"],
+        default="beat-this",
+        help="beats and bars from Beat This! (default) or librosa's tracker (no model)",
     )
     analyse.add_argument(
         "--level",
@@ -184,6 +191,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         log_json=args.log_json,
         device=args.device,
         keep_stems=args.out / "stems" if args.keep_stems else None,
+        tracker=LibrosaTracker() if args.beat_tracker == "librosa" else None,
         levels=LEVELS if args.level == "all" else (args.level,),
         simplify=args.simplify if args.type == "piano-solo" else None,
     )

@@ -5,13 +5,20 @@ from __future__ import annotations
 import numpy as np
 
 from isai.rhythm.derive import bpm, is_stable, metre, stability, tempo_confidence
-from isai.rhythm.tracker import BeatTracker, LibrosaTracker, Samples, TrackedBeats
+from isai.rhythm.tracker import (
+    BeatThisTracker,
+    BeatTracker,
+    LibrosaTracker,
+    Samples,
+    TrackedBeats,
+)
 from isai.rhythm.types import Rhythm
 
 RHYTHM_VERSION = "1"
 
 __all__ = [
     "RHYTHM_VERSION",
+    "BeatThisTracker",
     "BeatTracker",
     "LibrosaTracker",
     "Rhythm",

@@ -9,6 +9,7 @@ import mido  # pyright: ignore[reportMissingTypeStubs]
 import numpy as np
 import pytest
 
+import isai.cli
 import isai.pipeline
 from isai.assemble import SongInfo
 from isai.cli import main
@@ -272,3 +273,20 @@ def test_console_script_runs(song_file: Path, tmp_path: Path) -> None:
     )
     assert result.returncode == 0, result.stderr
     validate_song(load_json(tmp_path / "cadence.song.json"))
+
+
+def test_beat_tracker_flag_picks_the_tracker(
+    song_file: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    seen: list[object] = []
+    real_run = isai.cli.run
+
+    def spy(source: Path, info: SongInfo, options: Options):
+        seen.append(options.tracker)
+        return real_run(source, info, options)
+
+    monkeypatch.setattr(isai.cli, "run", spy)
+    assert analyse(song_file, tmp_path / "a", "--no-cache") == 0
+    assert analyse(song_file, tmp_path / "b", "--no-cache", "--beat-tracker", "librosa") == 0
+    assert seen[0] is None  # the default: Beat This! through the models
+    assert type(seen[1]).__name__ == "LibrosaTracker"

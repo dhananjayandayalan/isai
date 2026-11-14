@@ -34,7 +34,8 @@ from isai.ingest import INGEST_VERSION, IngestLimits, ingest
 from isai.ingest.types import LOW_RATE, RATE, Ingested
 from isai.midi_out import MidiNote, song_midi
 from isai.models import model_path
-from isai.rhythm import RHYTHM_VERSION, BeatTracker, LibrosaTracker, Rhythm, analyse_rhythm
+from isai.rhythm import RHYTHM_VERSION, BeatThisTracker, BeatTracker, Rhythm, analyse_rhythm
+from isai.rhythm.derive import filled_downbeats, filled_grid
 from isai.runner import Runner, StageRecord
 from isai.separate import SEPARATE_VERSION, STEM_RATE, HDemucsSeparator, Separator, Stems
 from isai.separate import write_stems as write_stem_files
@@ -50,7 +51,7 @@ LATER_TYPES = ("carnatic",)
 STAGES = ("separate", "rhythm", "tonality", "piano", "melody", "bass", "harmony")
 
 PIANO_VERSION = "1"
-HARMONY_VERSION = "1"
+HARMONY_VERSION = "2"  # 2: on the filled beat grid
 # How much the transcribed notes count against the audio chroma for piano-solo chords.
 NOTE_CHROMA_WEIGHT = 0.5
 MELODY_VERSION = "1"
@@ -68,6 +69,8 @@ class Models:
     piano_id: str
     pitch: Callable[[], PitchTracker]
     pitch_id: str
+    beats: Callable[[], BeatTracker]
+    beats_id: str
 
 
 def default_models(choice: DeviceChoice = "auto") -> Models:
@@ -84,6 +87,8 @@ def default_models(choice: DeviceChoice = "auto") -> Models:
         piano_id=f"{ByteDanceTranscriber.name}-{ByteDanceTranscriber.version}",
         pitch=functools.cache(lambda: CrepeTracker(device())),
         pitch_id=f"{CrepeTracker.name}-{CrepeTracker.version}",
+        beats=functools.cache(lambda: BeatThisTracker(model_path("beat-this"), device())),
+        beats_id=f"{BeatThisTracker.name}-{BeatThisTracker.version}",
     )
 
 
@@ -95,7 +100,8 @@ class Options:
     log_json: bool = False
     log_stream: TextIO | None = None
     limits: IngestLimits = field(default_factory=IngestLimits)
-    tracker: BeatTracker = field(default_factory=LibrosaTracker)
+    tracker: BeatTracker | None = None
+    """A beat tracker to use instead of the default (`--beat-tracker librosa`)."""
     device: DeviceChoice = "auto"
     models: Models | None = None
     keep_stems: Path | None = None
@@ -213,13 +219,16 @@ def run(source: Path, info: SongInfo, options: Options) -> Result:
         if options.keep_stems is not None:
             stem_files = write_stem_files(stems, options.keep_stems)
 
-    tracker = options.tracker
+    override = options.tracker
+    tracker_id = f"{override.name}-{override.version}" if override is not None else models.beats_id
     rhythm = runner.stage(
         "rhythm",
         RHYTHM_VERSION,
         Rhythm,
-        lambda: analyse_rhythm(ingested.samples_low, LOW_RATE, tracker),
-        {"tracker": f"{tracker.name}-{tracker.version}", "type": kind},
+        lambda: analyse_rhythm(
+            ingested.samples_low, LOW_RATE, override if override is not None else models.beats()
+        ),
+        {"tracker": tracker_id, "type": kind},
         rhythm_detail,
     )
     beats = [float(b) for b in rhythm.beats]
@@ -275,12 +284,15 @@ def run(source: Path, info: SongInfo, options: Options) -> Result:
         tonality = refine(tonality, notes)
 
     end = ingested.samples_low.size / LOW_RATE  # the trimmed audio's length
-    downbeats = [float(d) for d in rhythm.downbeats]
+    # Chords and patterns are laid out on a grid with the tracker's holes filled; the
+    # Song itself keeps the detected beats.
+    grid = filled_grid(beats, end)
+    downbeats = filled_downbeats(grid, [float(d) for d in rhythm.downbeats], rhythm.beats_per_bar)
     harmony = runner.stage(
         "harmony",
         HARMONY_VERSION,
         Harmony,
-        lambda: _harmony(kind, notes, bass_line, beats, downbeats, rhythm, tonality, harmonic, end),
+        lambda: _harmony(kind, notes, bass_line, grid, downbeats, rhythm, tonality, harmonic, end),
         {"type": kind, "key": [tonality.tonic, tonality.mode]},
         harmony_detail,
     )
@@ -299,7 +311,7 @@ def run(source: Path, info: SongInfo, options: Options) -> Result:
         melody_line = notes
         for level in levels:
             arranged = arrange(
-                melody_line, segments, beats, downbeats, rhythm.beats_per_bar, rhythm.bpm,
+                melody_line, segments, grid, downbeats, rhythm.beats_per_bar, rhythm.bpm,
                 level, end,
             )  # fmt: skip
             song = assemble(

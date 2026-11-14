@@ -33,6 +33,8 @@ class Model:
     size: int
     licence: str
     what: str
+    mirrors: tuple[str, ...] = ()
+    """Tried in order when `url` fails."""
 
 
 REGISTRY: dict[str, Model] = {
@@ -46,6 +48,16 @@ REGISTRY: dict[str, Model] = {
             size=171_966_578,
             licence="CC BY 4.0 (Kong et al. 2021, Zenodo 4034264)",
             what="piano notes, velocities and sustain pedal",
+        ),
+        Model(
+            name="beat-this",
+            filename="beat-this-final0.ckpt",
+            url="https://cloud.cp.jku.at/public.php/dav/files/7ik4RrBKTS273gp/final0.ckpt",
+            sha256="8c328b45f59d8dd3dff219253ff6a8d6482be57d0133a29140e2febbf8eb8331",
+            size=81_058_141,
+            licence="MIT (Foscarin, Schlueter, Widmer 2024, Beat This!)",
+            what="beats and downbeats",
+            mirrors=("https://f0k.de/pubs/2024_ismir/beat_this-final0.ckpt",),
         ),
         Model(
             name="hdemucs",
@@ -126,8 +138,17 @@ def fetch(name: str, opener: Opener = _open_url) -> Path:
     folder.mkdir(parents=True, exist_ok=True)
     path = folder / model.filename
     partial = path.with_name(path.name + ".part")
-    with opener(model.url) as source, partial.open("wb") as target:
-        shutil.copyfileobj(source, target, _CHUNK)
+    failures: list[str] = []
+    for url in (model.url, *model.mirrors):
+        try:
+            with opener(url) as source, partial.open("wb") as target:
+                shutil.copyfileobj(source, target, _CHUNK)
+            break
+        except OSError as e:  # a server down: try the next mirror
+            failures.append(f"{url}: {e}")
+    else:
+        partial.unlink(missing_ok=True)
+        raise OSError("every source failed: " + "; ".join(failures))
     digest = _sha256(partial)
     if digest != model.sha256:
         partial.unlink()

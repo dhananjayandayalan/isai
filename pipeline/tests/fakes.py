@@ -7,6 +7,7 @@ from typing import Any
 import numpy as np
 
 from isai.pipeline import Models
+from isai.rhythm import LibrosaTracker
 from isai.separate import STEM_RATE, Stems
 from isai.transcribe.piano import PianoResult
 from isai.transcribe.types import F0Track, PedalSpan, TNote
@@ -82,6 +83,7 @@ class FakePitch:
 
 def fake_models() -> tuple[Models, FakeSeparator, FakePiano, FakePitch]:
     separator, piano, pitch = FakeSeparator(), FakePiano(), FakePitch()
+    beats = LibrosaTracker()  # real, but needs no torch: the fast tests' beat grid
     models = Models(
         separator=lambda: separator,
         separator_id="fake-separator-1",
@@ -89,5 +91,7 @@ def fake_models() -> tuple[Models, FakeSeparator, FakePiano, FakePitch]:
         piano_id="fake-piano-1",
         pitch=lambda: pitch,
         pitch_id="fake-pitch-1",
+        beats=lambda: beats,
+        beats_id="librosa-1",
     )
     return models, separator, piano, pitch

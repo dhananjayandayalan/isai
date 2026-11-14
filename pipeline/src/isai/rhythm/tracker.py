@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Protocol
 
 import numpy as np
@@ -88,3 +89,33 @@ class LibrosaTracker:
         strengths = accents(envelope, beat_frames)
         meter, phase = bar_phase(strengths)
         return TrackedBeats(beats=beats, downbeats=beats[phase::meter].copy())
+
+
+class BeatThisTracker:
+    """Beat This! (Foscarin, Schlueter, Widmer, ISMIR 2024): beats and downbeats from one
+    transformer, without a DBN. MIT code and weights (ADR 0009).
+
+    The checkpoint is the verified local file, so the package never downloads.
+    """
+
+    name = "beat-this"
+    version = "final0-1"
+
+    def __init__(self, checkpoint: Path, device: str = "cpu") -> None:
+        self.checkpoint = checkpoint
+        self.device = device
+        self._model: Any = None
+
+    def track(self, samples: Samples, rate: int) -> TrackedBeats:
+        if self._model is None:
+            from beat_this.inference import Audio2Beats  # pyright: ignore[reportMissingTypeStubs, reportUnknownVariableType]
+
+            self._model = Audio2Beats(
+                checkpoint_path=str(self.checkpoint), device=self.device, dbn=False
+            )
+        beats, downbeats = self._model(np.asarray(samples, dtype=np.float32), rate)
+        # Frame times (50 per second), rounded so GPU noise can't move them.
+        return TrackedBeats(
+            beats=np.round(np.asarray(beats, dtype=np.float64), 3),
+            downbeats=np.round(np.asarray(downbeats, dtype=np.float64), 3),
+        )

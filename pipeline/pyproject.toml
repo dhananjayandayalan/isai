@@ -24,12 +24,14 @@ cpu = [
     "torchaudio>=2.11",
     "piano-transcription-inference>=0.0.6",
     "torchcrepe>=0.0.24",
+    "beat-this",
 ]
 cuda = [
     "torch>=2.11",
     "torchaudio>=2.11",
     "piano-transcription-inference>=0.0.6",
     "torchcrepe>=0.0.24",
+    "beat-this",
 ]
 
 [project.scripts]
@@ -50,6 +52,7 @@ dev = [
 conflicts = [[{ extra = "cpu" }, { extra = "cuda" }]]
 
 [tool.uv.sources]
+beat-this = { git = "https://github.com/CPJKU/beat_this", rev = "b95c8ab0c58c2d9fcfd40508ae8dffbc05ac4f5c" }
 torch = [
     { index = "pytorch-cpu", extra = "cpu" },
     { index = "pytorch-cu130", extra = "cuda" },
