@@ -28,9 +28,13 @@ export interface KeyboardProps {
   frames?: FrameScheduler;
 }
 
-/** Piano tokens never theme (STYLE_GUIDE rule 6), so reading them once is enough. */
+/**
+ * Piano colours never theme (STYLE_GUIDE rule 6), but the key names follow the learner's
+ * font size, so they are read again on the same events as the stage colours.
+ */
 function rootColors() {
-  return readPianoColors(getComputedStyle(document.documentElement));
+  const style = getComputedStyle(document.documentElement);
+  return readPianoColors(style, Number.parseFloat(style.fontSize));
 }
 
 /** Stage tokens follow the theme and the learner's font size: read them when either may change. */
@@ -84,6 +88,7 @@ export function Keyboard(props: KeyboardProps) {
     const motion = media('(prefers-reduced-motion: reduce)');
     const scheme = media('(prefers-color-scheme: dark)');
     applyStage.current = () => {
+      controller.setColors(rootColors());
       const wanted = latest.current.stage;
       controller.setStage(wanted ? { ...wanted, colors: stageColors(), reducedMotion: motion?.matches ?? false } : null);
     };

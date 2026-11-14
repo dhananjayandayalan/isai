@@ -403,6 +403,14 @@ describe('readPianoColors', () => {
     expect(colors.radius).toBe(4);
     expect(readPianoColors({ getPropertyValue: () => '' }).radius).toBe(0);
   });
+
+  it("scales the key names with the learner's font size", () => {
+    const style = { getPropertyValue: (name: string) => ({ '--text-2xs': '11px', '--font-mono': 'mono', '--weight-medium': '500' })[name] ?? '' };
+    expect(readPianoColors(style, 20).labelFont).toBe('500 14px mono');
+    expect(readPianoColors(style, 16).labelFont).toBe('500 11px mono');
+    expect(readPianoColors(style, Number.NaN).labelFont).toBe('500 11px mono');
+    expect(readPianoColors({ getPropertyValue: () => '' }).labelFont).toBe('500 11px monospace');
+  });
 });
 
 describe('keyboardHeight', () => {

@@ -60,9 +60,21 @@ export interface PianoColors {
   radius: number;
 }
 
-/** Read the piano tokens from computed style (the document root). */
-export function readPianoColors(style: Pick<CSSStyleDeclaration, 'getPropertyValue'>): PianoColors {
+/** The root font size the text tokens were written for. */
+const TOKEN_ROOT = 16;
+
+/**
+ * Read the piano tokens from computed style (the document root). The key names follow the
+ * learner's font size: `rootFontSize` is the document's computed font size in px, and the
+ * px text tokens are scaled by it.
+ */
+export function readPianoColors(
+  style: Pick<CSSStyleDeclaration, 'getPropertyValue'>,
+  rootFontSize: number = TOKEN_ROOT,
+): PianoColors {
   const v = (name: string) => style.getPropertyValue(name).trim();
+  const scale = Number.isFinite(rootFontSize) && rootFontSize > 0 ? rootFontSize / TOKEN_ROOT : 1;
+  const labelSize = Math.round((Number.parseFloat(v('--text-2xs')) || 11) * scale);
   return {
     frame: v('--piano-frame'),
     white: v('--piano-white'),
@@ -76,7 +88,7 @@ export function readPianoColors(style: Pick<CSSStyleDeclaration, 'getPropertyVal
     pillEdge: v('--piano-pill-edge'),
     correct: v('--piano-correct'),
     wrong: v('--piano-wrong'),
-    labelFont: `${v('--weight-medium')} ${v('--text-2xs')} ${v('--font-mono')}`.trim(),
+    labelFont: `${v('--weight-medium') || 500} ${labelSize}px ${v('--font-mono') || 'monospace'}`,
     radius: Number.parseFloat(v('--radius-sm')) || 0,
   };
 }
