@@ -4,3 +4,5 @@ export * from './pitch';
 export * from './solfege';
 export * from './spelling';
 export * from './swaras';
+export * from './labels';
+export * from './roman';
