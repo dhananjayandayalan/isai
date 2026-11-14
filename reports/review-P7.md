@@ -131,3 +131,29 @@ and the pedal) are **pending**, not failed.
 8. **A replugged keyboard reconnects without a click**, so if the browser had suspended
    audio, the learner's notes are silent until the next click. It's in the plan's
    differences; a short hint in the panel would help.
+
+## Follow-up (2026-11-14)
+
+| Item | Status |
+|---|---|
+| Blocking 1, a stale result after switching songs | fixed in `a1c1d4c`, with a DOM test of the exact path |
+| Blocking 2, key names and the font size | fixed in `445bc0d`: the label font scales with the root font size; unit test at a 20 px root |
+| Suggestion 1, weak DOM tests | fixed in `fea58a1`: the hidden-hand test checks both sides; a reading-order test for Practice and Devices replaces the `onclick` check |
+| Suggestion 2, the engine and the pedal | fixed in `fea58a1`: engine tests for a training hold and a scored run |
+| Suggestion 3, a ref written during render | fixed in `fea58a1` |
+| Suggestion 4, `GHOST_ALPHA` twice | fixed in `c5ffd28` |
+| Suggestion 5, staff glyph sizes | commented in `c5ffd28` |
+| Suggestion 6, chord tones and direction | fixed in `c5ffd28` (`notation/lines.ts`, shared by falling notes and the staff) |
+| Suggestion 7, velocity readout | fixed in `fea58a1` ("32 → 56") |
+| Suggestion 8, silent reconnect | fixed in `fea58a1`: "Connected again by itself · if you don't hear your notes, press Play" |
+
+One thing the new hidden-hand test showed: before the first Play there is no engine yet,
+so the stage draws both hands solid until Play is pressed, like the keyboard's practice
+overlay. Left as it is.
+
+After the fixes: 711 web tests pass; lint, typecheck, build and `check-tokens.mjs` pass;
+`theory/`, `notation/`, `midi/` and `engine/` stay at 100% lines.
+
+**Verdict now: ready**, pending the owner's checks by hand and sign-off of the spelling
+change and the other differences listed in the plan.
+
