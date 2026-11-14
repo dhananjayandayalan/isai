@@ -17,8 +17,17 @@ Run the golden evaluation for Isai. Scope: **$ARGUMENTS** (blank means all songs
    - **Key/tonic:** exact match, or relative/parallel key (partial credit).
    - **Tempo:** within 2% (also accept half or double tempo, flagged).
    - **Chords:** weighted chord overlap against the `.lab` reference (root + quality).
-   - **Notes (piano-solo only):** onset F1 against the reference MIDI, 50 ms tolerance.
-   - **Runtime:** seconds per song, and whether the GPU was used.
+   - **Notes (piano-solo):** onset F1 against the reference MIDI, 50 ms tolerance, plus
+     onset+offset F1 (offset within 20% of the note or 50 ms) and velocity correlation.
+     Target onset F1 ≥ 0.85.
+   - **Melody (a-cappella and full-mix, when the entry has a `midi` reference of the
+     melody):** onset F1 at 50 ms, and raw pitch accuracy (share of voiced reference
+     frames whose transcribed pitch is within 50 cents). Targets: onset F1 ≥ 0.60 for
+     a-cappella, ≥ 0.50 for full-mix vocal stems.
+   - **tonicHz (a-cappella with `expected.tonic_hz`):** the error in cents.
+   - **Runtime:** seconds per song and per stage (from the `--log-json` lines), and the
+     device. Run with `--device cuda` on the owner's machine; the spec's targets for a
+     4-minute full mix are ≤ 3 minutes on GPU and ≤ 20 minutes on CPU.
 5. Compare with the latest previous report in `reports/golden-*.md` and flag any metric that
    got worse by more than 2 points.
 6. Write `reports/golden-<YYYY-MM-DD-HHmm>.md` with a summary table, regressions first,
