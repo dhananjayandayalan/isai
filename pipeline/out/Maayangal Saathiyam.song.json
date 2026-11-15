@@ -1,0 +1,9115 @@
+{
+  "schemaVersion": "0.3.0",
+  "id": "62d69107987742009c30c3b7b21d588f",
+  "title": "Maayangal Saathiyam",
+  "sourceType": "piano-solo",
+  "durationSec": 231.015,
+  "tempo": {
+    "bpm": 120.0,
+    "beats": [
+      0.77,
+      2.01,
+      2.77,
+      3.15,
+      3.53,
+      4.37,
+      5.17,
+      5.55,
+      5.99,
+      6.77,
+      7.15,
+      8.01,
+      8.41,
+      9.17,
+      9.53,
+      9.99,
+      10.77,
+      11.15,
+      11.55,
+      11.95,
+      12.35,
+      13.15,
+      14.01,
+      15.01,
+      15.49,
+      16.01,
+      16.49,
+      17.01,
+      17.49,
+      18.01,
+      18.51,
+      18.99,
+      20.01,
+      20.51,
+      21.01,
+      22.01,
+      22.51,
+      23.01,
+      23.51,
+      24.01,
+      24.51,
+      25.01,
+      25.51,
+      26.01,
+      26.51,
+      27.01,
+      28.01,
+      28.51,
+      29.01,
+      29.75,
+      30.01,
+      30.51,
+      31.03,
+      31.51,
+      32.01,
+      32.51,
+      33.01,
+      33.51,
+      34.01,
+      34.51,
+      35.01,
+      35.51,
+      36.01,
+      36.53,
+      37.01,
+      37.51,
+      38.01,
+      38.51,
+      39.01,
+      39.51,
+      40.01,
+      40.51,
+      41.01,
+      41.51,
+      42.03,
+      42.53,
+      43.01,
+      43.51,
+      44.01,
+      44.51,
+      45.01,
+      45.51,
+      46.01,
+      46.51,
+      46.99,
+      47.51,
+      47.99,
+      48.49,
+      48.99,
+      49.49,
+      50.01,
+      50.51,
+      51.01,
+      51.51,
+      52.01,
+      52.51,
+      53.01,
+      53.51,
+      54.01,
+      54.51,
+      55.01,
+      55.51,
+      56.01,
+      56.49,
+      57.01,
+      57.51,
+      58.01,
+      58.51,
+      59.01,
+      59.51,
+      60.01,
+      60.49,
+      61.01,
+      61.51,
+      62.01,
+      62.51,
+      63.01,
+      63.51,
+      64.01,
+      64.51,
+      65.01,
+      65.49,
+      66.01,
+      66.51,
+      67.01,
+      67.51,
+      68.01,
+      68.51,
+      69.01,
+      69.51,
+      70.01,
+      70.51,
+      71.01,
+      71.51,
+      72.01,
+      72.51,
+      73.01,
+      73.51,
+      74.01,
+      74.51,
+      75.01,
+      75.51,
+      76.01,
+      76.51,
+      77.01,
+      77.51,
+      78.01,
+      78.51,
+      79.01,
+      79.51,
+      80.01,
+      80.51,
+      81.01,
+      81.51,
+      82.01,
+      82.51,
+      83.01,
+      83.51,
+      84.01,
+      84.51,
+      85.01,
+      85.51,
+      86.01,
+      86.51,
+      87.01,
+      87.51,
+      88.01,
+      88.51,
+      89.01,
+      89.53,
+      90.01,
+      90.51,
+      91.01,
+      91.51,
+      92.01,
+      92.51,
+      93.01,
+      93.51,
+      94.01,
+      94.51,
+      95.01,
+      95.51,
+      96.01,
+      96.51,
+      97.01,
+      97.51,
+      98.01,
+      98.51,
+      98.99,
+      99.51,
+      100.01,
+      100.53,
+      101.01,
+      101.51,
+      102.01,
+      102.51,
+      103.01,
+      103.53,
+      104.01,
+      104.51,
+      105.01,
+      105.51,
+      106.01,
+      106.51,
+      107.01,
+      107.51,
+      108.01,
+      108.51,
+      108.99,
+      109.49,
+      110.01,
+      110.49,
+      110.99,
+      111.49,
+      111.99,
+      112.49,
+      113.01,
+      113.51,
+      114.01,
+      114.51,
+      115.01,
+      115.51,
+      116.01,
+      116.51,
+      117.01,
+      117.51,
+      118.01,
+      118.51,
+      119.01,
+      119.51,
+      120.01,
+      120.51,
+      121.01,
+      121.51,
+      122.01,
+      122.51,
+      123.01,
+      123.51,
+      124.01,
+      124.51,
+      125.01,
+      125.51,
+      126.01,
+      126.51,
+      127.01,
+      127.51,
+      128.01,
+      128.51,
+      129.01,
+      129.51,
+      130.01,
+      130.51,
+      131.01,
+      131.51,
+      132.01,
+      132.51,
+      133.01,
+      133.51,
+      134.01,
+      134.51,
+      135.01,
+      135.51,
+      136.01,
+      136.49,
+      137.01,
+      137.51,
+      138.01,
+      138.51,
+      139.01,
+      139.49,
+      140.01,
+      140.51,
+      141.01,
+      141.51,
+      142.01,
+      142.51,
+      143.01,
+      143.51,
+      144.01,
+      144.51,
+      144.99,
+      145.49,
+      146.01,
+      146.51,
+      147.01,
+      147.51,
+      148.03,
+      148.51,
+      149.03,
+      149.51,
+      150.01,
+      150.51,
+      151.01,
+      151.51,
+      152.01,
+      152.51,
+      153.01,
+      153.51,
+      154.01,
+      154.51,
+      155.01,
+      155.51,
+      156.01,
+      156.51,
+      157.01,
+      157.51,
+      158.01,
+      158.51,
+      159.01,
+      159.51,
+      160.01,
+      160.51,
+      161.01,
+      161.51,
+      162.01,
+      162.51,
+      163.01,
+      163.51,
+      164.01,
+      164.51,
+      165.01,
+      165.51,
+      166.01,
+      166.51,
+      167.01,
+      167.51,
+      168.01,
+      168.51,
+      169.01,
+      169.51,
+      170.01,
+      170.51,
+      171.01,
+      171.51,
+      172.01,
+      172.51,
+      173.01,
+      173.51,
+      174.01,
+      174.51,
+      175.01,
+      175.51,
+      176.01,
+      176.51,
+      177.01,
+      177.51,
+      178.01,
+      178.51,
+      179.03,
+      179.53,
+      180.03,
+      180.53,
+      181.03,
+      181.53,
+      182.03,
+      182.53,
+      183.03,
+      183.53,
+      184.03,
+      184.53,
+      185.03,
+      185.53,
+      186.03,
+      186.53,
+      187.03,
+      187.53,
+      188.03,
+      188.55,
+      189.05,
+      189.55,
+      190.05,
+      190.53,
+      191.05,
+      191.53,
+      192.05,
+      192.59,
+      193.09,
+      193.61,
+      194.13,
+      194.67,
+      195.19,
+      196.21,
+      196.75,
+      197.25,
+      197.77,
+      198.25,
+      198.77,
+      199.29,
+      199.83,
+      200.33,
+      200.91,
+      201.45,
+      201.97,
+      202.49,
+      203.05,
+      203.59,
+      204.11,
+      204.63,
+      205.19,
+      205.77,
+      206.97,
+      207.57,
+      207.65,
+      208.21,
+      208.79
+    ],
+    "downbeats": [
+      0.77,
+      2.01,
+      3.15,
+      3.53,
+      5.17,
+      5.55,
+      5.99,
+      6.77,
+      8.01,
+      8.41,
+      9.17,
+      9.99,
+      10.77,
+      11.15,
+      14.01,
+      16.01,
+      18.01,
+      20.01,
+      22.01,
+      24.01,
+      26.01,
+      28.01,
+      30.01,
+      32.01,
+      34.01,
+      36.01,
+      38.01,
+      40.01,
+      42.03,
+      44.01,
+      46.01,
+      47.99,
+      50.01,
+      52.01,
+      54.01,
+      56.01,
+      58.01,
+      60.01,
+      62.01,
+      64.01,
+      66.01,
+      68.01,
+      70.01,
+      72.01,
+      74.01,
+      76.01,
+      78.01,
+      80.01,
+      82.01,
+      84.01,
+      86.01,
+      88.01,
+      90.01,
+      92.01,
+      94.01,
+      96.01,
+      98.01,
+      100.01,
+      102.01,
+      104.01,
+      106.01,
+      108.01,
+      110.01,
+      111.99,
+      114.01,
+      116.01,
+      118.01,
+      120.01,
+      122.01,
+      124.01,
+      126.01,
+      128.01,
+      130.01,
+      132.01,
+      134.01,
+      136.01,
+      138.01,
+      140.01,
+      142.01,
+      144.01,
+      146.01,
+      148.03,
+      151.01,
+      153.01,
+      155.01,
+      157.01,
+      159.01,
+      161.01,
+      163.01,
+      165.01,
+      167.01,
+      169.01,
+      171.01,
+      173.01,
+      175.01,
+      177.01,
+      179.03,
+      181.03,
+      183.03,
+      185.03,
+      187.03,
+      189.05,
+      191.05,
+      193.09,
+      195.19,
+      197.25,
+      199.29,
+      201.45,
+      203.59,
+      205.77,
+      207.65,
+      208.21
+    ]
+  },
+  "timeSignature": {
+    "num": 4,
+    "den": 4
+  },
+  "tonality": {
+    "key": "D",
+    "mode": "minor",
+    "scale": [
+      2,
+      4,
+      5,
+      7,
+      9,
+      10,
+      0
+    ]
+  },
+  "chords": [
+    {
+      "start": 0.77,
+      "end": 1.39,
+      "root": 9,
+      "quality": "7",
+      "label": "A7"
+    },
+    {
+      "start": 1.39,
+      "end": 2.77,
+      "root": 2,
+      "quality": "min",
+      "label": "Dm"
+    },
+    {
+      "start": 2.77,
+      "end": 3.15,
+      "root": 10,
+      "quality": "maj",
+      "label": "Bb"
+    },
+    {
+      "start": 3.15,
+      "end": 3.95,
+      "root": 2,
+      "quality": "min",
+      "label": "Dm"
+    },
+    {
+      "start": 3.95,
+      "end": 5.99,
+      "root": 7,
+      "quality": "min",
+      "label": "Gm"
+    },
+    {
+      "start": 5.99,
+      "end": 7.58,
+      "root": 2,
+      "quality": "min",
+      "label": "Dm"
+    },
+    {
+      "start": 7.58,
+      "end": 8.01,
+      "root": 5,
+      "quality": "maj7",
+      "label": "Fmaj7"
+    },
+    {
+      "start": 8.01,
+      "end": 9.99,
+      "root": 9,
+      "quality": "min",
+      "label": "Am"
+    },
+    {
+      "start": 9.99,
+      "end": 11.95,
+      "root": 10,
+      "quality": "maj",
+      "label": "Bb/D",
+      "bass": 2
+    },
+    {
+      "start": 11.95,
+      "end": 14.01,
+      "root": 7,
+      "quality": "min",
+      "label": "Gm"
+    },
+    {
+      "start": 14.01,
+      "end": 16.01,
+      "root": 2,
+      "quality": "min",
+      "label": "Dm"
+    },
+    {
+      "start": 16.01,
+      "end": 17.01,
+      "root": 9,
+      "quality": "min",
+      "label": "Am"
+    },
+    {
+      "start": 17.01,
+      "end": 18.01,
+      "root": 9,
+      "quality": "7",
+      "label": "A7"
+    },
+    {
+      "start": 18.01,
+      "end": 20.01,
+      "root": 2,
+      "quality": "min",
+      "label": "Dm"
+    },
+    {
+      "start": 20.01,
+      "end": 21.51,
+      "root": 7,
+      "quality": "min",
+      "label": "Gm"
+    },
+    {
+      "start": 21.51,
+      "end": 24.01,
+      "root": 2,
+      "quality": "min",
+      "label": "Dm"
+    },
+    {
+      "start": 24.01,
+      "end": 25.51,
+      "root": 0,
+      "quality": "min",
+      "label": "Cm"
+    },
+    {
+      "start": 25.51,
+      "end": 26.01,
+      "root": 5,
+      "quality": "maj",
+      "label": "F"
+    },
+    {
+      "start": 26.01,
+      "end": 27.01,
+      "root": 10,
+      "quality": "maj",
+      "label": "Bb"
+    },
+    {
+      "start": 27.01,
+      "end": 28.01,
+      "root": 2,
+      "quality": "min",
+      "label": "Dm/F",
+      "bass": 5
+    },
+    {
+      "start": 28.01,
+      "end": 29.01,
+      "root": 7,
+      "quality": "min",
+      "label": "Gm"
+    },
+    {
+      "start": 29.01,
+      "end": 32.01,
+      "root": 2,
+      "quality": "min",
+      "label": "Dm"
+    },
+    {
+      "start": 32.01,
+      "end": 33.01,
+      "root": 9,
+      "quality": "min",
+      "label": "Am/E",
+      "bass": 4
+    },
+    {
+      "start": 33.01,
+      "end": 34.01,
+      "root": 9,
+      "quality": "7",
+      "label": "A7"
+    },
+    {
+      "start": 34.01,
+      "end": 36.01,
+      "root": 7,
+      "quality": "min7",
+      "label": "Gm7"
+    },
+    {
+      "start": 36.01,
+      "end": 37.01,
+      "root": 0,
+      "quality": "maj",
+      "label": "C"
+    },
+    {
+      "start": 37.01,
+      "end": 38.01,
+      "root": 0,
+      "quality": "7",
+      "label": "C7"
+    },
+    {
+      "start": 38.01,
+      "end": 40.01,
+      "root": 9,
+      "quality": "min",
+      "label": "Am"
+    },
+    {
+      "start": 40.01,
+      "end": 42.53,
+      "root": 2,
+      "quality": "min",
+      "label": "Dm/A",
+      "bass": 9
+    },
+    {
+      "start": 42.53,
+      "end": 46.01,
+      "root": 7,
+      "quality": "sus4",
+      "label": "Gsus4/D",
+      "bass": 2
+    },
+    {
+      "start": 46.01,
+      "end": 50.01,
+      "root": 5,
+      "quality": "maj",
+      "label": "F"
+    },
+    {
+      "start": 50.01,
+      "end": 51.51,
+      "root": 10,
+      "quality": "maj7",
+      "label": "Bbmaj7"
+    },
+    {
+      "start": 51.51,
+      "end": 52.01,
+      "root": 7,
+      "quality": "min",
+      "label": "Gm"
+    },
+    {
+      "start": 52.01,
+      "end": 53.51,
+      "root": 0,
+      "quality": "maj",
+      "label": "C"
+    },
+    {
+      "start": 53.51,
+      "end": 54.01,
+      "root": 7,
+      "quality": "min7",
+      "label": "Gm7/F",
+      "bass": 5
+    },
+    {
+      "start": 54.01,
+      "end": 56.01,
+      "root": 2,
+      "quality": "min",
+      "label": "Dm"
+    },
+    {
+      "start": 56.01,
+      "end": 56.49,
+      "root": 0,
+      "quality": "min",
+      "label": "Cm"
+    },
+    {
+      "start": 56.49,
+      "end": 57.51,
+      "root": 5,
+      "quality": "maj",
+      "label": "F"
+    },
+    {
+      "start": 57.51,
+      "end": 58.01,
+      "root": 0,
+      "quality": "maj",
+      "label": "C"
+    },
+    {
+      "start": 58.01,
+      "end": 58.51,
+      "root": 5,
+      "quality": "maj7",
+      "label": "Fmaj7"
+    },
+    {
+      "start": 58.51,
+      "end": 61.51,
+      "root": 9,
+      "quality": "min",
+      "label": "Am"
+    },
+    {
+      "start": 61.51,
+      "end": 64.01,
+      "root": 2,
+      "quality": "min",
+      "label": "Dm"
+    },
+    {
+      "start": 64.01,
+      "end": 67.51,
+      "root": 7,
+      "quality": "min7",
+      "label": "Gm7"
+    },
+    {
+      "start": 67.51,
+      "end": 68.01,
+      "root": 10,
+      "quality": "maj",
+      "label": "Bb"
+    },
+    {
+      "start": 68.01,
+      "end": 72.01,
+      "root": 2,
+      "quality": "min",
+      "label": "Dm"
+    },
+    {
+      "start": 72.01,
+      "end": 79.51,
+      "root": 7,
+      "quality": "min7",
+      "label": "Gm7"
+    },
+    {
+      "start": 79.51,
+      "end": 80.01,
+      "root": 2,
+      "quality": "min",
+      "label": "Dm"
+    },
+    {
+      "start": 80.01,
+      "end": 85.51,
+      "root": 7,
+      "quality": "min7",
+      "label": "Gm7/Bb",
+      "bass": 10
+    },
+    {
+      "start": 85.51,
+      "end": 88.01,
+      "root": 2,
+      "quality": "min",
+      "label": "Dm"
+    },
+    {
+      "start": 88.01,
+      "end": 100.01,
+      "root": 7,
+      "quality": "min7",
+      "label": "Gm7"
+    },
+    {
+      "start": 100.01,
+      "end": 102.01,
+      "root": 10,
+      "quality": "maj",
+      "label": "Bb/D",
+      "bass": 2
+    },
+    {
+      "start": 102.01,
+      "end": 105.01,
+      "root": 2,
+      "quality": "sus4",
+      "label": "Dsus4"
+    },
+    {
+      "start": 105.01,
+      "end": 108.01,
+      "root": 2,
+      "quality": "min7",
+      "label": "Dm7"
+    },
+    {
+      "start": 108.01,
+      "end": 110.01,
+      "root": 10,
+      "quality": "maj7",
+      "label": "Bbmaj7"
+    },
+    {
+      "start": 110.01,
+      "end": 111.49,
+      "root": 2,
+      "quality": "sus4",
+      "label": "Dsus4"
+    },
+    {
+      "start": 111.49,
+      "end": 114.01,
+      "root": 2,
+      "quality": "min7",
+      "label": "Dm7"
+    },
+    {
+      "start": 114.01,
+      "end": 116.01,
+      "root": 5,
+      "quality": "maj",
+      "label": "F"
+    },
+    {
+      "start": 116.01,
+      "end": 129.51,
+      "root": 10,
+      "quality": "7",
+      "label": "Bb7"
+    },
+    {
+      "start": 129.51,
+      "end": 131.51,
+      "root": 7,
+      "quality": "min",
+      "label": "Gm"
+    },
+    {
+      "start": 131.51,
+      "end": 134.51,
+      "root": 7,
+      "quality": "min7",
+      "label": "Gm7"
+    },
+    {
+      "start": 134.51,
+      "end": 136.01,
+      "root": 2,
+      "quality": "min",
+      "label": "Dm"
+    },
+    {
+      "start": 136.01,
+      "end": 137.01,
+      "root": 0,
+      "quality": "min",
+      "label": "Cm"
+    },
+    {
+      "start": 137.01,
+      "end": 138.01,
+      "root": 5,
+      "quality": "maj",
+      "label": "F"
+    },
+    {
+      "start": 138.01,
+      "end": 139.01,
+      "root": 0,
+      "quality": "7",
+      "label": "C7"
+    },
+    {
+      "start": 139.01,
+      "end": 142.01,
+      "root": 5,
+      "quality": "maj",
+      "label": "F"
+    },
+    {
+      "start": 142.01,
+      "end": 146.51,
+      "root": 2,
+      "quality": "min",
+      "label": "Dm"
+    },
+    {
+      "start": 146.51,
+      "end": 150.51,
+      "root": 10,
+      "quality": "maj7",
+      "label": "Bbmaj7"
+    },
+    {
+      "start": 150.51,
+      "end": 151.01,
+      "root": 7,
+      "quality": "min",
+      "label": "Gm"
+    },
+    {
+      "start": 151.01,
+      "end": 152.51,
+      "root": 2,
+      "quality": "min7",
+      "label": "Dm7"
+    },
+    {
+      "start": 152.51,
+      "end": 154.51,
+      "root": 7,
+      "quality": "min7",
+      "label": "Gm7/D",
+      "bass": 2
+    },
+    {
+      "start": 154.51,
+      "end": 155.01,
+      "root": 0,
+      "quality": "min",
+      "label": "Cm"
+    },
+    {
+      "start": 155.01,
+      "end": 159.01,
+      "root": 7,
+      "quality": "min7",
+      "label": "Gm7"
+    },
+    {
+      "start": 159.01,
+      "end": 161.01,
+      "root": 2,
+      "quality": "min",
+      "label": "Dm"
+    },
+    {
+      "start": 161.01,
+      "end": 163.01,
+      "root": 0,
+      "quality": "maj",
+      "label": "C"
+    },
+    {
+      "start": 163.01,
+      "end": 165.01,
+      "root": 10,
+      "quality": "maj",
+      "label": "Bb"
+    },
+    {
+      "start": 165.01,
+      "end": 171.01,
+      "root": 2,
+      "quality": "min",
+      "label": "Dm"
+    },
+    {
+      "start": 171.01,
+      "end": 175.01,
+      "root": 7,
+      "quality": "min7",
+      "label": "Gm7"
+    },
+    {
+      "start": 175.01,
+      "end": 178.01,
+      "root": 2,
+      "quality": "min",
+      "label": "Dm"
+    },
+    {
+      "start": 178.01,
+      "end": 178.51,
+      "root": 3,
+      "quality": "maj",
+      "label": "Eb"
+    },
+    {
+      "start": 178.51,
+      "end": 180.03,
+      "root": 0,
+      "quality": "7",
+      "label": "C7"
+    },
+    {
+      "start": 180.03,
+      "end": 183.03,
+      "root": 7,
+      "quality": "min7",
+      "label": "Gm7/Bb",
+      "bass": 10
+    },
+    {
+      "start": 183.03,
+      "end": 185.03,
+      "root": 2,
+      "quality": "min7",
+      "label": "Dm7"
+    },
+    {
+      "start": 185.03,
+      "end": 186.53,
+      "root": 5,
+      "quality": "maj",
+      "label": "F"
+    },
+    {
+      "start": 186.53,
+      "end": 188.55,
+      "root": 7,
+      "quality": "min7",
+      "label": "Gm7/Bb",
+      "bass": 10
+    },
+    {
+      "start": 188.55,
+      "end": 191.05,
+      "root": 7,
+      "quality": "min",
+      "label": "Gm"
+    },
+    {
+      "start": 191.05,
+      "end": 193.09,
+      "root": 2,
+      "quality": "min7",
+      "label": "Dm7"
+    },
+    {
+      "start": 193.09,
+      "end": 198.77,
+      "root": 9,
+      "quality": "min",
+      "label": "Am"
+    },
+    {
+      "start": 199.29,
+      "end": 201.97,
+      "root": 10,
+      "quality": "maj",
+      "label": "Bb"
+    },
+    {
+      "start": 203.05,
+      "end": 206.37,
+      "root": 2,
+      "quality": "min",
+      "label": "Dm"
+    },
+    {
+      "start": 208.21,
+      "end": 208.79,
+      "root": 2,
+      "quality": "min",
+      "label": "Dm"
+    }
+  ],
+  "notes": [
+    {
+      "start": 1.998,
+      "end": 2.659,
+      "midi": 50,
+      "velocity": 58,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 1.998,
+      "end": 2.08,
+      "midi": 53,
+      "velocity": 45,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 2.005,
+      "end": 2.67,
+      "midi": 62,
+      "velocity": 56,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 2.745,
+      "end": 2.8,
+      "midi": 34,
+      "velocity": 62,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 2.746,
+      "end": 2.81,
+      "midi": 58,
+      "velocity": 53,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 2.748,
+      "end": 2.82,
+      "midi": 50,
+      "velocity": 42,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 2.749,
+      "end": 2.81,
+      "midi": 46,
+      "velocity": 52,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 2.751,
+      "end": 2.787,
+      "midi": 53,
+      "velocity": 52,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 2.755,
+      "end": 2.81,
+      "midi": 57,
+      "velocity": 47,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 3.149,
+      "end": 3.2,
+      "midi": 50,
+      "velocity": 44,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 3.154,
+      "end": 3.21,
+      "midi": 57,
+      "velocity": 50,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 3.155,
+      "end": 3.189,
+      "midi": 53,
+      "velocity": 65,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 3.5,
+      "end": 3.534,
+      "midi": 53,
+      "velocity": 61,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 3.505,
+      "end": 3.57,
+      "midi": 50,
+      "velocity": 41,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 3.996,
+      "end": 4.033,
+      "midi": 50,
+      "velocity": 44,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 3.999,
+      "end": 4.08,
+      "midi": 58,
+      "velocity": 43,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 4.002,
+      "end": 4.06,
+      "midi": 43,
+      "velocity": 41,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 4.002,
+      "end": 4.06,
+      "midi": 53,
+      "velocity": 44,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 4.746,
+      "end": 4.87,
+      "midi": 50,
+      "velocity": 55,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 4.753,
+      "end": 4.81,
+      "midi": 31,
+      "velocity": 39,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 4.753,
+      "end": 4.83,
+      "midi": 43,
+      "velocity": 39,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 4.758,
+      "end": 4.85,
+      "midi": 55,
+      "velocity": 37,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 4.775,
+      "end": 4.9,
+      "midi": 57,
+      "velocity": 40,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 5.15,
+      "end": 5.212,
+      "midi": 50,
+      "velocity": 53,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 5.155,
+      "end": 5.24,
+      "midi": 55,
+      "velocity": 38,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 5.495,
+      "end": 5.55,
+      "midi": 55,
+      "velocity": 41,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 5.497,
+      "end": 5.536,
+      "midi": 50,
+      "velocity": 50,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 5.498,
+      "end": 5.54,
+      "midi": 43,
+      "velocity": 34,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 5.994,
+      "end": 6.033,
+      "midi": 57,
+      "velocity": 59,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 5.998,
+      "end": 6.05,
+      "midi": 38,
+      "velocity": 57,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 6.0,
+      "end": 6.048,
+      "midi": 62,
+      "velocity": 62,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 6.747,
+      "end": 6.786,
+      "midi": 38,
+      "velocity": 59,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 6.748,
+      "end": 6.81,
+      "midi": 57,
+      "velocity": 60,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 6.754,
+      "end": 6.8,
+      "midi": 50,
+      "velocity": 46,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 6.755,
+      "end": 6.83,
+      "midi": 53,
+      "velocity": 47,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 7.154,
+      "end": 7.192,
+      "midi": 38,
+      "velocity": 57,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 7.154,
+      "end": 7.21,
+      "midi": 57,
+      "velocity": 63,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 7.155,
+      "end": 7.187,
+      "midi": 53,
+      "velocity": 43,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 7.495,
+      "end": 7.532,
+      "midi": 38,
+      "velocity": 56,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 7.496,
+      "end": 7.526,
+      "midi": 57,
+      "velocity": 59,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 7.502,
+      "end": 7.536,
+      "midi": 60,
+      "velocity": 50,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 7.505,
+      "end": 7.6,
+      "midi": 53,
+      "velocity": 44,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 7.998,
+      "end": 8.046,
+      "midi": 52,
+      "velocity": 60,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 8.001,
+      "end": 8.07,
+      "midi": 48,
+      "velocity": 54,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 8.004,
+      "end": 8.07,
+      "midi": 45,
+      "velocity": 52,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 8.004,
+      "end": 8.07,
+      "midi": 60,
+      "velocity": 51,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 8.009,
+      "end": 8.07,
+      "midi": 55,
+      "velocity": 45,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 8.402,
+      "end": 8.46,
+      "midi": 48,
+      "velocity": 53,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 8.402,
+      "end": 8.46,
+      "midi": 52,
+      "velocity": 55,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 8.403,
+      "end": 8.45,
+      "midi": 57,
+      "velocity": 46,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 8.749,
+      "end": 8.785,
+      "midi": 52,
+      "velocity": 42,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 8.753,
+      "end": 8.88,
+      "midi": 57,
+      "velocity": 36,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 8.754,
+      "end": 8.81,
+      "midi": 45,
+      "velocity": 39,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 8.754,
+      "end": 8.82,
+      "midi": 48,
+      "velocity": 44,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 9.149,
+      "end": 9.23,
+      "midi": 57,
+      "velocity": 46,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 9.151,
+      "end": 9.204,
+      "midi": 52,
+      "velocity": 54,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 9.154,
+      "end": 9.213,
+      "midi": 55,
+      "velocity": 49,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 9.155,
+      "end": 9.24,
+      "midi": 45,
+      "velocity": 48,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 9.496,
+      "end": 9.536,
+      "midi": 52,
+      "velocity": 52,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 9.497,
+      "end": 9.546,
+      "midi": 45,
+      "velocity": 40,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 9.995,
+      "end": 10.33,
+      "midi": 50,
+      "velocity": 45,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 9.995,
+      "end": 10.36,
+      "midi": 53,
+      "velocity": 38,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 9.996,
+      "end": 10.33,
+      "midi": 62,
+      "velocity": 54,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 10.746,
+      "end": 10.84,
+      "midi": 58,
+      "velocity": 53,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 10.747,
+      "end": 10.81,
+      "midi": 50,
+      "velocity": 44,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 10.753,
+      "end": 10.786,
+      "midi": 53,
+      "velocity": 54,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 10.753,
+      "end": 10.82,
+      "midi": 62,
+      "velocity": 36,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 11.15,
+      "end": 11.21,
+      "midi": 50,
+      "velocity": 41,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 11.154,
+      "end": 11.187,
+      "midi": 53,
+      "velocity": 58,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 11.155,
+      "end": 11.189,
+      "midi": 57,
+      "velocity": 47,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 11.155,
+      "end": 11.22,
+      "midi": 58,
+      "velocity": 54,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 11.497,
+      "end": 11.536,
+      "midi": 57,
+      "velocity": 52,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 11.501,
+      "end": 11.58,
+      "midi": 50,
+      "velocity": 45,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 11.504,
+      "end": 11.536,
+      "midi": 53,
+      "velocity": 63,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 11.505,
+      "end": 11.63,
+      "midi": 58,
+      "velocity": 56,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 11.508,
+      "end": 11.592,
+      "midi": 46,
+      "velocity": 57,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 11.998,
+      "end": 12.035,
+      "midi": 50,
+      "velocity": 54,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 12.004,
+      "end": 12.48,
+      "midi": 58,
+      "velocity": 49,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 12.005,
+      "end": 12.05,
+      "midi": 43,
+      "velocity": 44,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 12.005,
+      "end": 12.042,
+      "midi": 53,
+      "velocity": 47,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 12.746,
+      "end": 12.81,
+      "midi": 50,
+      "velocity": 53,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 12.748,
+      "end": 12.8,
+      "midi": 31,
+      "velocity": 50,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 12.749,
+      "end": 12.79,
+      "midi": 58,
+      "velocity": 50,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 12.75,
+      "end": 12.79,
+      "midi": 34,
+      "velocity": 50,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 12.753,
+      "end": 12.798,
+      "midi": 43,
+      "velocity": 46,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 12.757,
+      "end": 12.85,
+      "midi": 55,
+      "velocity": 40,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 13.146,
+      "end": 13.191,
+      "midi": 50,
+      "velocity": 49,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 13.154,
+      "end": 13.23,
+      "midi": 34,
+      "velocity": 47,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 13.154,
+      "end": 13.49,
+      "midi": 55,
+      "velocity": 45,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 13.496,
+      "end": 13.56,
+      "midi": 50,
+      "velocity": 47,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 13.497,
+      "end": 13.6,
+      "midi": 58,
+      "velocity": 44,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 13.499,
+      "end": 13.56,
+      "midi": 55,
+      "velocity": 42,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 13.5,
+      "end": 13.55,
+      "midi": 34,
+      "velocity": 48,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 13.502,
+      "end": 13.543,
+      "midi": 53,
+      "velocity": 44,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 13.997,
+      "end": 14.19,
+      "midi": 57,
+      "velocity": 62,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 14.003,
+      "end": 14.18,
+      "midi": 38,
+      "velocity": 59,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 14.007,
+      "end": 14.2,
+      "midi": 53,
+      "velocity": 41,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 14.008,
+      "end": 14.18,
+      "midi": 50,
+      "velocity": 51,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 14.746,
+      "end": 14.95,
+      "midi": 38,
+      "velocity": 53,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 14.746,
+      "end": 14.98,
+      "midi": 57,
+      "velocity": 58,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 14.753,
+      "end": 14.95,
+      "midi": 50,
+      "velocity": 46,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 15.146,
+      "end": 15.185,
+      "midi": 57,
+      "velocity": 64,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 15.147,
+      "end": 15.189,
+      "midi": 38,
+      "velocity": 59,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 15.147,
+      "end": 15.19,
+      "midi": 53,
+      "velocity": 47,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 15.153,
+      "end": 15.23,
+      "midi": 50,
+      "velocity": 49,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 15.496,
+      "end": 15.534,
+      "midi": 57,
+      "velocity": 63,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 15.498,
+      "end": 15.55,
+      "midi": 53,
+      "velocity": 44,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 15.502,
+      "end": 15.537,
+      "midi": 60,
+      "velocity": 53,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 15.503,
+      "end": 15.55,
+      "midi": 50,
+      "velocity": 50,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 15.999,
+      "end": 16.07,
+      "midi": 64,
+      "velocity": 64,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 16.001,
+      "end": 16.06,
+      "midi": 33,
+      "velocity": 59,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 16.002,
+      "end": 16.035,
+      "midi": 52,
+      "velocity": 58,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 16.003,
+      "end": 16.08,
+      "midi": 45,
+      "velocity": 50,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 16.401,
+      "end": 16.46,
+      "midi": 33,
+      "velocity": 62,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 16.404,
+      "end": 16.437,
+      "midi": 52,
+      "velocity": 61,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 16.407,
+      "end": 16.45,
+      "midi": 57,
+      "velocity": 50,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 16.408,
+      "end": 16.47,
+      "midi": 45,
+      "velocity": 53,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 16.746,
+      "end": 16.799,
+      "midi": 33,
+      "velocity": 66,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 16.746,
+      "end": 16.81,
+      "midi": 52,
+      "velocity": 59,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 16.751,
+      "end": 16.82,
+      "midi": 45,
+      "velocity": 60,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 17.013,
+      "end": 17.24,
+      "midi": 67,
+      "velocity": 68,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 17.149,
+      "end": 17.22,
+      "midi": 33,
+      "velocity": 68,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 17.152,
+      "end": 17.204,
+      "midi": 52,
+      "velocity": 61,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 17.154,
+      "end": 17.197,
+      "midi": 45,
+      "velocity": 64,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 17.283,
+      "end": 17.32,
+      "midi": 69,
+      "velocity": 70,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 17.485,
+      "end": 17.54,
+      "midi": 93,
+      "velocity": 90,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 17.495,
+      "end": 17.529,
+      "midi": 69,
+      "velocity": 76,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 17.496,
+      "end": 17.557,
+      "midi": 45,
+      "velocity": 65,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 17.924,
+      "end": 17.99,
+      "midi": 61,
+      "velocity": 50,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 17.996,
+      "end": 18.05,
+      "midi": 34,
+      "velocity": 64,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 18.0,
+      "end": 18.35,
+      "midi": 53,
+      "velocity": 67,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 18.002,
+      "end": 18.26,
+      "midi": 57,
+      "velocity": 59,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 18.285,
+      "end": 18.47,
+      "midi": 65,
+      "velocity": 56,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 18.476,
+      "end": 18.54,
+      "midi": 65,
+      "velocity": 56,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 18.548,
+      "end": 18.79,
+      "midi": 65,
+      "velocity": 65,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 18.747,
+      "end": 18.86,
+      "midi": 38,
+      "velocity": 54,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 18.751,
+      "end": 18.798,
+      "midi": 53,
+      "velocity": 53,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 18.753,
+      "end": 18.97,
+      "midi": 50,
+      "velocity": 48,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 18.871,
+      "end": 18.99,
+      "midi": 69,
+      "velocity": 52,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 18.987,
+      "end": 19.14,
+      "midi": 53,
+      "velocity": 44,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 19.148,
+      "end": 19.26,
+      "midi": 53,
+      "velocity": 54,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 19.153,
+      "end": 19.21,
+      "midi": 58,
+      "velocity": 58,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 19.239,
+      "end": 19.43,
+      "midi": 62,
+      "velocity": 54,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 19.443,
+      "end": 19.56,
+      "midi": 62,
+      "velocity": 52,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 19.495,
+      "end": 19.6,
+      "midi": 38,
+      "velocity": 51,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 19.5,
+      "end": 19.56,
+      "midi": 53,
+      "velocity": 64,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 19.993,
+      "end": 20.05,
+      "midi": 69,
+      "velocity": 81,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 19.994,
+      "end": 20.07,
+      "midi": 50,
+      "velocity": 62,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 19.995,
+      "end": 20.13,
+      "midi": 58,
+      "velocity": 69,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 19.996,
+      "end": 20.1,
+      "midi": 43,
+      "velocity": 51,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 20.744,
+      "end": 20.786,
+      "midi": 50,
+      "velocity": 61,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 20.745,
+      "end": 20.79,
+      "midi": 43,
+      "velocity": 47,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 20.746,
+      "end": 20.81,
+      "midi": 53,
+      "velocity": 41,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 20.75,
+      "end": 20.82,
+      "midi": 67,
+      "velocity": 66,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 20.754,
+      "end": 20.84,
+      "midi": 58,
+      "velocity": 56,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 21.147,
+      "end": 21.21,
+      "midi": 50,
+      "velocity": 58,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 21.155,
+      "end": 21.22,
+      "midi": 58,
+      "velocity": 52,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 21.496,
+      "end": 21.57,
+      "midi": 65,
+      "velocity": 71,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 21.498,
+      "end": 21.56,
+      "midi": 50,
+      "velocity": 56,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 21.502,
+      "end": 21.57,
+      "midi": 43,
+      "velocity": 54,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 21.504,
+      "end": 21.537,
+      "midi": 55,
+      "velocity": 53,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 21.998,
+      "end": 22.18,
+      "midi": 38,
+      "velocity": 75,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 22.004,
+      "end": 22.47,
+      "midi": 57,
+      "velocity": 65,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 22.005,
+      "end": 22.13,
+      "midi": 50,
+      "velocity": 56,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 22.005,
+      "end": 22.46,
+      "midi": 62,
+      "velocity": 54,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 22.26,
+      "end": 22.477,
+      "midi": 65,
+      "velocity": 58,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 22.744,
+      "end": 22.95,
+      "midi": 65,
+      "velocity": 51,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 22.745,
+      "end": 22.92,
+      "midi": 57,
+      "velocity": 64,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 22.747,
+      "end": 22.82,
+      "midi": 41,
+      "velocity": 51,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 22.752,
+      "end": 22.98,
+      "midi": 50,
+      "velocity": 55,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 22.966,
+      "end": 23.14,
+      "midi": 69,
+      "velocity": 56,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 23.153,
+      "end": 23.25,
+      "midi": 57,
+      "velocity": 57,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 23.155,
+      "end": 23.33,
+      "midi": 50,
+      "velocity": 39,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 23.155,
+      "end": 23.28,
+      "midi": 60,
+      "velocity": 39,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 23.158,
+      "end": 23.2,
+      "midi": 53,
+      "velocity": 38,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 23.239,
+      "end": 23.48,
+      "midi": 67,
+      "velocity": 60,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 23.256,
+      "end": 23.37,
+      "midi": 65,
+      "velocity": 46,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 23.499,
+      "end": 23.56,
+      "midi": 57,
+      "velocity": 67,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 23.503,
+      "end": 23.7,
+      "midi": 38,
+      "velocity": 56,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 23.504,
+      "end": 23.71,
+      "midi": 50,
+      "velocity": 44,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 23.511,
+      "end": 23.7,
+      "midi": 65,
+      "velocity": 56,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 23.995,
+      "end": 24.08,
+      "midi": 36,
+      "velocity": 60,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 23.995,
+      "end": 24.28,
+      "midi": 48,
+      "velocity": 57,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 23.995,
+      "end": 24.457,
+      "midi": 51,
+      "velocity": 58,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 24.002,
+      "end": 24.399,
+      "midi": 55,
+      "velocity": 72,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 24.002,
+      "end": 24.09,
+      "midi": 60,
+      "velocity": 53,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 24.002,
+      "end": 24.457,
+      "midi": 67,
+      "velocity": 77,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 24.003,
+      "end": 24.27,
+      "midi": 63,
+      "velocity": 60,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 24.399,
+      "end": 24.8,
+      "midi": 55,
+      "velocity": 65,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 24.4,
+      "end": 24.504,
+      "midi": 63,
+      "velocity": 54,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 24.404,
+      "end": 24.501,
+      "midi": 60,
+      "velocity": 42,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 24.405,
+      "end": 24.68,
+      "midi": 48,
+      "velocity": 48,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 24.406,
+      "end": 24.59,
+      "midi": 36,
+      "velocity": 48,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 24.501,
+      "end": 24.75,
+      "midi": 60,
+      "velocity": 46,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 24.504,
+      "end": 24.97,
+      "midi": 63,
+      "velocity": 49,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 24.726,
+      "end": 24.9,
+      "midi": 69,
+      "velocity": 75,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 24.751,
+      "end": 24.93,
+      "midi": 48,
+      "velocity": 56,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 24.762,
+      "end": 24.98,
+      "midi": 60,
+      "velocity": 49,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 24.914,
+      "end": 24.99,
+      "midi": 67,
+      "velocity": 68,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 24.924,
+      "end": 25.01,
+      "midi": 66,
+      "velocity": 60,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 24.986,
+      "end": 25.14,
+      "midi": 60,
+      "velocity": 52,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 24.995,
+      "end": 25.29,
+      "midi": 67,
+      "velocity": 76,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 25.146,
+      "end": 25.31,
+      "midi": 48,
+      "velocity": 67,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 25.15,
+      "end": 25.638,
+      "midi": 57,
+      "velocity": 53,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 25.15,
+      "end": 25.46,
+      "midi": 60,
+      "velocity": 60,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 25.323,
+      "end": 25.5,
+      "midi": 69,
+      "velocity": 68,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 25.466,
+      "end": 25.985,
+      "midi": 60,
+      "velocity": 55,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 25.51,
+      "end": 25.985,
+      "midi": 69,
+      "velocity": 59,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 25.638,
+      "end": 25.99,
+      "midi": 57,
+      "velocity": 30,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 25.929,
+      "end": 26.04,
+      "midi": 65,
+      "velocity": 44,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 25.962,
+      "end": 26.75,
+      "midi": 62,
+      "velocity": 46,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 25.986,
+      "end": 26.15,
+      "midi": 58,
+      "velocity": 59,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 25.998,
+      "end": 26.77,
+      "midi": 34,
+      "velocity": 68,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 25.998,
+      "end": 26.046,
+      "midi": 53,
+      "velocity": 56,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 26.004,
+      "end": 26.74,
+      "midi": 46,
+      "velocity": 67,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 26.243,
+      "end": 26.743,
+      "midi": 58,
+      "velocity": 59,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 26.306,
+      "end": 26.744,
+      "midi": 65,
+      "velocity": 61,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 26.366,
+      "end": 26.75,
+      "midi": 60,
+      "velocity": 49,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 26.482,
+      "end": 26.739,
+      "midi": 67,
+      "velocity": 64,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 26.751,
+      "end": 26.83,
+      "midi": 50,
+      "velocity": 57,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 26.754,
+      "end": 26.83,
+      "midi": 53,
+      "velocity": 51,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 26.754,
+      "end": 26.88,
+      "midi": 57,
+      "velocity": 55,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 26.868,
+      "end": 26.96,
+      "midi": 58,
+      "velocity": 35,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 26.988,
+      "end": 27.14,
+      "midi": 53,
+      "velocity": 39,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 26.995,
+      "end": 27.19,
+      "midi": 69,
+      "velocity": 49,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 27.153,
+      "end": 27.25,
+      "midi": 38,
+      "velocity": 55,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 27.153,
+      "end": 27.25,
+      "midi": 53,
+      "velocity": 52,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 27.157,
+      "end": 27.39,
+      "midi": 57,
+      "velocity": 53,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 27.245,
+      "end": 27.52,
+      "midi": 65,
+      "velocity": 52,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 27.504,
+      "end": 27.56,
+      "midi": 57,
+      "velocity": 61,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 27.505,
+      "end": 27.654,
+      "midi": 53,
+      "velocity": 60,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 27.514,
+      "end": 27.68,
+      "midi": 58,
+      "velocity": 59,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 27.515,
+      "end": 27.69,
+      "midi": 62,
+      "velocity": 51,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 27.618,
+      "end": 27.69,
+      "midi": 69,
+      "velocity": 49,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 27.699,
+      "end": 27.75,
+      "midi": 62,
+      "velocity": 50,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 27.759,
+      "end": 27.93,
+      "midi": 65,
+      "velocity": 65,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 27.875,
+      "end": 28.01,
+      "midi": 69,
+      "velocity": 49,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 27.997,
+      "end": 28.15,
+      "midi": 43,
+      "velocity": 54,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 27.999,
+      "end": 28.11,
+      "midi": 31,
+      "velocity": 55,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 28.002,
+      "end": 28.09,
+      "midi": 50,
+      "velocity": 71,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 28.017,
+      "end": 28.062,
+      "midi": 69,
+      "velocity": 75,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 28.115,
+      "end": 28.195,
+      "midi": 67,
+      "velocity": 62,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 28.368,
+      "end": 28.74,
+      "midi": 58,
+      "velocity": 66,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 28.515,
+      "end": 28.62,
+      "midi": 67,
+      "velocity": 62,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 28.628,
+      "end": 28.88,
+      "midi": 67,
+      "velocity": 54,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 28.748,
+      "end": 28.97,
+      "midi": 50,
+      "velocity": 63,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 28.748,
+      "end": 28.94,
+      "midi": 58,
+      "velocity": 61,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 28.992,
+      "end": 29.14,
+      "midi": 69,
+      "velocity": 52,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 28.993,
+      "end": 29.03,
+      "midi": 67,
+      "velocity": 52,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 29.136,
+      "end": 29.21,
+      "midi": 53,
+      "velocity": 44,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 29.14,
+      "end": 29.22,
+      "midi": 58,
+      "velocity": 55,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 29.146,
+      "end": 29.21,
+      "midi": 50,
+      "velocity": 56,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 29.237,
+      "end": 29.47,
+      "midi": 62,
+      "velocity": 55,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 29.454,
+      "end": 29.502,
+      "midi": 65,
+      "velocity": 62,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 29.484,
+      "end": 29.55,
+      "midi": 62,
+      "velocity": 45,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 29.496,
+      "end": 29.57,
+      "midi": 43,
+      "velocity": 47,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 29.496,
+      "end": 29.68,
+      "midi": 50,
+      "velocity": 56,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 29.609,
+      "end": 30.02,
+      "midi": 69,
+      "velocity": 33,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 29.612,
+      "end": 29.73,
+      "midi": 65,
+      "velocity": 42,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 29.744,
+      "end": 30.02,
+      "midi": 65,
+      "velocity": 54,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 29.999,
+      "end": 30.252,
+      "midi": 62,
+      "velocity": 61,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 30.0,
+      "end": 30.09,
+      "midi": 53,
+      "velocity": 47,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 30.002,
+      "end": 30.23,
+      "midi": 57,
+      "velocity": 67,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 30.004,
+      "end": 30.74,
+      "midi": 50,
+      "velocity": 58,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 30.034,
+      "end": 30.41,
+      "midi": 93,
+      "velocity": 72,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 30.369,
+      "end": 30.74,
+      "midi": 57,
+      "velocity": 64,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 30.627,
+      "end": 30.77,
+      "midi": 69,
+      "velocity": 50,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 30.748,
+      "end": 31.49,
+      "midi": 38,
+      "velocity": 62,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 30.752,
+      "end": 31.144,
+      "midi": 57,
+      "velocity": 72,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 30.767,
+      "end": 31.001,
+      "midi": 62,
+      "velocity": 45,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 30.871,
+      "end": 31.49,
+      "midi": 65,
+      "velocity": 25,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 30.872,
+      "end": 31.49,
+      "midi": 74,
+      "velocity": 51,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 31.001,
+      "end": 31.49,
+      "midi": 62,
+      "velocity": 57,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 31.006,
+      "end": 31.49,
+      "midi": 81,
+      "velocity": 58,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 31.014,
+      "end": 31.49,
+      "midi": 86,
+      "velocity": 67,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 31.144,
+      "end": 31.49,
+      "midi": 57,
+      "velocity": 65,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 31.148,
+      "end": 31.994,
+      "midi": 50,
+      "velocity": 51,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 31.159,
+      "end": 31.49,
+      "midi": 93,
+      "velocity": 75,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 31.498,
+      "end": 31.994,
+      "midi": 38,
+      "velocity": 67,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 31.5,
+      "end": 31.994,
+      "midi": 57,
+      "velocity": 76,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 31.504,
+      "end": 31.994,
+      "midi": 65,
+      "velocity": 67,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 32.003,
+      "end": 32.21,
+      "midi": 52,
+      "velocity": 53,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 32.005,
+      "end": 32.1,
+      "midi": 57,
+      "velocity": 51,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 32.005,
+      "end": 32.413,
+      "midi": 60,
+      "velocity": 58,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 32.243,
+      "end": 32.38,
+      "midi": 57,
+      "velocity": 53,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 32.246,
+      "end": 32.42,
+      "midi": 55,
+      "velocity": 52,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 32.392,
+      "end": 32.51,
+      "midi": 57,
+      "velocity": 54,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 32.395,
+      "end": 32.5,
+      "midi": 52,
+      "velocity": 57,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 32.747,
+      "end": 32.87,
+      "midi": 57,
+      "velocity": 47,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 32.748,
+      "end": 32.787,
+      "midi": 52,
+      "velocity": 54,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 32.755,
+      "end": 32.805,
+      "midi": 69,
+      "velocity": 64,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 33.144,
+      "end": 33.217,
+      "midi": 67,
+      "velocity": 60,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 33.145,
+      "end": 33.25,
+      "midi": 57,
+      "velocity": 36,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 33.153,
+      "end": 33.22,
+      "midi": 69,
+      "velocity": 47,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 33.155,
+      "end": 33.205,
+      "midi": 52,
+      "velocity": 53,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 33.368,
+      "end": 33.44,
+      "midi": 69,
+      "velocity": 54,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 33.493,
+      "end": 33.56,
+      "midi": 67,
+      "velocity": 60,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 33.497,
+      "end": 33.538,
+      "midi": 52,
+      "velocity": 53,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 33.503,
+      "end": 33.56,
+      "midi": 45,
+      "velocity": 43,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 33.513,
+      "end": 33.56,
+      "midi": 55,
+      "velocity": 36,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 33.967,
+      "end": 34.033,
+      "midi": 64,
+      "velocity": 55,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 33.996,
+      "end": 34.1,
+      "midi": 43,
+      "velocity": 41,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 33.996,
+      "end": 34.047,
+      "midi": 50,
+      "velocity": 56,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 34.001,
+      "end": 34.39,
+      "midi": 58,
+      "velocity": 54,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 34.003,
+      "end": 34.39,
+      "midi": 55,
+      "velocity": 50,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 34.004,
+      "end": 34.38,
+      "midi": 67,
+      "velocity": 64,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 34.026,
+      "end": 34.3,
+      "midi": 62,
+      "velocity": 48,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 34.385,
+      "end": 34.792,
+      "midi": 62,
+      "velocity": 45,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 34.388,
+      "end": 34.49,
+      "midi": 67,
+      "velocity": 57,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 34.395,
+      "end": 34.52,
+      "midi": 58,
+      "velocity": 48,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 34.399,
+      "end": 34.51,
+      "midi": 55,
+      "velocity": 46,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 34.416,
+      "end": 34.746,
+      "midi": 65,
+      "velocity": 50,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 34.418,
+      "end": 34.755,
+      "midi": 50,
+      "velocity": 44,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 34.418,
+      "end": 34.76,
+      "midi": 53,
+      "velocity": 46,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 34.746,
+      "end": 34.81,
+      "midi": 65,
+      "velocity": 59,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 34.751,
+      "end": 34.8,
+      "midi": 67,
+      "velocity": 85,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 34.755,
+      "end": 34.84,
+      "midi": 50,
+      "velocity": 64,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 34.756,
+      "end": 34.84,
+      "midi": 58,
+      "velocity": 66,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 34.761,
+      "end": 34.85,
+      "midi": 55,
+      "velocity": 52,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 34.762,
+      "end": 34.8,
+      "midi": 53,
+      "velocity": 45,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 35.155,
+      "end": 35.216,
+      "midi": 50,
+      "velocity": 63,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 35.158,
+      "end": 35.5,
+      "midi": 55,
+      "velocity": 59,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 35.158,
+      "end": 35.49,
+      "midi": 67,
+      "velocity": 67,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 35.164,
+      "end": 35.49,
+      "midi": 58,
+      "velocity": 54,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 35.165,
+      "end": 35.49,
+      "midi": 53,
+      "velocity": 51,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 35.501,
+      "end": 35.99,
+      "midi": 67,
+      "velocity": 70,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 35.502,
+      "end": 36.11,
+      "midi": 57,
+      "velocity": 54,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 35.502,
+      "end": 36.019,
+      "midi": 69,
+      "velocity": 60,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 35.503,
+      "end": 36.0,
+      "midi": 53,
+      "velocity": 49,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 35.503,
+      "end": 36.09,
+      "midi": 65,
+      "velocity": 51,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 35.505,
+      "end": 35.587,
+      "midi": 50,
+      "velocity": 57,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 35.505,
+      "end": 35.99,
+      "midi": 55,
+      "velocity": 55,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 35.505,
+      "end": 35.99,
+      "midi": 58,
+      "velocity": 55,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 36.002,
+      "end": 36.4,
+      "midi": 55,
+      "velocity": 67,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 36.004,
+      "end": 36.25,
+      "midi": 67,
+      "velocity": 68,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 36.005,
+      "end": 36.18,
+      "midi": 48,
+      "velocity": 51,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 36.005,
+      "end": 36.4,
+      "midi": 60,
+      "velocity": 48,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 36.007,
+      "end": 36.1,
+      "midi": 53,
+      "velocity": 57,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 36.007,
+      "end": 36.09,
+      "midi": 64,
+      "velocity": 61,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 36.008,
+      "end": 36.34,
+      "midi": 52,
+      "velocity": 48,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 36.259,
+      "end": 36.39,
+      "midi": 67,
+      "velocity": 59,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 36.394,
+      "end": 36.48,
+      "midi": 58,
+      "velocity": 48,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 36.403,
+      "end": 36.68,
+      "midi": 67,
+      "velocity": 55,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 36.406,
+      "end": 36.74,
+      "midi": 55,
+      "velocity": 53,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 36.406,
+      "end": 36.72,
+      "midi": 64,
+      "velocity": 58,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 36.41,
+      "end": 36.54,
+      "midi": 48,
+      "velocity": 47,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 36.413,
+      "end": 36.74,
+      "midi": 60,
+      "velocity": 43,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 36.748,
+      "end": 36.81,
+      "midi": 64,
+      "velocity": 65,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 36.751,
+      "end": 36.85,
+      "midi": 48,
+      "velocity": 53,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 36.751,
+      "end": 36.797,
+      "midi": 55,
+      "velocity": 68,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 36.752,
+      "end": 36.803,
+      "midi": 60,
+      "velocity": 47,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 36.768,
+      "end": 36.88,
+      "midi": 65,
+      "velocity": 66,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 37.153,
+      "end": 37.224,
+      "midi": 60,
+      "velocity": 56,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 37.155,
+      "end": 37.216,
+      "midi": 55,
+      "velocity": 66,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 37.156,
+      "end": 37.27,
+      "midi": 48,
+      "velocity": 61,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 37.16,
+      "end": 37.27,
+      "midi": 52,
+      "velocity": 55,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 37.255,
+      "end": 37.987,
+      "midi": 70,
+      "velocity": 75,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 37.502,
+      "end": 37.987,
+      "midi": 55,
+      "velocity": 60,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 37.504,
+      "end": 38.0,
+      "midi": 60,
+      "velocity": 60,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 37.505,
+      "end": 38.0,
+      "midi": 64,
+      "velocity": 53,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 37.506,
+      "end": 38.0,
+      "midi": 48,
+      "velocity": 64,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 37.506,
+      "end": 38.0,
+      "midi": 52,
+      "velocity": 52,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 38.005,
+      "end": 38.09,
+      "midi": 52,
+      "velocity": 59,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 38.005,
+      "end": 38.11,
+      "midi": 57,
+      "velocity": 57,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 38.007,
+      "end": 38.12,
+      "midi": 64,
+      "velocity": 60,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 38.011,
+      "end": 38.13,
+      "midi": 48,
+      "velocity": 49,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 38.013,
+      "end": 38.07,
+      "midi": 45,
+      "velocity": 53,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 38.014,
+      "end": 38.11,
+      "midi": 60,
+      "velocity": 51,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 38.403,
+      "end": 38.548,
+      "midi": 64,
+      "velocity": 60,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 38.416,
+      "end": 38.52,
+      "midi": 48,
+      "velocity": 49,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 38.416,
+      "end": 38.492,
+      "midi": 60,
+      "velocity": 51,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 38.419,
+      "end": 38.51,
+      "midi": 45,
+      "velocity": 46,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 38.724,
+      "end": 38.8,
+      "midi": 65,
+      "velocity": 70,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 38.755,
+      "end": 38.85,
+      "midi": 57,
+      "velocity": 59,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 38.756,
+      "end": 38.84,
+      "midi": 45,
+      "velocity": 56,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 38.758,
+      "end": 38.82,
+      "midi": 52,
+      "velocity": 70,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 38.758,
+      "end": 38.86,
+      "midi": 60,
+      "velocity": 61,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 39.158,
+      "end": 39.49,
+      "midi": 64,
+      "velocity": 65,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 39.16,
+      "end": 39.49,
+      "midi": 48,
+      "velocity": 52,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 39.162,
+      "end": 39.49,
+      "midi": 57,
+      "velocity": 57,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 39.163,
+      "end": 39.49,
+      "midi": 60,
+      "velocity": 58,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 39.164,
+      "end": 39.49,
+      "midi": 52,
+      "velocity": 60,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 39.167,
+      "end": 39.21,
+      "midi": 45,
+      "velocity": 54,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 39.505,
+      "end": 39.58,
+      "midi": 52,
+      "velocity": 52,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 39.506,
+      "end": 40.002,
+      "midi": 48,
+      "velocity": 53,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 39.506,
+      "end": 40.002,
+      "midi": 64,
+      "velocity": 58,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 39.508,
+      "end": 40.002,
+      "midi": 45,
+      "velocity": 55,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 39.508,
+      "end": 40.002,
+      "midi": 57,
+      "velocity": 57,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 39.512,
+      "end": 40.002,
+      "midi": 60,
+      "velocity": 54,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 40.006,
+      "end": 40.08,
+      "midi": 45,
+      "velocity": 61,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 40.013,
+      "end": 40.1,
+      "midi": 57,
+      "velocity": 62,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 40.015,
+      "end": 40.46,
+      "midi": 62,
+      "velocity": 57,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 40.024,
+      "end": 40.45,
+      "midi": 65,
+      "velocity": 60,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 40.4,
+      "end": 40.68,
+      "midi": 67,
+      "velocity": 56,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 40.402,
+      "end": 40.75,
+      "midi": 57,
+      "velocity": 49,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 40.403,
+      "end": 40.53,
+      "midi": 64,
+      "velocity": 59,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 40.406,
+      "end": 40.69,
+      "midi": 60,
+      "velocity": 34,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 40.746,
+      "end": 40.85,
+      "midi": 67,
+      "velocity": 70,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 40.748,
+      "end": 41.15,
+      "midi": 65,
+      "velocity": 60,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 40.754,
+      "end": 40.83,
+      "midi": 45,
+      "velocity": 59,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 40.757,
+      "end": 41.15,
+      "midi": 57,
+      "velocity": 58,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 40.763,
+      "end": 41.15,
+      "midi": 60,
+      "velocity": 44,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 41.163,
+      "end": 41.205,
+      "midi": 45,
+      "velocity": 54,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 41.163,
+      "end": 41.54,
+      "midi": 65,
+      "velocity": 54,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 41.164,
+      "end": 41.209,
+      "midi": 60,
+      "velocity": 50,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 41.165,
+      "end": 41.23,
+      "midi": 57,
+      "velocity": 52,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 41.175,
+      "end": 41.48,
+      "midi": 50,
+      "velocity": 43,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 41.179,
+      "end": 41.58,
+      "midi": 53,
+      "velocity": 41,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 41.501,
+      "end": 41.8,
+      "midi": 69,
+      "velocity": 56,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 41.506,
+      "end": 43.15,
+      "midi": 45,
+      "velocity": 54,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 41.507,
+      "end": 41.992,
+      "midi": 57,
+      "velocity": 53,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 41.507,
+      "end": 42.01,
+      "midi": 62,
+      "velocity": 64,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 41.509,
+      "end": 41.82,
+      "midi": 67,
+      "velocity": 64,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 41.513,
+      "end": 43.4,
+      "midi": 50,
+      "velocity": 42,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 41.513,
+      "end": 41.985,
+      "midi": 60,
+      "velocity": 55,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 42.025,
+      "end": 42.2,
+      "midi": 65,
+      "velocity": 67,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 42.056,
+      "end": 43.76,
+      "midi": 62,
+      "velocity": 57,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 42.207,
+      "end": 42.27,
+      "midi": 65,
+      "velocity": 46,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 42.275,
+      "end": 46.01,
+      "midi": 67,
+      "velocity": 72,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 42.54,
+      "end": 46.01,
+      "midi": 72,
+      "velocity": 57,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 43.771,
+      "end": 46.01,
+      "midi": 62,
+      "velocity": 63,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 45.996,
+      "end": 49.46,
+      "midi": 65,
+      "velocity": 48,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 46.027,
+      "end": 47.785,
+      "midi": 60,
+      "velocity": 62,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 46.973,
+      "end": 49.52,
+      "midi": 77,
+      "velocity": 68,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 46.973,
+      "end": 49.52,
+      "midi": 84,
+      "velocity": 72,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 47.785,
+      "end": 49.33,
+      "midi": 60,
+      "velocity": 65,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 49.454,
+      "end": 49.516,
+      "midi": 57,
+      "velocity": 47,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 49.463,
+      "end": 49.58,
+      "midi": 69,
+      "velocity": 62,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 49.466,
+      "end": 49.515,
+      "midi": 65,
+      "velocity": 46,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 49.467,
+      "end": 49.517,
+      "midi": 60,
+      "velocity": 71,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 49.468,
+      "end": 49.54,
+      "midi": 72,
+      "velocity": 75,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 50.547,
+      "end": 50.68,
+      "midi": 62,
+      "velocity": 66,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 50.714,
+      "end": 50.79,
+      "midi": 60,
+      "velocity": 60,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 50.867,
+      "end": 51.023,
+      "midi": 57,
+      "velocity": 62,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 50.986,
+      "end": 51.05,
+      "midi": 65,
+      "velocity": 44,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 51.375,
+      "end": 51.515,
+      "midi": 57,
+      "velocity": 49,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 51.464,
+      "end": 51.506,
+      "midi": 60,
+      "velocity": 72,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 51.486,
+      "end": 51.53,
+      "midi": 69,
+      "velocity": 68,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 51.736,
+      "end": 51.81,
+      "midi": 67,
+      "velocity": 80,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 51.741,
+      "end": 51.82,
+      "midi": 62,
+      "velocity": 74,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 51.884,
+      "end": 51.96,
+      "midi": 67,
+      "velocity": 65,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 52.497,
+      "end": 52.545,
+      "midi": 64,
+      "velocity": 68,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 52.593,
+      "end": 52.666,
+      "midi": 62,
+      "velocity": 67,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 52.741,
+      "end": 52.79,
+      "midi": 60,
+      "velocity": 68,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 52.782,
+      "end": 52.88,
+      "midi": 58,
+      "velocity": 64,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 52.986,
+      "end": 53.07,
+      "midi": 60,
+      "velocity": 61,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 53.507,
+      "end": 53.73,
+      "midi": 67,
+      "velocity": 67,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 53.517,
+      "end": 53.74,
+      "midi": 65,
+      "velocity": 58,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 53.523,
+      "end": 53.72,
+      "midi": 53,
+      "velocity": 55,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 53.735,
+      "end": 53.795,
+      "midi": 67,
+      "velocity": 79,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 53.973,
+      "end": 54.2,
+      "midi": 64,
+      "velocity": 55,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 53.984,
+      "end": 54.07,
+      "midi": 57,
+      "velocity": 57,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 53.994,
+      "end": 54.28,
+      "midi": 69,
+      "velocity": 63,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 54.369,
+      "end": 54.59,
+      "midi": 69,
+      "velocity": 68,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 54.382,
+      "end": 54.49,
+      "midi": 62,
+      "velocity": 58,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 54.625,
+      "end": 54.693,
+      "midi": 62,
+      "velocity": 50,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 54.73,
+      "end": 54.773,
+      "midi": 64,
+      "velocity": 71,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 54.755,
+      "end": 54.79,
+      "midi": 57,
+      "velocity": 68,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 54.986,
+      "end": 55.072,
+      "midi": 65,
+      "velocity": 68,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 54.994,
+      "end": 55.042,
+      "midi": 69,
+      "velocity": 66,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 55.125,
+      "end": 55.165,
+      "midi": 65,
+      "velocity": 67,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 55.127,
+      "end": 55.167,
+      "midi": 57,
+      "velocity": 74,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 55.128,
+      "end": 55.18,
+      "midi": 62,
+      "velocity": 64,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 55.287,
+      "end": 55.335,
+      "midi": 65,
+      "velocity": 68,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 55.473,
+      "end": 55.8,
+      "midi": 69,
+      "velocity": 63,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 55.489,
+      "end": 55.526,
+      "midi": 57,
+      "velocity": 65,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 55.495,
+      "end": 55.529,
+      "midi": 65,
+      "velocity": 51,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 55.735,
+      "end": 55.934,
+      "midi": 62,
+      "velocity": 45,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 55.756,
+      "end": 55.85,
+      "midi": 65,
+      "velocity": 64,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 55.827,
+      "end": 55.92,
+      "midi": 58,
+      "velocity": 46,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 55.976,
+      "end": 56.04,
+      "midi": 67,
+      "velocity": 87,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 56.057,
+      "end": 56.223,
+      "midi": 60,
+      "velocity": 46,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 56.128,
+      "end": 56.31,
+      "midi": 63,
+      "velocity": 57,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 56.196,
+      "end": 56.28,
+      "midi": 67,
+      "velocity": 74,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 56.375,
+      "end": 56.482,
+      "midi": 60,
+      "velocity": 77,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 56.376,
+      "end": 56.48,
+      "midi": 67,
+      "velocity": 85,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 56.473,
+      "end": 56.55,
+      "midi": 81,
+      "velocity": 94,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 56.475,
+      "end": 56.522,
+      "midi": 69,
+      "velocity": 83,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 56.495,
+      "end": 56.68,
+      "midi": 65,
+      "velocity": 56,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 56.605,
+      "end": 56.72,
+      "midi": 57,
+      "velocity": 59,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 56.696,
+      "end": 56.76,
+      "midi": 67,
+      "velocity": 75,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 56.749,
+      "end": 56.95,
+      "midi": 60,
+      "velocity": 69,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 56.899,
+      "end": 57.1,
+      "midi": 69,
+      "velocity": 60,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 56.927,
+      "end": 57.17,
+      "midi": 67,
+      "velocity": 78,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 56.993,
+      "end": 57.12,
+      "midi": 62,
+      "velocity": 46,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 57.125,
+      "end": 57.2,
+      "midi": 60,
+      "velocity": 62,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 57.256,
+      "end": 57.42,
+      "midi": 65,
+      "velocity": 54,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 57.362,
+      "end": 57.5,
+      "midi": 60,
+      "velocity": 66,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 57.365,
+      "end": 57.41,
+      "midi": 69,
+      "velocity": 62,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 57.475,
+      "end": 57.65,
+      "midi": 67,
+      "velocity": 64,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 57.507,
+      "end": 57.66,
+      "midi": 60,
+      "velocity": 83,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 57.964,
+      "end": 58.06,
+      "midi": 64,
+      "velocity": 52,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 58.22,
+      "end": 58.31,
+      "midi": 65,
+      "velocity": 80,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 58.495,
+      "end": 58.71,
+      "midi": 69,
+      "velocity": 58,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 58.995,
+      "end": 59.03,
+      "midi": 60,
+      "velocity": 61,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 59.458,
+      "end": 59.5,
+      "midi": 60,
+      "velocity": 71,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 60.005,
+      "end": 60.17,
+      "midi": 57,
+      "velocity": 79,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 60.007,
+      "end": 60.13,
+      "midi": 64,
+      "velocity": 82,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 60.012,
+      "end": 60.09,
+      "midi": 53,
+      "velocity": 61,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 60.225,
+      "end": 60.29,
+      "midi": 65,
+      "velocity": 75,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 60.236,
+      "end": 60.34,
+      "midi": 69,
+      "velocity": 76,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 60.49,
+      "end": 60.68,
+      "midi": 69,
+      "velocity": 60,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 60.764,
+      "end": 60.83,
+      "midi": 60,
+      "velocity": 71,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 61.003,
+      "end": 61.05,
+      "midi": 65,
+      "velocity": 35,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 61.004,
+      "end": 61.04,
+      "midi": 60,
+      "velocity": 65,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 61.225,
+      "end": 61.29,
+      "midi": 64,
+      "velocity": 63,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 61.494,
+      "end": 61.54,
+      "midi": 60,
+      "velocity": 76,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 61.735,
+      "end": 61.78,
+      "midi": 62,
+      "velocity": 68,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 61.984,
+      "end": 62.06,
+      "midi": 57,
+      "velocity": 85,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 62.378,
+      "end": 62.45,
+      "midi": 69,
+      "velocity": 68,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 62.384,
+      "end": 62.48,
+      "midi": 38,
+      "velocity": 69,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 62.49,
+      "end": 62.55,
+      "midi": 62,
+      "velocity": 74,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 62.756,
+      "end": 62.86,
+      "midi": 57,
+      "velocity": 79,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 62.757,
+      "end": 62.85,
+      "midi": 69,
+      "velocity": 63,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 62.767,
+      "end": 62.83,
+      "midi": 65,
+      "velocity": 53,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 62.772,
+      "end": 62.83,
+      "midi": 62,
+      "velocity": 52,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 63.124,
+      "end": 63.25,
+      "midi": 62,
+      "velocity": 74,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 63.126,
+      "end": 63.21,
+      "midi": 57,
+      "velocity": 82,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 63.262,
+      "end": 63.3,
+      "midi": 62,
+      "velocity": 59,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 63.479,
+      "end": 63.55,
+      "midi": 64,
+      "velocity": 71,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 63.497,
+      "end": 63.893,
+      "midi": 57,
+      "velocity": 68,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 63.504,
+      "end": 63.56,
+      "midi": 76,
+      "velocity": 79,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 63.514,
+      "end": 63.58,
+      "midi": 69,
+      "velocity": 52,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 63.515,
+      "end": 63.73,
+      "midi": 83,
+      "velocity": 70,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 63.683,
+      "end": 63.86,
+      "midi": 69,
+      "velocity": 45,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 63.867,
+      "end": 63.95,
+      "midi": 69,
+      "velocity": 60,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 67.66,
+      "end": 67.74,
+      "midi": 34,
+      "velocity": 69,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 69.677,
+      "end": 69.72,
+      "midi": 50,
+      "velocity": 64,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 79.66,
+      "end": 79.79,
+      "midi": 50,
+      "velocity": 67,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 79.665,
+      "end": 79.73,
+      "midi": 62,
+      "velocity": 52,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 79.667,
+      "end": 79.78,
+      "midi": 45,
+      "velocity": 65,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 83.659,
+      "end": 83.72,
+      "midi": 34,
+      "velocity": 71,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 85.673,
+      "end": 85.78,
+      "midi": 50,
+      "velocity": 70,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 91.668,
+      "end": 91.8,
+      "midi": 34,
+      "velocity": 62,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 99.545,
+      "end": 99.587,
+      "midi": 70,
+      "velocity": 57,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 99.643,
+      "end": 99.674,
+      "midi": 67,
+      "velocity": 44,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 100.005,
+      "end": 103.15,
+      "midi": 53,
+      "velocity": 43,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 100.007,
+      "end": 103.15,
+      "midi": 46,
+      "velocity": 52,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 100.008,
+      "end": 102.016,
+      "midi": 50,
+      "velocity": 41,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 100.023,
+      "end": 100.445,
+      "midi": 58,
+      "velocity": 43,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 100.238,
+      "end": 101.679,
+      "midi": 57,
+      "velocity": 48,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 100.445,
+      "end": 102.014,
+      "midi": 58,
+      "velocity": 34,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 100.615,
+      "end": 101.137,
+      "midi": 62,
+      "velocity": 50,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 100.959,
+      "end": 101.201,
+      "midi": 60,
+      "velocity": 62,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 101.137,
+      "end": 102.74,
+      "midi": 62,
+      "velocity": 36,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 101.201,
+      "end": 101.451,
+      "midi": 60,
+      "velocity": 54,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 101.451,
+      "end": 101.574,
+      "midi": 60,
+      "velocity": 47,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 101.574,
+      "end": 102.53,
+      "midi": 60,
+      "velocity": 57,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 101.679,
+      "end": 102.245,
+      "midi": 57,
+      "velocity": 54,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 102.013,
+      "end": 104.03,
+      "midi": 55,
+      "velocity": 62,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 102.014,
+      "end": 103.15,
+      "midi": 58,
+      "velocity": 48,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 102.016,
+      "end": 106.015,
+      "midi": 50,
+      "velocity": 41,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 102.245,
+      "end": 102.49,
+      "midi": 57,
+      "velocity": 69,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 102.496,
+      "end": 102.74,
+      "midi": 57,
+      "velocity": 54,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 102.537,
+      "end": 102.988,
+      "midi": 60,
+      "velocity": 35,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 102.753,
+      "end": 103.995,
+      "midi": 57,
+      "velocity": 53,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 102.753,
+      "end": 104.033,
+      "midi": 62,
+      "velocity": 53,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 102.988,
+      "end": 103.386,
+      "midi": 60,
+      "velocity": 44,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 103.386,
+      "end": 104.008,
+      "midi": 60,
+      "velocity": 43,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 103.995,
+      "end": 104.1,
+      "midi": 57,
+      "velocity": 56,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 104.008,
+      "end": 104.1,
+      "midi": 60,
+      "velocity": 44,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 104.011,
+      "end": 107.994,
+      "midi": 38,
+      "velocity": 57,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 104.013,
+      "end": 108.393,
+      "midi": 45,
+      "velocity": 50,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 104.245,
+      "end": 105.718,
+      "midi": 57,
+      "velocity": 60,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 104.603,
+      "end": 107.246,
+      "midi": 62,
+      "velocity": 66,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 104.885,
+      "end": 104.998,
+      "midi": 60,
+      "velocity": 49,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 104.998,
+      "end": 105.155,
+      "midi": 60,
+      "velocity": 71,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 105.155,
+      "end": 105.452,
+      "midi": 60,
+      "velocity": 53,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 105.452,
+      "end": 105.585,
+      "midi": 60,
+      "velocity": 55,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 105.585,
+      "end": 107.994,
+      "midi": 60,
+      "velocity": 66,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 105.718,
+      "end": 107.01,
+      "midi": 57,
+      "velocity": 61,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 106.34,
+      "end": 106.513,
+      "midi": 58,
+      "velocity": 61,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 106.513,
+      "end": 107.03,
+      "midi": 58,
+      "velocity": 63,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 107.015,
+      "end": 107.445,
+      "midi": 57,
+      "velocity": 47,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 107.246,
+      "end": 107.456,
+      "midi": 62,
+      "velocity": 57,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 107.445,
+      "end": 108.279,
+      "midi": 57,
+      "velocity": 48,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 107.456,
+      "end": 107.744,
+      "midi": 62,
+      "velocity": 55,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 107.744,
+      "end": 107.994,
+      "midi": 62,
+      "velocity": 68,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 107.757,
+      "end": 108.256,
+      "midi": 93,
+      "velocity": 89,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 107.98,
+      "end": 108.393,
+      "midi": 91,
+      "velocity": 95,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 108.002,
+      "end": 108.393,
+      "midi": 60,
+      "velocity": 72,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 108.022,
+      "end": 108.261,
+      "midi": 58,
+      "velocity": 67,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 108.237,
+      "end": 110.0,
+      "midi": 34,
+      "velocity": 62,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 108.254,
+      "end": 108.63,
+      "midi": 62,
+      "velocity": 61,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 108.256,
+      "end": 110.72,
+      "midi": 93,
+      "velocity": 72,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 108.261,
+      "end": 108.393,
+      "midi": 58,
+      "velocity": 57,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 108.279,
+      "end": 108.42,
+      "midi": 57,
+      "velocity": 52,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 108.705,
+      "end": 110.43,
+      "midi": 91,
+      "velocity": 80,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 108.738,
+      "end": 109.544,
+      "midi": 62,
+      "velocity": 65,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 108.936,
+      "end": 112.002,
+      "midi": 92,
+      "velocity": 83,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 109.264,
+      "end": 110.0,
+      "midi": 64,
+      "velocity": 55,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 109.544,
+      "end": 110.75,
+      "midi": 62,
+      "velocity": 61,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 109.671,
+      "end": 109.922,
+      "midi": 60,
+      "velocity": 55,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 109.922,
+      "end": 110.11,
+      "midi": 60,
+      "velocity": 59,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 110.201,
+      "end": 111.665,
+      "midi": 60,
+      "velocity": 46,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 110.589,
+      "end": 110.79,
+      "midi": 58,
+      "velocity": 52,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 110.72,
+      "end": 111.553,
+      "midi": 86,
+      "velocity": 72,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 110.728,
+      "end": 112.5,
+      "midi": 93,
+      "velocity": 75,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 110.736,
+      "end": 111.534,
+      "midi": 81,
+      "velocity": 64,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 110.756,
+      "end": 111.38,
+      "midi": 62,
+      "velocity": 64,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 110.796,
+      "end": 111.08,
+      "midi": 58,
+      "velocity": 35,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 110.952,
+      "end": 112.002,
+      "midi": 88,
+      "velocity": 77,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 110.956,
+      "end": 112.02,
+      "midi": 84,
+      "velocity": 78,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 110.964,
+      "end": 112.01,
+      "midi": 65,
+      "velocity": 54,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 110.967,
+      "end": 112.002,
+      "midi": 89,
+      "velocity": 79,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 110.97,
+      "end": 112.76,
+      "midi": 57,
+      "velocity": 46,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 111.086,
+      "end": 112.04,
+      "midi": 58,
+      "velocity": 49,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 111.204,
+      "end": 111.416,
+      "midi": 64,
+      "velocity": 54,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 111.38,
+      "end": 111.557,
+      "midi": 62,
+      "velocity": 38,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 111.416,
+      "end": 112.02,
+      "midi": 64,
+      "velocity": 56,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 111.495,
+      "end": 112.395,
+      "midi": 69,
+      "velocity": 51,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 111.534,
+      "end": 112.395,
+      "midi": 81,
+      "velocity": 69,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 111.553,
+      "end": 112.01,
+      "midi": 86,
+      "velocity": 65,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 111.557,
+      "end": 112.262,
+      "midi": 62,
+      "velocity": 58,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 111.665,
+      "end": 112.01,
+      "midi": 60,
+      "velocity": 49,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 112.015,
+      "end": 112.58,
+      "midi": 60,
+      "velocity": 50,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 112.262,
+      "end": 113.995,
+      "midi": 62,
+      "velocity": 54,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 112.765,
+      "end": 113.995,
+      "midi": 60,
+      "velocity": 37,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 112.769,
+      "end": 113.998,
+      "midi": 57,
+      "velocity": 44,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 115.734,
+      "end": 115.94,
+      "midi": 89,
+      "velocity": 75,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 115.747,
+      "end": 115.901,
+      "midi": 65,
+      "velocity": 64,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 115.748,
+      "end": 115.78,
+      "midi": 77,
+      "velocity": 65,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 117.641,
+      "end": 117.77,
+      "midi": 34,
+      "velocity": 60,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 117.794,
+      "end": 117.844,
+      "midi": 60,
+      "velocity": 74,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 125.635,
+      "end": 125.718,
+      "midi": 34,
+      "velocity": 62,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 125.783,
+      "end": 125.92,
+      "midi": 62,
+      "velocity": 63,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 129.628,
+      "end": 129.79,
+      "midi": 62,
+      "velocity": 72,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 129.804,
+      "end": 130.584,
+      "midi": 62,
+      "velocity": 64,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 129.808,
+      "end": 130.242,
+      "midi": 67,
+      "velocity": 75,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 130.242,
+      "end": 131.0,
+      "midi": 67,
+      "velocity": 60,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 130.498,
+      "end": 131.0,
+      "midi": 74,
+      "velocity": 76,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 130.584,
+      "end": 131.994,
+      "midi": 62,
+      "velocity": 60,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 131.251,
+      "end": 131.994,
+      "midi": 64,
+      "velocity": 50,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 131.476,
+      "end": 132.0,
+      "midi": 60,
+      "velocity": 63,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 131.505,
+      "end": 131.69,
+      "midi": 65,
+      "velocity": 44,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 131.726,
+      "end": 132.495,
+      "midi": 65,
+      "velocity": 52,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 131.994,
+      "end": 132.249,
+      "midi": 62,
+      "velocity": 59,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 131.994,
+      "end": 132.675,
+      "midi": 67,
+      "velocity": 71,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 131.996,
+      "end": 132.319,
+      "midi": 64,
+      "velocity": 71,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 131.998,
+      "end": 132.08,
+      "midi": 70,
+      "velocity": 68,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 132.249,
+      "end": 132.584,
+      "midi": 62,
+      "velocity": 54,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 132.319,
+      "end": 133.985,
+      "midi": 64,
+      "velocity": 73,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 132.33,
+      "end": 132.495,
+      "midi": 69,
+      "velocity": 69,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 132.493,
+      "end": 133.985,
+      "midi": 74,
+      "velocity": 78,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 132.495,
+      "end": 132.666,
+      "midi": 65,
+      "velocity": 57,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 132.495,
+      "end": 132.976,
+      "midi": 69,
+      "velocity": 67,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 132.584,
+      "end": 132.983,
+      "midi": 62,
+      "velocity": 55,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 132.666,
+      "end": 132.983,
+      "midi": 65,
+      "velocity": 51,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 132.675,
+      "end": 133.561,
+      "midi": 67,
+      "velocity": 62,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 132.72,
+      "end": 132.983,
+      "midi": 60,
+      "velocity": 49,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 132.833,
+      "end": 133.15,
+      "midi": 77,
+      "velocity": 68,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 132.976,
+      "end": 133.25,
+      "midi": 69,
+      "velocity": 49,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 132.983,
+      "end": 133.15,
+      "midi": 65,
+      "velocity": 43,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 132.99,
+      "end": 133.455,
+      "midi": 60,
+      "velocity": 52,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 132.99,
+      "end": 133.72,
+      "midi": 62,
+      "velocity": 49,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 133.156,
+      "end": 133.958,
+      "midi": 65,
+      "velocity": 53,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 133.258,
+      "end": 133.32,
+      "midi": 69,
+      "velocity": 46,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 133.327,
+      "end": 133.462,
+      "midi": 69,
+      "velocity": 65,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 133.455,
+      "end": 133.985,
+      "midi": 60,
+      "velocity": 57,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 133.462,
+      "end": 133.985,
+      "midi": 69,
+      "velocity": 62,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 133.561,
+      "end": 133.728,
+      "midi": 67,
+      "velocity": 74,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 133.72,
+      "end": 133.99,
+      "midi": 62,
+      "velocity": 67,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 133.728,
+      "end": 133.974,
+      "midi": 67,
+      "velocity": 67,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 133.958,
+      "end": 134.493,
+      "midi": 65,
+      "velocity": 55,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 133.974,
+      "end": 134.16,
+      "midi": 67,
+      "velocity": 63,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 133.996,
+      "end": 134.989,
+      "midi": 62,
+      "velocity": 63,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 134.16,
+      "end": 134.24,
+      "midi": 67,
+      "velocity": 63,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 134.247,
+      "end": 134.799,
+      "midi": 67,
+      "velocity": 65,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 134.332,
+      "end": 134.99,
+      "midi": 69,
+      "velocity": 66,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 134.493,
+      "end": 134.985,
+      "midi": 65,
+      "velocity": 54,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 134.568,
+      "end": 135.04,
+      "midi": 77,
+      "velocity": 72,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 134.734,
+      "end": 134.985,
+      "midi": 64,
+      "velocity": 61,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 134.799,
+      "end": 134.985,
+      "midi": 67,
+      "velocity": 73,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 134.997,
+      "end": 135.314,
+      "midi": 69,
+      "velocity": 65,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 134.997,
+      "end": 135.09,
+      "midi": 81,
+      "velocity": 89,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 134.998,
+      "end": 135.494,
+      "midi": 65,
+      "velocity": 63,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 135.231,
+      "end": 135.99,
+      "midi": 82,
+      "velocity": 78,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 135.235,
+      "end": 135.478,
+      "midi": 67,
+      "velocity": 65,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 135.314,
+      "end": 135.735,
+      "midi": 69,
+      "velocity": 75,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 135.334,
+      "end": 136.0,
+      "midi": 72,
+      "velocity": 68,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 135.478,
+      "end": 135.969,
+      "midi": 67,
+      "velocity": 71,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 135.487,
+      "end": 135.992,
+      "midi": 64,
+      "velocity": 66,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 135.494,
+      "end": 135.787,
+      "midi": 65,
+      "velocity": 63,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 135.735,
+      "end": 136.01,
+      "midi": 69,
+      "velocity": 69,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 135.787,
+      "end": 136.02,
+      "midi": 65,
+      "velocity": 74,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 135.969,
+      "end": 136.324,
+      "midi": 67,
+      "velocity": 79,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 136.157,
+      "end": 136.658,
+      "midi": 63,
+      "velocity": 58,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 136.324,
+      "end": 136.695,
+      "midi": 67,
+      "velocity": 71,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 136.463,
+      "end": 136.571,
+      "midi": 69,
+      "velocity": 73,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 136.465,
+      "end": 136.984,
+      "midi": 72,
+      "velocity": 68,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 136.571,
+      "end": 136.982,
+      "midi": 69,
+      "velocity": 68,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 136.658,
+      "end": 136.754,
+      "midi": 60,
+      "velocity": 43,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 136.658,
+      "end": 136.854,
+      "midi": 63,
+      "velocity": 50,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 136.695,
+      "end": 136.923,
+      "midi": 67,
+      "velocity": 73,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 136.754,
+      "end": 137.419,
+      "midi": 60,
+      "velocity": 47,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 136.854,
+      "end": 136.984,
+      "midi": 63,
+      "velocity": 42,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 136.923,
+      "end": 136.984,
+      "midi": 67,
+      "velocity": 76,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 136.982,
+      "end": 137.14,
+      "midi": 69,
+      "velocity": 83,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 136.992,
+      "end": 137.682,
+      "midi": 65,
+      "velocity": 57,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 137.139,
+      "end": 137.979,
+      "midi": 67,
+      "velocity": 74,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 137.155,
+      "end": 137.434,
+      "midi": 69,
+      "velocity": 72,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 137.236,
+      "end": 137.517,
+      "midi": 70,
+      "velocity": 85,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 137.419,
+      "end": 137.979,
+      "midi": 60,
+      "velocity": 72,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 137.434,
+      "end": 137.74,
+      "midi": 69,
+      "velocity": 69,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 137.517,
+      "end": 137.98,
+      "midi": 70,
+      "velocity": 89,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 137.659,
+      "end": 138.0,
+      "midi": 62,
+      "velocity": 54,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 137.682,
+      "end": 138.0,
+      "midi": 65,
+      "velocity": 45,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 137.74,
+      "end": 137.993,
+      "midi": 69,
+      "velocity": 78,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 137.964,
+      "end": 138.274,
+      "midi": 64,
+      "velocity": 61,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 137.983,
+      "end": 138.12,
+      "midi": 72,
+      "velocity": 76,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 138.115,
+      "end": 138.328,
+      "midi": 69,
+      "velocity": 70,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 138.135,
+      "end": 138.977,
+      "midi": 67,
+      "velocity": 76,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 138.267,
+      "end": 138.579,
+      "midi": 62,
+      "velocity": 53,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 138.274,
+      "end": 138.98,
+      "midi": 64,
+      "velocity": 70,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 138.328,
+      "end": 138.748,
+      "midi": 69,
+      "velocity": 73,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 138.566,
+      "end": 138.986,
+      "midi": 72,
+      "velocity": 81,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 138.578,
+      "end": 138.99,
+      "midi": 60,
+      "velocity": 54,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 138.579,
+      "end": 139.01,
+      "midi": 62,
+      "velocity": 53,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 138.745,
+      "end": 138.989,
+      "midi": 70,
+      "velocity": 89,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 138.748,
+      "end": 138.99,
+      "midi": 69,
+      "velocity": 74,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 138.794,
+      "end": 138.987,
+      "midi": 65,
+      "velocity": 49,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 139.0,
+      "end": 139.456,
+      "midi": 60,
+      "velocity": 63,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 139.16,
+      "end": 139.737,
+      "midi": 65,
+      "velocity": 61,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 139.329,
+      "end": 139.503,
+      "midi": 69,
+      "velocity": 69,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 139.456,
+      "end": 139.985,
+      "midi": 60,
+      "velocity": 73,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 139.503,
+      "end": 139.867,
+      "midi": 69,
+      "velocity": 71,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 139.543,
+      "end": 139.878,
+      "midi": 67,
+      "velocity": 66,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 139.737,
+      "end": 140.0,
+      "midi": 65,
+      "velocity": 47,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 139.738,
+      "end": 139.997,
+      "midi": 62,
+      "velocity": 67,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 139.867,
+      "end": 139.99,
+      "midi": 69,
+      "velocity": 53,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 139.878,
+      "end": 140.04,
+      "midi": 67,
+      "velocity": 62,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 139.98,
+      "end": 140.06,
+      "midi": 64,
+      "velocity": 67,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 139.995,
+      "end": 140.977,
+      "midi": 69,
+      "velocity": 72,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 140.245,
+      "end": 140.498,
+      "midi": 65,
+      "velocity": 54,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 140.498,
+      "end": 141.03,
+      "midi": 65,
+      "velocity": 50,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 140.731,
+      "end": 141.02,
+      "midi": 60,
+      "velocity": 58,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 140.765,
+      "end": 141.09,
+      "midi": 67,
+      "velocity": 62,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 141.026,
+      "end": 141.475,
+      "midi": 60,
+      "velocity": 55,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 141.159,
+      "end": 141.701,
+      "midi": 65,
+      "velocity": 55,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 141.25,
+      "end": 141.535,
+      "midi": 70,
+      "velocity": 86,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 141.368,
+      "end": 141.78,
+      "midi": 72,
+      "velocity": 88,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 141.475,
+      "end": 141.78,
+      "midi": 60,
+      "velocity": 69,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 141.535,
+      "end": 141.719,
+      "midi": 70,
+      "velocity": 83,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 141.744,
+      "end": 141.968,
+      "midi": 69,
+      "velocity": 80,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 141.754,
+      "end": 141.984,
+      "midi": 62,
+      "velocity": 54,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 141.968,
+      "end": 142.243,
+      "midi": 69,
+      "velocity": 75,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 141.988,
+      "end": 142.322,
+      "midi": 62,
+      "velocity": 64,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 141.989,
+      "end": 142.964,
+      "midi": 65,
+      "velocity": 60,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 142.132,
+      "end": 142.746,
+      "midi": 67,
+      "velocity": 78,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 142.243,
+      "end": 142.629,
+      "midi": 69,
+      "velocity": 70,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 142.322,
+      "end": 142.498,
+      "midi": 62,
+      "velocity": 60,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 142.498,
+      "end": 142.98,
+      "midi": 62,
+      "velocity": 62,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 142.629,
+      "end": 142.98,
+      "midi": 69,
+      "velocity": 53,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 142.746,
+      "end": 142.98,
+      "midi": 67,
+      "velocity": 82,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 142.992,
+      "end": 143.06,
+      "midi": 62,
+      "velocity": 62,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 142.994,
+      "end": 143.15,
+      "midi": 69,
+      "velocity": 66,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 143.114,
+      "end": 143.747,
+      "midi": 65,
+      "velocity": 56,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 143.225,
+      "end": 143.682,
+      "midi": 62,
+      "velocity": 58,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 143.24,
+      "end": 143.494,
+      "midi": 69,
+      "velocity": 68,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 143.366,
+      "end": 144.0,
+      "midi": 74,
+      "velocity": 78,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 143.478,
+      "end": 144.0,
+      "midi": 64,
+      "velocity": 65,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 143.494,
+      "end": 144.0,
+      "midi": 69,
+      "velocity": 69,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 143.682,
+      "end": 144.0,
+      "midi": 62,
+      "velocity": 54,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 143.747,
+      "end": 144.026,
+      "midi": 65,
+      "velocity": 46,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 143.748,
+      "end": 144.0,
+      "midi": 67,
+      "velocity": 59,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 143.974,
+      "end": 144.04,
+      "midi": 60,
+      "velocity": 69,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 144.004,
+      "end": 144.495,
+      "midi": 69,
+      "velocity": 62,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 144.008,
+      "end": 144.5,
+      "midi": 67,
+      "velocity": 61,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 144.02,
+      "end": 144.08,
+      "midi": 37,
+      "velocity": 60,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 144.766,
+      "end": 144.97,
+      "midi": 74,
+      "velocity": 66,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 148.625,
+      "end": 148.72,
+      "midi": 34,
+      "velocity": 65,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 148.672,
+      "end": 148.83,
+      "midi": 57,
+      "velocity": 63,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 150.622,
+      "end": 150.71,
+      "midi": 58,
+      "velocity": 62,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 150.623,
+      "end": 150.73,
+      "midi": 55,
+      "velocity": 55,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 150.624,
+      "end": 150.68,
+      "midi": 31,
+      "velocity": 47,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 150.625,
+      "end": 150.676,
+      "midi": 43,
+      "velocity": 41,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 150.627,
+      "end": 150.688,
+      "midi": 50,
+      "velocity": 61,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 152.253,
+      "end": 152.34,
+      "midi": 60,
+      "velocity": 85,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 152.261,
+      "end": 152.33,
+      "midi": 57,
+      "velocity": 81,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 152.262,
+      "end": 152.33,
+      "midi": 45,
+      "velocity": 79,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 152.264,
+      "end": 152.35,
+      "midi": 38,
+      "velocity": 78,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 152.265,
+      "end": 152.41,
+      "midi": 50,
+      "velocity": 58,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 152.632,
+      "end": 152.68,
+      "midi": 58,
+      "velocity": 70,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 152.633,
+      "end": 152.668,
+      "midi": 50,
+      "velocity": 69,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 152.641,
+      "end": 152.72,
+      "midi": 38,
+      "velocity": 74,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 152.641,
+      "end": 152.7,
+      "midi": 57,
+      "velocity": 74,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 152.642,
+      "end": 152.693,
+      "midi": 43,
+      "velocity": 57,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 152.642,
+      "end": 152.81,
+      "midi": 55,
+      "velocity": 53,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 154.625,
+      "end": 154.8,
+      "midi": 51,
+      "velocity": 68,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 154.627,
+      "end": 154.78,
+      "midi": 36,
+      "velocity": 56,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 154.627,
+      "end": 154.81,
+      "midi": 43,
+      "velocity": 58,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 154.627,
+      "end": 154.79,
+      "midi": 48,
+      "velocity": 65,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 154.629,
+      "end": 154.8,
+      "midi": 55,
+      "velocity": 61,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 156.634,
+      "end": 156.704,
+      "midi": 34,
+      "velocity": 68,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 158.622,
+      "end": 158.72,
+      "midi": 62,
+      "velocity": 65,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 158.629,
+      "end": 158.73,
+      "midi": 31,
+      "velocity": 58,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 158.63,
+      "end": 158.714,
+      "midi": 43,
+      "velocity": 51,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 158.632,
+      "end": 158.712,
+      "midi": 50,
+      "velocity": 64,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 158.632,
+      "end": 158.738,
+      "midi": 58,
+      "velocity": 61,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 158.633,
+      "end": 158.74,
+      "midi": 38,
+      "velocity": 63,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 158.633,
+      "end": 158.74,
+      "midi": 55,
+      "velocity": 52,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 158.633,
+      "end": 158.705,
+      "midi": 65,
+      "velocity": 56,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 158.783,
+      "end": 158.84,
+      "midi": 60,
+      "velocity": 76,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 160.264,
+      "end": 160.36,
+      "midi": 62,
+      "velocity": 49,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 160.629,
+      "end": 160.682,
+      "midi": 65,
+      "velocity": 47,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 160.635,
+      "end": 160.73,
+      "midi": 50,
+      "velocity": 62,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 160.636,
+      "end": 160.76,
+      "midi": 38,
+      "velocity": 66,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 160.636,
+      "end": 160.72,
+      "midi": 46,
+      "velocity": 67,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 160.636,
+      "end": 160.72,
+      "midi": 62,
+      "velocity": 45,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 160.638,
+      "end": 160.71,
+      "midi": 58,
+      "velocity": 56,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 162.627,
+      "end": 162.67,
+      "midi": 24,
+      "velocity": 67,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 162.628,
+      "end": 162.78,
+      "midi": 36,
+      "velocity": 59,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 164.634,
+      "end": 164.737,
+      "midi": 34,
+      "velocity": 66,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 165.259,
+      "end": 165.33,
+      "midi": 62,
+      "velocity": 50,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 165.26,
+      "end": 165.33,
+      "midi": 69,
+      "velocity": 72,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 166.627,
+      "end": 166.718,
+      "midi": 50,
+      "velocity": 66,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 166.627,
+      "end": 166.703,
+      "midi": 58,
+      "velocity": 62,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 168.255,
+      "end": 168.39,
+      "midi": 62,
+      "velocity": 68,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 168.635,
+      "end": 168.73,
+      "midi": 57,
+      "velocity": 73,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 168.64,
+      "end": 168.72,
+      "midi": 62,
+      "velocity": 55,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 168.643,
+      "end": 168.78,
+      "midi": 45,
+      "velocity": 74,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 170.807,
+      "end": 170.982,
+      "midi": 62,
+      "velocity": 67,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 172.629,
+      "end": 172.7,
+      "midi": 34,
+      "velocity": 71,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 174.628,
+      "end": 174.69,
+      "midi": 31,
+      "velocity": 52,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 174.63,
+      "end": 174.71,
+      "midi": 55,
+      "velocity": 59,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 174.631,
+      "end": 174.72,
+      "midi": 58,
+      "velocity": 68,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 174.632,
+      "end": 174.81,
+      "midi": 50,
+      "velocity": 69,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 176.257,
+      "end": 176.383,
+      "midi": 45,
+      "velocity": 81,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 176.262,
+      "end": 176.39,
+      "midi": 38,
+      "velocity": 81,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 176.632,
+      "end": 176.73,
+      "midi": 57,
+      "velocity": 74,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 176.633,
+      "end": 176.74,
+      "midi": 50,
+      "velocity": 65,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 176.64,
+      "end": 176.78,
+      "midi": 38,
+      "velocity": 65,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 178.246,
+      "end": 178.51,
+      "midi": 63,
+      "velocity": 86,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 178.628,
+      "end": 180.18,
+      "midi": 36,
+      "velocity": 61,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 178.635,
+      "end": 178.749,
+      "midi": 60,
+      "velocity": 66,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 179.003,
+      "end": 179.09,
+      "midi": 62,
+      "velocity": 58,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 179.005,
+      "end": 180.254,
+      "midi": 48,
+      "velocity": 61,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 179.006,
+      "end": 179.74,
+      "midi": 46,
+      "velocity": 61,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 179.007,
+      "end": 179.37,
+      "midi": 60,
+      "velocity": 54,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 179.104,
+      "end": 179.38,
+      "midi": 62,
+      "velocity": 43,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 179.242,
+      "end": 179.46,
+      "midi": 67,
+      "velocity": 66,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 179.336,
+      "end": 179.52,
+      "midi": 65,
+      "velocity": 51,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 179.394,
+      "end": 179.46,
+      "midi": 62,
+      "velocity": 46,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 179.397,
+      "end": 179.94,
+      "midi": 58,
+      "velocity": 37,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 179.466,
+      "end": 179.77,
+      "midi": 62,
+      "velocity": 46,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 179.533,
+      "end": 179.83,
+      "midi": 65,
+      "velocity": 48,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 179.744,
+      "end": 179.97,
+      "midi": 68,
+      "velocity": 71,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 179.748,
+      "end": 179.99,
+      "midi": 46,
+      "velocity": 49,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 179.779,
+      "end": 180.02,
+      "midi": 62,
+      "velocity": 56,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 179.955,
+      "end": 180.28,
+      "midi": 67,
+      "velocity": 65,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 179.963,
+      "end": 180.25,
+      "midi": 65,
+      "velocity": 44,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 179.997,
+      "end": 180.26,
+      "midi": 46,
+      "velocity": 47,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 180.027,
+      "end": 180.25,
+      "midi": 62,
+      "velocity": 45,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 180.088,
+      "end": 180.28,
+      "midi": 58,
+      "velocity": 36,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 180.262,
+      "end": 180.39,
+      "midi": 62,
+      "velocity": 48,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 180.263,
+      "end": 180.51,
+      "midi": 65,
+      "velocity": 49,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 180.265,
+      "end": 180.779,
+      "midi": 46,
+      "velocity": 54,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 180.4,
+      "end": 180.83,
+      "midi": 62,
+      "velocity": 47,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 180.516,
+      "end": 180.763,
+      "midi": 65,
+      "velocity": 50,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 180.659,
+      "end": 181.77,
+      "midi": 58,
+      "velocity": 36,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 180.757,
+      "end": 180.82,
+      "midi": 67,
+      "velocity": 66,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 180.826,
+      "end": 181.019,
+      "midi": 67,
+      "velocity": 61,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 180.836,
+      "end": 181.25,
+      "midi": 62,
+      "velocity": 46,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 180.843,
+      "end": 181.0,
+      "midi": 60,
+      "velocity": 46,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 181.0,
+      "end": 181.28,
+      "midi": 60,
+      "velocity": 39,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 181.019,
+      "end": 181.28,
+      "midi": 67,
+      "velocity": 69,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 181.248,
+      "end": 181.51,
+      "midi": 69,
+      "velocity": 60,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 181.259,
+      "end": 181.56,
+      "midi": 62,
+      "velocity": 43,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 181.269,
+      "end": 181.58,
+      "midi": 65,
+      "velocity": 41,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 181.355,
+      "end": 182.02,
+      "midi": 67,
+      "velocity": 65,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 181.572,
+      "end": 181.72,
+      "midi": 62,
+      "velocity": 38,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 181.583,
+      "end": 181.9,
+      "midi": 60,
+      "velocity": 32,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 181.588,
+      "end": 182.0,
+      "midi": 65,
+      "velocity": 54,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 181.731,
+      "end": 182.24,
+      "midi": 62,
+      "velocity": 56,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 181.794,
+      "end": 182.07,
+      "midi": 69,
+      "velocity": 70,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 181.924,
+      "end": 182.24,
+      "midi": 58,
+      "velocity": 35,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 182.033,
+      "end": 182.222,
+      "midi": 67,
+      "velocity": 64,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 182.135,
+      "end": 182.24,
+      "midi": 65,
+      "velocity": 40,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 182.25,
+      "end": 182.31,
+      "midi": 62,
+      "velocity": 58,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 182.259,
+      "end": 182.33,
+      "midi": 69,
+      "velocity": 73,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 182.382,
+      "end": 182.72,
+      "midi": 65,
+      "velocity": 55,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 182.485,
+      "end": 182.53,
+      "midi": 67,
+      "velocity": 71,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 182.494,
+      "end": 183.01,
+      "midi": 62,
+      "velocity": 40,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 182.606,
+      "end": 182.87,
+      "midi": 67,
+      "velocity": 75,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 182.725,
+      "end": 182.88,
+      "midi": 60,
+      "velocity": 39,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 182.725,
+      "end": 182.8,
+      "midi": 65,
+      "velocity": 60,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 182.734,
+      "end": 182.95,
+      "midi": 69,
+      "velocity": 71,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 182.805,
+      "end": 182.956,
+      "midi": 65,
+      "velocity": 49,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 182.881,
+      "end": 183.26,
+      "midi": 67,
+      "velocity": 62,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 182.888,
+      "end": 183.15,
+      "midi": 60,
+      "velocity": 43,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 183.023,
+      "end": 183.73,
+      "midi": 62,
+      "velocity": 44,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 183.046,
+      "end": 183.18,
+      "midi": 69,
+      "velocity": 47,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 183.237,
+      "end": 183.33,
+      "midi": 65,
+      "velocity": 55,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 183.339,
+      "end": 183.49,
+      "midi": 65,
+      "velocity": 62,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 183.385,
+      "end": 183.59,
+      "midi": 57,
+      "velocity": 46,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 183.496,
+      "end": 183.697,
+      "midi": 65,
+      "velocity": 47,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 183.739,
+      "end": 183.81,
+      "midi": 62,
+      "velocity": 51,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 183.748,
+      "end": 183.81,
+      "midi": 48,
+      "velocity": 50,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 183.753,
+      "end": 183.85,
+      "midi": 50,
+      "velocity": 55,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 183.908,
+      "end": 183.96,
+      "midi": 67,
+      "velocity": 62,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 184.244,
+      "end": 184.34,
+      "midi": 62,
+      "velocity": 51,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 184.264,
+      "end": 184.47,
+      "midi": 65,
+      "velocity": 52,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 184.266,
+      "end": 184.45,
+      "midi": 60,
+      "velocity": 37,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 184.465,
+      "end": 184.61,
+      "midi": 60,
+      "velocity": 33,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 184.484,
+      "end": 184.705,
+      "midi": 65,
+      "velocity": 54,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 184.492,
+      "end": 184.54,
+      "midi": 57,
+      "velocity": 48,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 184.518,
+      "end": 184.77,
+      "midi": 50,
+      "velocity": 42,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 184.646,
+      "end": 184.81,
+      "midi": 69,
+      "velocity": 44,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 184.724,
+      "end": 184.86,
+      "midi": 60,
+      "velocity": 45,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 184.765,
+      "end": 184.829,
+      "midi": 67,
+      "velocity": 71,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 184.871,
+      "end": 185.0,
+      "midi": 60,
+      "velocity": 55,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 184.955,
+      "end": 185.04,
+      "midi": 67,
+      "velocity": 64,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 185.077,
+      "end": 185.29,
+      "midi": 63,
+      "velocity": 34,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 185.085,
+      "end": 185.61,
+      "midi": 60,
+      "velocity": 51,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 185.263,
+      "end": 185.66,
+      "midi": 69,
+      "velocity": 65,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 185.484,
+      "end": 186.226,
+      "midi": 67,
+      "velocity": 66,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 185.617,
+      "end": 186.31,
+      "midi": 60,
+      "velocity": 52,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 185.625,
+      "end": 185.714,
+      "midi": 65,
+      "velocity": 57,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 185.784,
+      "end": 186.22,
+      "midi": 69,
+      "velocity": 78,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 185.847,
+      "end": 186.12,
+      "midi": 63,
+      "velocity": 64,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 186.258,
+      "end": 186.37,
+      "midi": 57,
+      "velocity": 60,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 186.261,
+      "end": 186.312,
+      "midi": 63,
+      "velocity": 75,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 186.275,
+      "end": 186.37,
+      "midi": 65,
+      "velocity": 70,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 186.38,
+      "end": 186.58,
+      "midi": 65,
+      "velocity": 64,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 186.476,
+      "end": 186.517,
+      "midi": 67,
+      "velocity": 82,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 186.485,
+      "end": 186.85,
+      "midi": 58,
+      "velocity": 60,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 186.587,
+      "end": 186.74,
+      "midi": 65,
+      "velocity": 66,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 186.596,
+      "end": 186.71,
+      "midi": 67,
+      "velocity": 77,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 186.723,
+      "end": 186.9,
+      "midi": 67,
+      "velocity": 81,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 186.753,
+      "end": 187.25,
+      "midi": 65,
+      "velocity": 69,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 186.905,
+      "end": 187.25,
+      "midi": 67,
+      "velocity": 70,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 187.259,
+      "end": 187.69,
+      "midi": 67,
+      "velocity": 80,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 187.263,
+      "end": 187.33,
+      "midi": 65,
+      "velocity": 66,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 187.337,
+      "end": 187.58,
+      "midi": 65,
+      "velocity": 68,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 187.452,
+      "end": 187.74,
+      "midi": 62,
+      "velocity": 59,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 187.47,
+      "end": 187.767,
+      "midi": 58,
+      "velocity": 47,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 187.587,
+      "end": 187.764,
+      "midi": 65,
+      "velocity": 59,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 187.699,
+      "end": 187.764,
+      "midi": 67,
+      "velocity": 75,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 187.754,
+      "end": 188.02,
+      "midi": 62,
+      "velocity": 61,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 187.876,
+      "end": 188.14,
+      "midi": 65,
+      "velocity": 50,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 187.877,
+      "end": 188.09,
+      "midi": 67,
+      "velocity": 77,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 188.005,
+      "end": 188.274,
+      "midi": 58,
+      "velocity": 48,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 188.029,
+      "end": 188.23,
+      "midi": 62,
+      "velocity": 47,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 188.043,
+      "end": 188.23,
+      "midi": 60,
+      "velocity": 53,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 188.105,
+      "end": 188.16,
+      "midi": 67,
+      "velocity": 60,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 188.166,
+      "end": 188.25,
+      "midi": 67,
+      "velocity": 66,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 188.242,
+      "end": 188.31,
+      "midi": 62,
+      "velocity": 63,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 188.245,
+      "end": 188.37,
+      "midi": 65,
+      "velocity": 61,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 188.267,
+      "end": 188.34,
+      "midi": 46,
+      "velocity": 56,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 188.346,
+      "end": 188.884,
+      "midi": 58,
+      "velocity": 46,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 188.391,
+      "end": 188.47,
+      "midi": 62,
+      "velocity": 55,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 188.588,
+      "end": 188.917,
+      "midi": 62,
+      "velocity": 66,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 188.764,
+      "end": 189.036,
+      "midi": 67,
+      "velocity": 74,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 188.884,
+      "end": 189.61,
+      "midi": 58,
+      "velocity": 44,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 188.899,
+      "end": 189.36,
+      "midi": 60,
+      "velocity": 47,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 188.917,
+      "end": 189.57,
+      "midi": 62,
+      "velocity": 50,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 189.036,
+      "end": 189.13,
+      "midi": 67,
+      "velocity": 76,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 189.144,
+      "end": 189.35,
+      "midi": 67,
+      "velocity": 67,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 189.249,
+      "end": 189.307,
+      "midi": 65,
+      "velocity": 48,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 189.254,
+      "end": 189.65,
+      "midi": 69,
+      "velocity": 64,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 189.358,
+      "end": 190.03,
+      "midi": 67,
+      "velocity": 74,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 189.366,
+      "end": 189.67,
+      "midi": 60,
+      "velocity": 53,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 189.555,
+      "end": 189.88,
+      "midi": 65,
+      "velocity": 59,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 189.578,
+      "end": 189.73,
+      "midi": 62,
+      "velocity": 51,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 189.616,
+      "end": 190.29,
+      "midi": 58,
+      "velocity": 54,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 189.744,
+      "end": 190.44,
+      "midi": 62,
+      "velocity": 69,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 189.785,
+      "end": 190.25,
+      "midi": 69,
+      "velocity": 80,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 190.036,
+      "end": 190.234,
+      "midi": 67,
+      "velocity": 76,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 190.258,
+      "end": 190.67,
+      "midi": 69,
+      "velocity": 81,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 190.259,
+      "end": 190.34,
+      "midi": 60,
+      "velocity": 56,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 190.448,
+      "end": 190.81,
+      "midi": 62,
+      "velocity": 65,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 190.603,
+      "end": 191.34,
+      "midi": 67,
+      "velocity": 78,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 190.728,
+      "end": 191.33,
+      "midi": 65,
+      "velocity": 81,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 190.817,
+      "end": 191.12,
+      "midi": 60,
+      "velocity": 52,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 190.825,
+      "end": 191.25,
+      "midi": 62,
+      "velocity": 65,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 191.128,
+      "end": 191.69,
+      "midi": 60,
+      "velocity": 50,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 191.258,
+      "end": 191.69,
+      "midi": 62,
+      "velocity": 51,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 191.336,
+      "end": 192.27,
+      "midi": 65,
+      "velocity": 50,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 191.702,
+      "end": 193.04,
+      "midi": 62,
+      "velocity": 50,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 191.705,
+      "end": 198.271,
+      "midi": 60,
+      "velocity": 37,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 192.292,
+      "end": 198.271,
+      "midi": 57,
+      "velocity": 54,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 192.303,
+      "end": 193.04,
+      "midi": 65,
+      "velocity": 77,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 192.811,
+      "end": 198.271,
+      "midi": 69,
+      "velocity": 82,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 209.667,
+      "end": 209.94,
+      "midi": 65,
+      "velocity": 51,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 209.714,
+      "end": 209.95,
+      "midi": 53,
+      "velocity": 30,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 209.948,
+      "end": 213.15,
+      "midi": 65,
+      "velocity": 41,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 209.96,
+      "end": 213.59,
+      "midi": 53,
+      "velocity": 26,
+      "hand": "left",
+      "source": "transcribed"
+    },
+    {
+      "start": 210.016,
+      "end": 213.15,
+      "midi": 62,
+      "velocity": 35,
+      "hand": "right",
+      "source": "transcribed"
+    },
+    {
+      "start": 210.859,
+      "end": 213.15,
+      "midi": 60,
+      "velocity": 23,
+      "hand": "right",
+      "source": "transcribed"
+    }
+  ],
+  "meta": {
+    "pipelineVersion": "0.1.0",
+    "createdAt": "2026-11-15T04:26:45+00:00",
+    "confidence": {
+      "key": 0.0093,
+      "tempo": 0.0848,
+      "chords": 0.2178,
+      "notes": 0.5763
+    }
+  }
+}
