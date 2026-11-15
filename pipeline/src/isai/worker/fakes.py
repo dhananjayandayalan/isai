@@ -28,6 +28,7 @@ class FakeJobQueue:
         self.rows: dict[str, FakeJobRow] = {}
         self.lock = threading.Lock()
         self.stages: list[str] = []
+        self.beats: list[tuple[str, str, str | None]] = []
         self.lose_lease = False
         """Set to make renew() report the lease lost (another worker took the job)."""
         for job in jobs or []:
@@ -85,6 +86,10 @@ class FakeJobQueue:
                 return False
             row.status, row.error_code, row.error_message = "failed", code, message
             return True
+
+    def heartbeat(self, worker_id: str, version: str, job_id: str | None) -> None:
+        with self.lock:
+            self.beats.append((worker_id, version, job_id))
 
     def release(self, job_id: str, worker_id: str) -> bool:
         with self.lock:

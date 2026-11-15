@@ -21,6 +21,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, TextIO
 
+from isai import __version__
 from isai.pipeline import SUPPORTED_TYPES
 from isai.worker.analyser import Analyser, Cancelled
 from isai.worker.errors import JobError, code_for_exception
@@ -34,6 +35,7 @@ class WorkerConfig:
     renew_every: float = 30.0
     job_timeout: float = 20 * 60.0
     poll_every: float = 5.0
+    heartbeat_every: float = 30.0
     sweep_every: float = 10 * 60.0
     upload_max_age: timedelta = field(default_factory=lambda: timedelta(hours=24))
     temp_root: Path | None = None
@@ -69,6 +71,8 @@ class Worker:
         self.abort = threading.Event()
         """Let the current job go back to the queue now (the second Ctrl+C)."""
         self._lock = threading.Lock()
+        self._current: str | None = None
+        """The job being processed, for the heartbeat."""
 
     def log(self, event: str, **fields: Any) -> None:
         """One JSON line. Never file names, titles or audio details (architecture §9)."""
@@ -108,6 +112,7 @@ class Worker:
 
         renewer = threading.Thread(target=renew, daemon=True)
         renewer.start()
+        self._current = job.job_id
         outcome = Outcome.FAILED
         code: str | None = None
         try:
@@ -156,6 +161,7 @@ class Worker:
                     pass  # the lease will expire and requeue_expired takes over
                 outcome = Outcome.FAILED
         finally:
+            self._current = None
             done.set()
             renewer.join(timeout=5)
             if outcome in (Outcome.SUCCEEDED, Outcome.FAILED):
@@ -191,8 +197,31 @@ class Worker:
             self.log("sweep", deleted=len(old))
         return old
 
+    def beat(self) -> None:
+        try:
+            with self._lock:
+                self.queue.heartbeat(self.config.worker_id, __version__, self._current)
+        except Exception as e:  # offline for a moment: the next beat tries again
+            self.log("heartbeat_failed", error=type(e).__name__)
+
     def run(self, once: bool = False) -> int:
         """Process jobs until `stop` is set (or one job with `once`); return how many."""
+        finished = threading.Event()
+
+        def heartbeats() -> None:
+            self.beat()
+            while not finished.wait(self.config.heartbeat_every):
+                self.beat()
+
+        beater = threading.Thread(target=heartbeats, daemon=True)
+        beater.start()
+        try:
+            return self._run(once)
+        finally:
+            finished.set()
+            beater.join(timeout=5)
+
+    def _run(self, once: bool) -> int:
         processed = 0
         last_sweep: float | None = None
         while not self.stop.is_set():

@@ -113,6 +113,10 @@ class SupabaseJobQueue:
                   "p_message": message}  # fmt: skip
         return bool(self._call("fail_job", params))
 
+    def heartbeat(self, worker_id: str, version: str, job_id: str | None) -> None:
+        params = {"p_worker_id": worker_id, "p_version": version, "p_job_id": job_id}
+        self.client.rpc("heartbeat", params).execute()
+
     def release(self, job_id: str, worker_id: str) -> bool:
         return bool(self._call("release_job", {"p_job_id": job_id, "p_worker_id": worker_id}))
 

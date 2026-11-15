@@ -133,6 +133,23 @@ def _parser() -> argparse.ArgumentParser:
     worker.add_argument(
         "--device", choices=["auto", "cpu", "cuda"], default="auto", help="where the models run"
     )
+
+    admin = commands.add_parser("admin", help="the owner's operations tools (service role)")
+    admin_commands = admin.add_subparsers(dest="admin_command", required=True)
+    admin_commands.add_parser("check", help="alerts and the rule 8 audit; exit 1 if any")
+    delete = admin_commands.add_parser("delete-user", help="delete a member and all their data")
+    delete.add_argument("email")
+    delete.add_argument("--yes", action="store_true", help="don't ask for confirmation")
+    backup = admin_commands.add_parser("backup", help="database rows and Song files, archived")
+    backup.add_argument("--out", type=Path, required=True)
+    restore = admin_commands.add_parser("restore", help="load a backup into an empty project")
+    restore.add_argument("archive", type=Path)
+    for sub in (backup, restore):
+        sub.add_argument(
+            "--passphrase-env",
+            metavar="VAR",
+            help="encrypt or decrypt with gpg, the passphrase in this environment variable",
+        )
     return parser
 
 
@@ -225,8 +242,54 @@ def _worker(args: argparse.Namespace) -> int:
     return ExitCode.OK
 
 
+def _admin(args: argparse.Namespace) -> int:
+    import os
+
+    from isai import admin
+    from isai.worker.supabase_impl import SettingsError, connect, load_settings
+
+    try:
+        client = connect(load_settings())
+    except SettingsError as e:
+        print(f"isai: {e}", file=sys.stderr)
+        return ExitCode.USAGE
+    if args.admin_command == "check":
+        alerts = admin.check(client)
+        for alert in alerts:
+            print(f"{alert.alert}: {alert.detail}")
+        if not alerts:
+            print("All clear")
+        return 1 if alerts else ExitCode.OK
+    if args.admin_command == "delete-user":
+        if not args.yes and input(f"Delete {args.email} and all their data? [y/N] ") != "y":
+            return ExitCode.OK
+        removed = admin.delete_user(client, args.email)
+        print(f"Deleted: {removed}")
+        return ExitCode.OK
+    passphrase = os.environ.get(args.passphrase_env) if args.passphrase_env else None
+    if args.passphrase_env and not passphrase:
+        print(f"isai: {args.passphrase_env} is empty", file=sys.stderr)
+        return ExitCode.USAGE
+    try:
+        db_url = admin.database_url()
+    except ValueError as e:
+        print(f"isai: {e}", file=sys.stderr)
+        return ExitCode.USAGE
+    if args.admin_command == "backup":
+        result = admin.backup(client, db_url, args.out, passphrase)
+        print(
+            f"Wrote {result.path} ({result.song_files} Song files, encrypted: {result.encrypted})"
+        )
+        return ExitCode.OK
+    restored = admin.restore(client, db_url, args.archive, passphrase)
+    print(f"Restored {restored['song_files']} Song files and the database rows")
+    return ExitCode.OK
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     args = _parser().parse_args(argv)
+    if args.command == "admin":
+        return _admin(args)
     if args.command == "models":
         return _models(args)
     if args.command == "worker":

@@ -271,3 +271,24 @@ def test_run_sweeps_at_start(tmp_path: Path) -> None:
     store.put(UPLOADS, "u/old.mp3", b"a", datetime.now(UTC) - timedelta(days=2))
     worker.run(once=True)
     assert not store.has(UPLOADS, "u/old.mp3")
+
+
+def test_the_worker_beats_while_it_runs_and_names_its_job(tmp_path: Path) -> None:
+    worker, queue, *_ = make(
+        tmp_path, FakeAnalyser(lambda _c: time.sleep(0.15)), heartbeat_every=0.02
+    )
+    worker.run(once=True)
+    assert queue.beats[0][0] == "w1"
+    assert ("w1", queue.beats[0][1], "job-1") in queue.beats  # a beat during the job
+    assert queue.beats[-1][2] in (None, "job-1")
+
+
+def test_a_failing_heartbeat_does_not_stop_the_worker(tmp_path: Path) -> None:
+    worker, queue, _, log = make(tmp_path, FakeAnalyser())
+
+    def down(worker_id: str, version: str, job_id: str | None) -> None:
+        raise ConnectionError("offline")
+
+    queue.heartbeat = down  # type: ignore[method-assign]
+    assert worker.run(once=True) == 1
+    assert "heartbeat_failed" in log.getvalue()
