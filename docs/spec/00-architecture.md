@@ -242,7 +242,7 @@ The service-role key never reaches the browser, the repo or CI logs.
 | 0014 | Beat tracker back to librosa, Beat This! as an option (P5, supersedes 0009 in part) | accepted |
 | next | Analysis models: chords (P5), if a learned recogniser is adopted | expected, after the spike |
 | next | `MidiInput` gains pedal and device-change events (P7, amends 0003) | expected |
-| next | Backend: Supabase, jobs-table queue, auth model, `api/` boundary (P8) | expected |
+| 0015 | Backend: Supabase, jobs-table queue, invite-only magic links, `api/` boundary (P8) | accepted |
 | next | Hosting: web host, worker host, sample hosting, error reporting (P9) | expected |
 | next | Carnatic data model: tala, raga data, swara spelling (P10) | expected |
 

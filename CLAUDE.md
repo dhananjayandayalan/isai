@@ -21,8 +21,8 @@ pipeline/                 # Python 3.11+, uv. Audio in -> Song JSON + MIDI out.
     harmony/              # chord recognition
     arrange/              # rule-based two-hand arranger (no LLM)
     theory/               # pure music theory, no audio deps
-    worker/               # Supabase queue worker
-    cli.py                # `isai analyse <file>`
+    worker/               # Supabase queue worker (`isai worker`)
+    cli.py                # `isai analyse <file>`, `isai worker`
   tests/
 web/                      # React + TypeScript + Vite, pnpm
   src/
@@ -31,7 +31,9 @@ web/                      # React + TypeScript + Vite, pnpm
     piano/                # keyboard rendering (canvas/SVG)
     engine/               # playback engine, training/performance modes
     theory/               # notation rendering (letter, staff, solfege, swaras, Roman)
+    api/                  # the only supabase-js user (auth, songs, sessions, jobs, uploads)
     generated/            # types generated from the schema. Never hand-edit.
+supabase/                 # Supabase CLI project: migrations, seed, pgTAP tests
 docs/spec/                # phased spec P0–P10 + 00-architecture.md, markdown with frontmatter
 docs/reference/           # scaling reference (tiers, capacity, security, ops, launch). Not a spec.
 docs/adr/                 # architecture decision records, NNNN-title.md
@@ -59,6 +61,10 @@ reports/                  # golden-eval reports (committed)
    uploaded audio after processing and only keeps Song JSON and MIDI.
 9. **Naming:** product, packages, modules, CLI commands and feature labels are English or
    Tamil, never Sanskrit. Musical terms stay in their native form (raga, swara, shruti, etc.).
+10. **Supabase goes through `web/src/api/`.** Nothing else in `web/` imports
+   `@supabase/*` (ESLint enforces it), and the worker reaches Supabase only through its
+   `JobQueue`, `ObjectStore` and `SongRepository` ports (ADR 0015). The service-role key
+   never reaches the browser, the repo or logs.
 
 ## Commands
 
@@ -69,11 +75,14 @@ Pipeline (run from `pipeline/`):
 - `uv run ruff check . && uv run ruff format --check .` lint
 - `uv run pyright` type check
 - `uv run isai analyse <file> --out <dir>` run the full pipeline on one song
+- `uv run isai worker [--once]` process the queue (needs `pipeline/.env`, see `.env.example`)
 
 Web (run from `web/`):
 
 - `pnpm install`, `pnpm dev`
 - `pnpm test` (Vitest), `pnpm lint`, `pnpm typecheck`
+- `pnpm db:start` / `pnpm db:stop` local Supabase (Docker), `pnpm db:reset` re-applies
+  migrations and seed, `pnpm db:test` pgTAP, `pnpm test:e2e` end to end on the local stack
 
 Schema:
 
