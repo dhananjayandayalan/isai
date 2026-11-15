@@ -2,7 +2,7 @@
 id: spec-p08-backend-library
 phase: P8
 title: Backend and library — accounts, upload, queue worker, songs
-status: draft
+status: ready
 track: both
 depends_on: [spec-p05-harmony-arranger, spec-p06-performance]
 ---
