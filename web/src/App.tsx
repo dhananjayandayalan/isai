@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type ReactNode } from 'react';
 import frere from '../../schema/examples/frere-jacques-a-cappella.json';
 import twinkle from '../../schema/examples/twinkle-g-major.json';
 import type { AudioSource } from './audio/engine';
@@ -35,8 +35,18 @@ export interface AppDeps {
   now?: () => string;
 }
 
-/** The pages of the app. There is no router yet (P8): one song is open at a time. */
+/** The pages of a song. In local mode they are state; signed in, they follow the URL (P8). */
 export type View = 'song' | 'practice' | 'results' | 'devices';
+
+/** A song from the account (P8): the URL picks the page, and the account adds actions. */
+export interface CloudSong {
+  view: View;
+  onNavigate: (view: View, options?: { replace?: boolean }) => void;
+  /** Above the song: the way back to the library and the song's actions. */
+  header: ReactNode;
+  /** The line over the title, e.g. "Your song" or "Shared with the group". */
+  overline: string;
+}
 
 /** The page Done on the Devices screen goes back to, and what it says. */
 const RETURN_LABEL: Record<Exclude<View, 'devices'>, string> = {
@@ -51,6 +61,8 @@ interface AppProps {
   deps?: AppDeps;
   /** The page to open on; the song overview by default. */
   view?: View;
+  /** Signed in: a song from the account instead of the example and file pickers. */
+  cloud?: CloudSong;
 }
 
 const EXAMPLES = [
@@ -83,7 +95,7 @@ function message(e: unknown): string {
   return e instanceof Error ? e.message : String(e);
 }
 
-export default function App({ source, deps, view: firstView = 'song' }: AppProps) {
+export default function App({ source, deps, view: firstView = 'song', cloud }: AppProps) {
   const [choice, setChoice] = useState<Choice>(() =>
     source === undefined ? { id: 'twinkle', json: twinkle } : { id: 'file', json: source },
   );
@@ -92,7 +104,13 @@ export default function App({ source, deps, view: firstView = 'song' }: AppProps
   const loaded = useMemo(() => load(choice), [choice]);
   const song = 'song' in loaded ? loaded.song : null;
 
-  const [view, setView] = useState<View>(firstView);
+  const [ownView, setOwnView] = useState<View>(cloud?.view ?? firstView);
+  const view = cloud ? cloud.view : ownView;
+  const navigate = cloud?.onNavigate;
+  const setView = useCallback(
+    (next: View) => (navigate ? navigate(next) : setOwnView(next)),
+    [navigate],
+  );
   const [returnTo, setReturnTo] = useState<Exclude<View, 'devices'>>(firstView === 'devices' ? 'song' : firstView);
   const [launch, setLaunch] = useState<Launch>({ mode: 'listen', loopBars: null, nonce: 0 });
   const [shown, setShown] = useState<PerformanceSession | null>(null);
@@ -264,7 +282,7 @@ export default function App({ source, deps, view: firstView = 'song' }: AppProps
         },
       );
     },
-    [song, sessionStore],
+    [song, sessionStore, setView],
   );
 
   const now = deps?.now ?? isoNow;
@@ -276,33 +294,44 @@ export default function App({ source, deps, view: firstView = 'song' }: AppProps
   const practiceMounted = page === 'practice';
   const showResults = page === 'results' && shown !== null;
 
+  // A results address with no result to show (opened directly, or after a reload): the song.
+  useEffect(() => {
+    if (navigate && view === 'results' && shown === null) navigate('song', { replace: true });
+  }, [navigate, view, shown]);
+
   return (
     <main className="app-main">
       <div className="app-content stack-6">
         <div className="row-between">
-          <div className="seg" role="group" aria-label="Song">
-            {EXAMPLES.map((example) => (
-              <button
-                key={example.id}
-                type="button"
-                className="seg-btn"
-                aria-pressed={choice.id === example.id}
-                onClick={() => pick({ id: example.id, json: example.json })}
-              >
-                {example.label}
-              </button>
-            ))}
-          </div>
+          {cloud ? (
+            cloud.header
+          ) : (
+            <div className="seg" role="group" aria-label="Song">
+              {EXAMPLES.map((example) => (
+                <button
+                  key={example.id}
+                  type="button"
+                  className="seg-btn"
+                  aria-pressed={choice.id === example.id}
+                  onClick={() => pick({ id: example.id, json: example.json })}
+                >
+                  {example.label}
+                </button>
+              ))}
+            </div>
+          )}
           <div className="row">
-            <label className="btn btn-secondary">
-              Open a .song.json file
-              <input
-                type="file"
-                accept=".json,application/json"
-                className="sr-only"
-                onChange={(e) => void openFile(e)}
-              />
-            </label>
+            {!cloud && (
+              <label className="btn btn-secondary">
+                Open a .song.json file
+                <input
+                  type="file"
+                  accept=".json,application/json"
+                  className="sr-only"
+                  onChange={(e) => void openFile(e)}
+                />
+              </label>
+            )}
             {deps && (
               <button type="button" className="btn btn-secondary" aria-pressed={onDevices} onClick={openDevices}>
                 MIDI & keyboard
@@ -327,7 +356,10 @@ export default function App({ source, deps, view: firstView = 'song' }: AppProps
 
         {song && !showResults && (
           <div hidden={onDevices} className="stack-6">
-            <SongSummary song={song} fromFile={choice.id === 'file' ? fileName : null} />
+            <SongSummary
+              song={song}
+              overline={cloud ? cloud.overline : choice.id === 'file' && fileName ? `From ${fileName}` : 'Example song'}
+            />
             {practiceMounted ? (
               <>
                 <div>
@@ -432,7 +464,7 @@ export default function App({ source, deps, view: firstView = 'song' }: AppProps
   );
 }
 
-function SongSummary({ song, fromFile }: { song: Song; fromFile: string | null }) {
+function SongSummary({ song, overline }: { song: Song; overline: string }) {
   const stats = [
     { label: 'Key', value: `${song.tonality.key} ${song.tonality.mode}` },
     { label: 'Tempo', value: `${Math.round(song.tempo.bpm)} BPM` },
@@ -441,7 +473,7 @@ function SongSummary({ song, fromFile }: { song: Song; fromFile: string | null }
   return (
     <section className="stack-6" aria-labelledby="song-title">
       <div className="stack-2">
-        <span className="t-overline">{fromFile ? `From ${fromFile}` : 'Example song'}</span>
+        <span className="t-overline">{overline}</span>
         <h1 className="t-page-title" id="song-title">
           {song.title}
         </h1>

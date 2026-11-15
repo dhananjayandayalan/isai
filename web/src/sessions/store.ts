@@ -84,6 +84,13 @@ export class IndexedDbSessionStore implements SessionStore {
     return found.sort(newestFirst);
   }
 
+  /** Every session on this device, newest first (for importing into an account, P8). */
+  async all(): Promise<Session[]> {
+    const store = (await this.open()).transaction(STORE, 'readonly').objectStore(STORE);
+    const found = (await settle(store.getAll())) as Session[];
+    return found.sort(newestFirst);
+  }
+
   private open(): Promise<IDBDatabase> {
     this.database ??= new Promise<IDBDatabase>((resolve, reject) => {
       const request = this.factory().open(this.name, 1);
