@@ -109,10 +109,14 @@ Schema:
 ## Where we left off (2026-11-15)
 
 Branches are stacked and unmerged: `p3-analysis` → `p4-transcription` → `p5-arranger`
-(current). P4 and P5 are built and pass their checks; their remaining exit criteria need
-the owner's ears and the golden audio. Plans: `docs/spec/plans/P3.md`, `P4.md`, `P5.md`.
+→ `p8-backend` (current). P4 and P5 are built and pass their checks; their remaining exit
+criteria need the owner's ears and the golden audio. P8 (backend) is built and in review:
+it waits on the owner's browser walkthrough and the Storage check
+(`docs/spec/plans/P8.md`). Next after P8: the repo-side half of P9 (hosting ADR, worker
+Dockerfile, CI, security headers, runbooks), with no deploy until the owner picks hosts,
+a budget and a domain. Plans: `docs/spec/plans/P3.md`, `P4.md`, `P5.md`, `P8.md`.
 
-**Open regression, start here.** The owner's verdict on `Maayangal Saathiyam`
+**Arrangement regression (resolved in code; owner's ears pending).** The owner's verdict on `Maayangal Saathiyam`
 (full-mix, a film song with vocals): the output is "definitely not good".
 - **Before** the last three code commits: the timing was off, but the keys (notes) and
   chord mapping sounded good.

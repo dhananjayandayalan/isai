@@ -68,6 +68,18 @@ Exit codes: 0 done, 1 invalid Song, 2 missing input or bad arguments, 3 schema n
 4 decode failed (or no ffmpeg), 5 longer than 12 minutes or bigger than 100 MB, 6 silent,
 7 torch or a model is missing (or fails its checksum).
 
+## The queue worker (P8)
+
+`uv run isai worker` takes analysis jobs from Supabase (ADR 0015): it claims a job with a
+lease, downloads the upload, runs `isai analyse` in a child process (20-minute limit), stores
+the Song JSON and MIDI, and marks the job done or failed with a code from
+`schema/job-errors.json`. The upload and the job's temp folder (audio, stems, stage cache)
+are deleted when the job ends; uploads older than 24 hours are swept at start-up and every
+10 minutes (`isai worker sweep` runs it once). The first Ctrl+C finishes the current job,
+the second puts it back in the queue. Settings: `ISAI_SUPABASE_URL`,
+`ISAI_SUPABASE_SERVICE_KEY`, `ISAI_WORKER_ID`, from the environment or `pipeline/.env`
+(see `.env.example`). Setup for the local stack is in the root README.
+
 ## The cache
 
 Each stage's output goes to `.cache/<audio-hash>/<stage>-<version>-<key>/`, where the key
