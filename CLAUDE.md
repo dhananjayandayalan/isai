@@ -117,13 +117,19 @@ Schema:
 
 ## Where we left off (2026-11-15)
 
-Branches are stacked and unmerged: `p3-analysis` → `p4-transcription` → `p5-arranger`
-→ `p8-backend` (current). P4 and P5 are built and pass their checks; their remaining exit
-criteria need the owner's ears and the golden audio. P8 (backend) is built and in review:
-it waits on the owner's browser walkthrough and the Storage check
-(`docs/spec/plans/P8.md`). Next after P8: the repo-side half of P9 (hosting ADR, worker
-Dockerfile, CI, security headers, runbooks), with no deploy until the owner picks hosts,
-a budget and a domain. Plans: `docs/spec/plans/P3.md`, `P4.md`, `P5.md`, `P8.md`.
+P1–P9 are merged into `main` (`74738f8`) and the phase branches are deleted; `main` is
+the only branch, with no git remote yet. Merged does not mean signed off:
+- P4 and P5 are built and pass their checks; their remaining exit criteria need the
+  owner's ears and the golden audio.
+- P8 (backend) is built; it waits on the owner's browser walkthrough and the Storage
+  check (`docs/spec/plans/P8.md`).
+- P9 repo side is built (ADR 0016 `proposed`, worker image, CI workflows, security
+  headers, runbooks). Nothing is deployed until the owner picks hosts, a budget and a
+  domain; the rest of its exit criteria need the GitHub repo or production
+  (`docs/spec/plans/P9.md`).
+
+Plans: `docs/spec/plans/P3.md`, `P4.md`, `P5.md`, `P8.md`, `P9.md`. New work starts on a
+branch off `main`.
 
 **Arrangement regression (resolved in code; owner's ears pending).** The owner's verdict on `Maayangal Saathiyam`
 (full-mix, a film song with vocals): the output is "definitely not good".
