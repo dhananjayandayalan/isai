@@ -13,6 +13,7 @@ import isai.cli
 import isai.pipeline
 from isai.assemble import SongInfo
 from isai.cli import main
+from isai.errors import ExitCode
 from isai.ingest import IngestLimits
 from isai.pipeline import Options, run
 from isai.schema import SongValidationError, current_version, load_json, validate_song
@@ -251,9 +252,27 @@ def test_an_invalid_song_exits_1(
     assert analyse(song_file, tmp_path / "out", "--no-cache") == 1
 
 
+def test_console_script_is_installed() -> None:
+    # The `isai` entry point installed next to this interpreter, not `python -m`. No models:
+    # the fake ones the other tests use don't reach a child process.
+    script = shutil.which("isai", path=str(Path(sys.executable).parent))
+    assert script is not None, "isai console script is not installed in this environment"
+    version = subprocess.run([script, "--version"], capture_output=True, text=True, check=False)
+    assert version.returncode == 0 and version.stdout.startswith("isai ")
+    missing = subprocess.run(
+        [script, "analyse", "no-such-file.mp3", "--type", "piano-solo", "--out", "out"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert missing.returncode == ExitCode.USAGE
+    assert "input file not found" in missing.stderr
+
+
+@pytest.mark.slow
 @needs_ffmpeg
 def test_console_script_runs(song_file: Path, tmp_path: Path) -> None:
-    # The `isai` entry point installed next to this interpreter, not `python -m`.
+    # A full analysis through the installed script: the real models, in a child process.
     script = shutil.which("isai", path=str(Path(sys.executable).parent))
     assert script is not None, "isai console script is not installed in this environment"
     result = subprocess.run(
