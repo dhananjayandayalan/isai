@@ -107,6 +107,22 @@ sign-in, uploads, the analysis queue and the library (ADR 0015).
 5. **End to end:** with the stack running, `pnpm test:e2e` (in `web/`) signs in test users,
    uploads a synthesised recording, runs `isai worker --once` and checks the result.
 
+## Production (P9)
+
+Hosting is proposed in ADR 0016: Cloudflare Pages for the web, the owner's GPU PC for the
+worker (Docker), Supabase for the backend. The one-time setup, the secrets and every runbook
+are in [`docs/runbooks/`](docs/runbooks/README.md). What the repo provides:
+
+- `pnpm build:site` (in `web/`): the production build with a strict CSP, the SPA fallback,
+  and the piano samples served by the site itself, checked against `samples.lock.json`.
+- `pipeline/Dockerfile` and `ops/worker/compose.yaml`: the worker image and how it runs on
+  the PC (GPU, restarts, memory caps, about 14 days of logs).
+- `.github/workflows/`: CI on every pull request, plus deploy, a 15-minute production watch
+  and a weekly dependency audit, all off until the owner enables them.
+- `uv run isai admin check | delete-user | backup | restore` (in `pipeline/`): alerts and
+  the rule 8 audit, deleting a member, and encrypted backups. Backup and restore also need
+  `ISAI_DATABASE_URL` (the project's Postgres connection string) and Docker.
+
 ## Changing the Song contract
 
 Edit `schema/song.schema.json`, then regenerate both type sets:

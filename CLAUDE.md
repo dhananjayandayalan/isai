@@ -34,6 +34,9 @@ web/                      # React + TypeScript + Vite, pnpm
     api/                  # the only supabase-js user (auth, songs, sessions, jobs, uploads)
     generated/            # types generated from the schema. Never hand-edit.
 supabase/                 # Supabase CLI project: migrations, seed, pgTAP tests
+ops/worker/               # worker container: compose file and entrypoint (Dockerfile in pipeline/)
+.github/                  # CI (every PR), gated deploy, production watch, weekly audit
+docs/runbooks/            # production setup and what to do when something breaks
 docs/spec/                # phased spec P0–P10 + 00-architecture.md, markdown with frontmatter
 docs/reference/           # scaling reference (tiers, capacity, security, ops, launch). Not a spec.
 docs/adr/                 # architecture decision records, NNNN-title.md
@@ -76,6 +79,9 @@ Pipeline (run from `pipeline/`):
 - `uv run pyright` type check
 - `uv run isai analyse <file> --out <dir>` run the full pipeline on one song
 - `uv run isai worker [--once]` process the queue (needs `pipeline/.env`, see `.env.example`)
+- `uv run isai admin check|delete-user|backup|restore` the owner's operations tools
+  (service role; backup and restore also need `ISAI_DATABASE_URL` and Docker)
+- `docker build -f pipeline/Dockerfile -t isai-worker .` (from the repo root) the worker image
 
 Web (run from `web/`):
 
@@ -83,6 +89,9 @@ Web (run from `web/`):
 - `pnpm test` (Vitest), `pnpm lint`, `pnpm typecheck`
 - `pnpm db:start` / `pnpm db:stop` local Supabase (Docker), `pnpm db:reset` re-applies
   migrations and seed, `pnpm db:test` pgTAP, `pnpm test:e2e` end to end on the local stack
+- `pnpm build:site` production build: CSP `_headers`, `_redirects`, self-hosted samples
+  checked against `samples.lock.json` (`pnpm samples:lock` records a new set)
+- `sh scripts/check-no-audio.sh` (repo root) the rule 8 guard CI runs
 
 Schema:
 
