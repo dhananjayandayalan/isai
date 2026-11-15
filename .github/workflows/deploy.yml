@@ -116,7 +116,7 @@ jobs:
             echo "sha=$(git rev-parse --short=12 HEAD)"
             echo "image=ghcr.io/$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')/isai-worker"
           } >> "$GITHUB_OUTPUT"
-      - uses: docker/build-push-action@v6
+      - uses: docker/build-push-action@v7
         with:
           context: .
           file: pipeline/Dockerfile
