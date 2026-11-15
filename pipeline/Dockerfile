@@ -6,7 +6,7 @@
 # Models are not baked in: they are fetched and checksummed into the /models volume on first
 # start (ops/worker/entrypoint.sh).
 
-FROM python:3.11-slim-bookworm AS base
+FROM python:3.15-slim-bookworm AS base
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     UV_COMPILE_BYTECODE=1 \
