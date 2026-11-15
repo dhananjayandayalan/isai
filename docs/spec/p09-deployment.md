@@ -2,7 +2,7 @@
 id: spec-p09-deployment
 phase: P9
 title: Deployment and operations — production for the friends group
-status: draft
+status: ready
 track: ops
 depends_on: [spec-p07-notation-settings, spec-p08-backend-library]
 ---
