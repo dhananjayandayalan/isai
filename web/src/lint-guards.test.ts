@@ -61,6 +61,32 @@ describe('rule 4 guard: Web MIDI only in src/midi/', () => {
   });
 });
 
+const SUPABASE_PROBES = [
+  "import { createClient } from '@supabase/supabase-js'; export const c = createClient;",
+  "export * from '@supabase/supabase-js';",
+  "export { RealtimeChannel } from '@supabase/realtime-js';",
+  "export const load = () => import('@supabase/supabase-js');",
+];
+
+describe('rule 10 guard: Supabase only in src/api/', () => {
+  it.each(SUPABASE_PROBES)('flags %s outside src/api/', async (code) => {
+    expect(await guardHits(code, 'src/cloud/probe.ts')).toBeGreaterThan(0);
+    expect(await guardHits(code, 'src/engine/probe.ts')).toBeGreaterThan(0);
+  });
+
+  it.each(SUPABASE_PROBES)('allows %s inside src/api/', async (code) => {
+    expect(await guardHits(code, 'src/api/supabase/probe.ts')).toBe(0);
+  });
+
+  it('flags Supabase in the MIDI adapters too', async () => {
+    expect(await guardHits(SUPABASE_PROBES[0] ?? '', 'src/midi/probe.ts')).toBeGreaterThan(0);
+  });
+
+  it('keeps rule 4 inside src/api/', async () => {
+    expect(await guardHits("export { WebMidi } from 'webmidi';", 'src/api/probe.ts')).toBeGreaterThan(0);
+  });
+});
+
 describe('rule 6 guard: no wall clock or timers in app code', () => {
   it.each(CLOCK_PROBES)('flags %s in src/', async (code) => {
     expect(await guardHits(code, 'src/piano/probe.ts')).toBeGreaterThan(0);

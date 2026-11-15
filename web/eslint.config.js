@@ -48,7 +48,18 @@ const CLOCK_SYNTAX = [...DATE_SYNTAX, ...TIMER_SYNTAX];
 
 const CLOCK_GLOBALS = ['setTimeout', 'setInterval'].map((name) => ({ name, message: CLOCK_MESSAGE }));
 
-const MIDI_IMPORTS = { patterns: [{ group: ['webmidi', 'webmidi/*'], message: MIDI_MESSAGE }] };
+const SUPABASE_MESSAGE =
+  'Use the interfaces in src/api/ (AuthClient, SongStore, ...); only src/api/ imports supabase-js ' +
+  '(ADR 0015, CLAUDE.md rule 10).';
+// Dynamic imports slip past no-restricted-imports.
+const SUPABASE_SYNTAX = [
+  { selector: "ImportExpression[source.value=/^@supabase./]", message: SUPABASE_MESSAGE },
+];
+const MIDI_PATTERN = { group: ['webmidi', 'webmidi/*'], message: MIDI_MESSAGE };
+const SUPABASE_PATTERN = { group: ['@supabase/*'], message: SUPABASE_MESSAGE };
+const MIDI_IMPORTS = { patterns: [MIDI_PATTERN] };
+// App code outside src/api/: neither Web MIDI nor Supabase.
+const APP_IMPORTS = { patterns: [MIDI_PATTERN, SUPABASE_PATTERN] };
 
 export default tseslint.config(
   { ignores: ['dist', 'coverage', 'src/generated'] },
@@ -70,12 +81,27 @@ export default tseslint.config(
     },
   },
   {
-    // App code: rules 4 and 6.
+    // App code: rules 4, 6 and 10.
     files: ['src/**/*.{ts,tsx}'],
     ignores: ['src/**/*.test.{ts,tsx}'],
     rules: {
-      'no-restricted-syntax': ['error', ...MIDI_SYNTAX, ...CLOCK_SYNTAX],
+      'no-restricted-syntax': ['error', ...MIDI_SYNTAX, ...CLOCK_SYNTAX, ...SUPABASE_SYNTAX],
       'no-restricted-globals': ['error', ...CLOCK_GLOBALS],
+      'no-restricted-imports': ['error', APP_IMPORTS],
+    },
+  },
+  {
+    // Tests import neither Supabase (they use src/api/fakes.ts) nor Web MIDI outside src/midi/.
+    files: ['src/**/*.test.{ts,tsx}'],
+    rules: { 'no-restricted-imports': ['error', APP_IMPORTS] },
+  },
+  {
+    // src/api/ is the one place that talks to Supabase (rule 10); rules 4 and 6 still hold.
+    files: ['src/api/**/*.{ts,tsx}'],
+    ignores: ['src/api/**/*.test.{ts,tsx}'],
+    rules: {
+      'no-restricted-syntax': ['error', ...MIDI_SYNTAX, ...CLOCK_SYNTAX],
+      'no-restricted-imports': ['error', MIDI_IMPORTS],
     },
   },
   {
@@ -83,8 +109,8 @@ export default tseslint.config(
     files: ['src/midi/**/*.{ts,tsx}'],
     ignores: ['src/midi/**/*.test.{ts,tsx}'],
     rules: {
-      'no-restricted-syntax': ['error', ...CLOCK_SYNTAX],
-      'no-restricted-imports': 'off',
+      'no-restricted-syntax': ['error', ...CLOCK_SYNTAX, ...SUPABASE_SYNTAX],
+      'no-restricted-imports': ['error', { patterns: [SUPABASE_PATTERN] }],
     },
   },
   {
@@ -92,7 +118,7 @@ export default tseslint.config(
     // allowed in this file only, and still no timers or performance.now.
     files: ['src/sessions/wallClock.ts'],
     rules: {
-      'no-restricted-syntax': ['error', ...MIDI_SYNTAX, ...TIMER_SYNTAX],
+      'no-restricted-syntax': ['error', ...MIDI_SYNTAX, ...TIMER_SYNTAX, ...SUPABASE_SYNTAX],
     },
   },
   {
