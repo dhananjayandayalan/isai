@@ -9,6 +9,8 @@ interface ImportMetaEnv {
   readonly VITE_SUPABASE_URL?: string;
   /** The project's public anon key (never the service-role key). */
   readonly VITE_SUPABASE_ANON_KEY?: string;
+  /** The build's version (the git SHA), set by `pnpm build:site`. */
+  readonly VITE_APP_VERSION?: string;
 }
 
 interface ImportMeta {

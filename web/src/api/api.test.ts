@@ -125,3 +125,31 @@ describe('device sessions', () => {
     expect(all.map((s) => s.songId)).toEqual(['b', 'a']);
   });
 });
+
+describe('error reports', () => {
+  it('send route patterns and scrubbed messages, a few per page load', async () => {
+    const { ErrorReporter, routePattern, scrub } = await import('../cloud/errorReporter');
+    expect(routePattern('/songs/3f2a/practice')).toBe('/songs/:id/practice');
+    expect(routePattern('/jobs/9')).toBe('/jobs/:id');
+    expect(routePattern('/upload')).toBe('/upload');
+    expect(scrub('failed for a.b@c.io at https://x.test/s?token=1 id 123e4567-e89b-12d3-a456-426614174000')).toBe(
+      'failed for <email> at <url> id <id>',
+    );
+    const reports: unknown[] = [];
+    const ops = { reportError: (r: unknown) => (reports.push(r), Promise.resolve()) };
+    const reporter = new ErrorReporter(ops as never, 'v1', () => '/songs/abc', 2);
+    reporter.report('audio', new Error('no output'));
+    reporter.report('midi', 'blocked');
+    reporter.report('other', 'dropped');
+    expect(reports).toEqual([
+      { kind: 'audio', message: 'Error: no output', page: '/songs/:id', version: 'v1' },
+      { kind: 'midi', message: 'blocked', page: '/songs/:id', version: 'v1' },
+    ]);
+    const target = new EventTarget();
+    const stop = new ErrorReporter(ops as never, 'v1', () => '/', 5).install(target as unknown as Window);
+    target.dispatchEvent(Object.assign(new Event('unhandledrejection'), { reason: new Error('late') }));
+    stop();
+    target.dispatchEvent(Object.assign(new Event('unhandledrejection'), { reason: new Error('after') }));
+    expect(reports).toHaveLength(3);
+  });
+});

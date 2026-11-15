@@ -9,7 +9,9 @@ import {
   type UploadClient,
   type UploadHandle,
   type UploadProblem,
+  type OpsClient,
 } from '../api/types';
+import { OfflineNotice } from './OfflineNotice';
 import { SOURCE_HINT, SOURCE_LABEL, formatDuration } from './format';
 import { EXTENSIONS, MAX_BYTES, MAX_SECONDS, type DurationProbe } from './media';
 
@@ -44,7 +46,7 @@ interface Picked {
   seconds: number | null;
 }
 
-export function Upload({ uploads, probe }: { uploads: UploadClient; probe: DurationProbe }) {
+export function Upload({ uploads, probe, ops }: { uploads: UploadClient; probe: DurationProbe; ops: OpsClient }) {
   const navigate = useNavigate();
   const [picked, setPicked] = useState<Picked | null>(null);
   const [fileProblem, setFileProblem] = useState<FileProblem | null>(null);
@@ -105,6 +107,7 @@ export function Upload({ uploads, probe }: { uploads: UploadClient; probe: Durat
             Isai finds the key, tempo and chords, then writes a two-hand arrangement you can practise.
           </p>
         </header>
+        <OfflineNotice ops={ops} />
 
         <form className="stack-6" onSubmit={(e) => void start(e)} aria-label="Analyse a song">
           {!picked ? (

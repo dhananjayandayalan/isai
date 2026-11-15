@@ -543,3 +543,82 @@ it('has a page for addresses that lead nowhere', async () => {
   await settle();
   expect(text()).toContain("There's no page here");
 });
+
+describe('operations', () => {
+  const OWNER = { ...FRIEND, role: 'owner' as const };
+
+  it('says when the analysis machine is offline, on upload and in the queue', async () => {
+    const api = fakeApi(FRIEND, [songRow({ status: 'analysing' })]);
+    api.ops.online = false;
+    api.jobs.jobs.set('job-1', job());
+    await render(api, '/upload');
+    await settle();
+    expect(text()).toContain('The analysis machine is offline');
+    act(() => root.unmount());
+    root = createRoot(container);
+    await render(api, '/jobs/job-1');
+    await settle();
+    expect(text()).toContain("Your song will be analysed when it's back");
+    api.ops.online = true;
+    await act(async () => api.jobs.update(job({ attempts: 0, stage: null })));
+    await settle();
+    expect(text()).not.toContain('The analysis machine is offline');
+  });
+
+  it('shows the owner the queue, failures in words, stage times and workers', async () => {
+    const api = fakeApi(OWNER);
+    api.ops.stats = {
+      ...api.ops.stats,
+      queued: 2,
+      oldestQueuedSec: 300,
+      failures7d: { timeout: 3 },
+      stages: { separate: { p50: 40.1, p95: 61.5 } },
+      workers: [{ workerId: 'pc-1', seenAt: '2026-11-15T10:00:00Z', version: '0.1.0' }],
+    };
+    api.ops.errors = [{ kind: 'audio', message: 'NotAllowedError: x', page: '/songs/:id/practice', version: 'abc', createdAt: '2026-11-15T09:00:00Z' }];
+    await render(api, '/admin');
+    await settle();
+    expect(text()).toContain('Admin');
+    expect(text()).toContain('5 min');
+    expect(text()).toContain('The analysis took too long and was stopped.');
+    expect(text()).toContain('timeout × 3');
+    expect(text()).toContain('40.1 / 61.5');
+    expect(text()).toContain('pc-1');
+    expect(text()).toContain('/songs/:id/practice');
+  });
+
+  it('keeps the Admin page from members', async () => {
+    await render(fakeApi(FRIEND), '/admin');
+    await settle();
+    expect(text()).toContain("There's no page here");
+    expect(text()).not.toContain('Analysis machines');
+  });
+
+  it('deletes the account from About, after asking', async () => {
+    const api = fakeApi(FRIEND);
+    await render(api, '/about');
+    await settle();
+    expect(text()).toContain('The audio you upload is deleted as soon as its analysis finishes');
+    expect(text()).toContain('Salamander Grand Piano');
+    expect(text()).toContain('Version dev');
+    await click('Delete my account');
+    await click('Keep my account');
+    expect(api.ops.deleted).toBe(0);
+    await click('Delete my account');
+    await click('Delete everything');
+    await settle();
+    expect(api.ops.deleted).toBe(1);
+  });
+
+  it('reports a page that crashes, and says so', async () => {
+    // A row the library can't render (no title) breaks the page while rendering.
+    const api = fakeApi(FRIEND, [songRow({ title: undefined as unknown as string })]);
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    await render(api, '/');
+    await settle();
+    errors.mockRestore();
+    expect(text()).toContain('Something on this page broke');
+    expect(api.ops.reports[0]).toMatchObject({ kind: 'render', page: '/', version: 'dev' });
+    expect(api.ops.reports[0]?.message).toContain('TypeError');
+  });
+});

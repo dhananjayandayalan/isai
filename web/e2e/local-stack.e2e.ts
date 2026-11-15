@@ -193,6 +193,21 @@ describe('the local stack, end to end', () => {
     expect(await a.api.sessions.list(songId)).toEqual([]);
   });
 
+  it('reports the worker online after it ran, takes error reports and deletes accounts', async () => {
+    const d = await member('d');
+    expect(await d.api.ops.workerOnline()).toBe(true); // the worker beat during the job above
+    await d.api.ops.reportError({ kind: 'audio', message: 'NotAllowedError', page: '/songs/:id', version: 'e2e' });
+    await expect(d.api.ops.adminStats()).rejects.toThrow(); // members get no stats
+    const reports = await admin.from('client_errors').select('kind, page').eq('version', 'e2e');
+    expect(reports.data).toEqual([{ kind: 'audio', page: '/songs/:id' }]);
+    await d.api.ops.deleteAccount();
+    const gone = await admin.auth.admin.getUserById(d.id);
+    expect(gone.data.user).toBeNull();
+    const invite = await admin.from('invites').select('email').eq('email', d.email);
+    expect(invite.data).toEqual([]);
+    await admin.from('client_errors').delete().eq('version', 'e2e');
+  });
+
   it('keeps notation preferences in the profile', async () => {
     const c = await member('c');
     await c.api.preferences.save({ notation: 'swaras' });

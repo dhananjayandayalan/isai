@@ -7,7 +7,11 @@ import {
   SignInError,
   UploadError,
   type AccountSessionStore,
+  type AdminStats,
   type Api,
+  type ClientErrorRow,
+  type ErrorReport,
+  type OpsClient,
   type AuthClient,
   type AuthUser,
   type JobRow,
@@ -201,7 +205,45 @@ export class FakePreferences implements PreferencesStore {
   }
 }
 
+export class FakeOps implements OpsClient {
+  online = true;
+  stats: AdminStats = {
+    queued: 0,
+    running: 0,
+    oldestQueuedSec: null,
+    succeeded7d: 0,
+    failures7d: {},
+    stages: {},
+    workers: [],
+    clientErrors7d: 0,
+    members: 1,
+  };
+  errors: ClientErrorRow[] = [];
+  reports: ErrorReport[] = [];
+  deleted = 0;
+  failStats = false;
+
+  workerOnline(): Promise<boolean> {
+    return Promise.resolve(this.online);
+  }
+  adminStats(): Promise<AdminStats> {
+    return this.failStats ? Promise.reject(new Error('owner_only')) : Promise.resolve(this.stats);
+  }
+  recentErrors(): Promise<ClientErrorRow[]> {
+    return Promise.resolve(this.errors);
+  }
+  reportError(report: ErrorReport): Promise<void> {
+    this.reports.push(report);
+    return Promise.resolve();
+  }
+  deleteAccount(): Promise<void> {
+    this.deleted += 1;
+    return Promise.resolve();
+  }
+}
+
 export interface FakeApi extends Api {
+  ops: FakeOps;
   auth: FakeAuth;
   songs: FakeSongStore;
   jobs: FakeJobs;
@@ -212,6 +254,7 @@ export interface FakeApi extends Api {
 
 export function fakeApi(user: AuthUser | null = null, rows: SongRow[] = []): FakeApi {
   return {
+    ops: new FakeOps(),
     auth: new FakeAuth(user),
     songs: new FakeSongStore(rows),
     jobs: new FakeJobs(),

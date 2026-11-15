@@ -1,8 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
-import { NavLink, Route, Routes, useLocation, useParams } from 'react-router';
+import { NavLink, Route, Routes, useLocation, useNavigate, useParams } from 'react-router';
 import type { Api, AuthUser } from '../api/types';
 import type { AppDeps } from '../App';
+import { formatWhen } from '../sessions/wallClock';
 import { MemorySettingsStore } from '../settings/store';
+import { About } from './About';
+import { Admin } from './Admin';
+import { ErrorBoundary } from './ErrorBoundary';
+import { ErrorReporter } from './errorReporter';
 import { linkExpired } from './format';
 import { JobProgress } from './JobProgress';
 import { Library } from './Library';
@@ -23,6 +28,8 @@ export interface CloudAppProps {
   openUrl?: (url: string) => void;
   /** Where sign-in links come back to; the site's address by default. */
   origin?: string;
+  /** The build, shown on About and sent with error reports (the git SHA in production). */
+  version?: string;
 }
 
 type Auth = { state: 'loading' } | { state: 'signed-out' } | { state: 'signed-in'; user: AuthUser };
@@ -31,8 +38,22 @@ type Auth = { state: 'loading' } | { state: 'signed-out' } | { state: 'signed-in
  * Isai with an account (P8): sign in, the library, uploads and job progress, and songs
  * from the account. Rendered inside a router (BrowserRouter in main.tsx).
  */
-export function CloudApp({ api, deps, local, probe = probeDuration, openUrl, origin }: CloudAppProps) {
+export function CloudApp({
+  api,
+  deps,
+  local,
+  probe = probeDuration,
+  openUrl,
+  origin,
+  version = import.meta.env.VITE_APP_VERSION || 'dev',
+}: CloudAppProps) {
   const location = useLocation();
+  const navigate = useNavigate();
+  const reporter = useMemo(
+    () => new ErrorReporter(api.ops, version, () => window.location.pathname),
+    [api.ops, version],
+  );
+  useEffect(() => reporter.install(window), [reporter]);
   const [auth, setAuth] = useState<Auth>({ state: 'loading' });
   const settings = useMemo(
     () => new SyncedSettingsStore(deps.settings ?? new MemorySettingsStore(), api.preferences),
@@ -103,6 +124,14 @@ export function CloudApp({ api, deps, local, probe = probeDuration, openUrl, ori
           <NavLink className="nav-item" to="/upload">
             Analyse a song
           </NavLink>
+          <NavLink className="nav-item" to="/about">
+            About
+          </NavLink>
+          {user.role === 'owner' && (
+            <NavLink className="nav-item" to="/admin">
+              Admin
+            </NavLink>
+          )}
         </nav>
         <div className="stack-2" style={{ marginTop: 'auto' }}>
           <span className="t-muted">{user.email}</span>
@@ -113,16 +142,23 @@ export function CloudApp({ api, deps, local, probe = probeDuration, openUrl, ori
           </div>
         </div>
       </aside>
-      <Routes>
-        <Route path="/" element={<Library api={api} userId={user.id} local={local} />} />
-        <Route path="/upload" element={<Upload uploads={api.uploads} probe={probe} />} />
-        <Route path="/jobs/:jobId" element={<Keyed param="jobId" render={() => <JobProgress api={api} />} />} />
-        <Route
-          path="/songs/:songId/:view?"
-          element={<Keyed param="songId" render={() => <SongPage api={api} deps={songDeps} openUrl={openUrl} />} />}
-        />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <ErrorBoundary reporter={reporter}>
+        <Routes>
+          <Route path="/" element={<Library api={api} userId={user.id} local={local} />} />
+          <Route path="/upload" element={<Upload uploads={api.uploads} probe={probe} ops={api.ops} />} />
+          <Route
+            path="/about"
+            element={<About ops={api.ops} version={version} onDeleted={() => navigate('/', { replace: true })} />}
+          />
+          {user.role === 'owner' && <Route path="/admin" element={<Admin ops={api.ops} formatWhen={formatWhen} />} />}
+          <Route path="/jobs/:jobId" element={<Keyed param="jobId" render={() => <JobProgress api={api} />} />} />
+          <Route
+            path="/songs/:songId/:view?"
+            element={<Keyed param="songId" render={() => <SongPage api={api} deps={songDeps} openUrl={openUrl} />} />}
+          />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </ErrorBoundary>
     </div>
   );
 }

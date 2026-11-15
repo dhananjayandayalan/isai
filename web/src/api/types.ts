@@ -155,7 +155,48 @@ export interface SongPractice {
   lastAt: string;
 }
 
+/** The owner's view of the system (the Admin page). */
+export interface AdminStats {
+  queued: number;
+  running: number;
+  oldestQueuedSec: number | null;
+  succeeded7d: number;
+  failures7d: Record<string, number>;
+  stages: Record<string, { p50: number; p95: number }>;
+  workers: { workerId: string; seenAt: string; version: string | null }[];
+  clientErrors7d: number;
+  members: number;
+}
+
+export type ErrorKind = 'audio' | 'midi' | 'load' | 'render' | 'network' | 'other';
+
+/** A web error as it is reported: no names, emails, titles or song data. */
+export interface ErrorReport {
+  kind: ErrorKind;
+  message: string;
+  /** The route pattern, e.g. /songs/:id/practice, never the address with ids. */
+  page: string;
+  version: string;
+}
+
+export interface ClientErrorRow extends ErrorReport {
+  createdAt: string;
+}
+
+export interface OpsClient {
+  /** Has a worker sent a heartbeat in the last 90 seconds? */
+  workerOnline(): Promise<boolean>;
+  /** Owner only. */
+  adminStats(): Promise<AdminStats>;
+  /** Owner only: the latest web error reports. */
+  recentErrors(): Promise<ClientErrorRow[]>;
+  reportError(report: ErrorReport): Promise<void>;
+  /** Delete the signed-in account: its Song files, then its rows and the user. */
+  deleteAccount(): Promise<void>;
+}
+
 export interface Api {
+  ops: OpsClient;
   auth: AuthClient;
   songs: SongStore;
   jobs: JobWatcher;

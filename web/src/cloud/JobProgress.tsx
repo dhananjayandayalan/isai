@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { jobErrorWords } from '../api/jobErrors';
 import { STEPS, stepsDone } from '../api/stages';
-import type { Api, JobRow, SongRow } from '../api/types';
+import type { Api, JobRow, OpsClient, SongRow } from '../api/types';
+import { OfflineNotice } from './OfflineNotice';
 
 type Loaded = { state: 'loading' } | { state: 'missing' } | { state: 'error' } | { state: 'ready'; song: SongRow };
 
@@ -76,14 +77,14 @@ export function JobProgress({ api }: { api: Api }) {
           </div>
         )}
         {loaded.state === 'ready' && job && (
-          <Progress song={loaded.song} job={job} position={job.status === 'queued' ? position : null} />
+          <Progress song={loaded.song} job={job} position={job.status === 'queued' ? position : null} ops={api.ops} />
         )}
       </div>
     </main>
   );
 }
 
-function Progress({ song, job, position }: { song: SongRow; job: JobRow; position: number | null }) {
+function Progress({ song, job, position, ops }: { song: SongRow; job: JobRow; position: number | null; ops: OpsClient }) {
   const steps = STEPS[song.sourceType];
   const done = stepsDone(job, song.sourceType);
   const running = job.status === 'running';
@@ -108,6 +109,7 @@ function Progress({ song, job, position }: { song: SongRow; job: JobRow; positio
             </div>
           </>
         )}
+        {job.status === 'queued' && <OfflineNotice ops={ops} recheck={job} />}
         {job.status === 'queued' && (
           <p className="t-body">
             Waiting for the analysis machine.{' '}

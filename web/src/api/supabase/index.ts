@@ -8,7 +8,12 @@ import {
   SOURCE_TYPES,
   UploadError,
   type AccountSessionStore,
+  type AdminStats,
   type Api,
+  type ClientErrorRow,
+  type ErrorKind,
+  type ErrorReport,
+  type OpsClient,
   type AuthClient,
   type AuthUser,
   type JobRow,
@@ -47,6 +52,7 @@ export function createSupabaseApi(url: string, anonKey: string): Api {
 /** The same API over a client made elsewhere (the end-to-end test signs in its own). */
 export function apiFromClient(client: SupabaseClient, url: string, anonKey: string): Api {
   return {
+    ops: new SupabaseOps(client),
     auth: new SupabaseAuth(client),
     songs: new SupabaseSongs(client),
     jobs: new SupabaseJobs(client),
@@ -499,5 +505,66 @@ export class SupabasePreferences implements PreferencesStore {
     const current = await this.load();
     const { error } = await this.client.from('profiles').update({ preferences: { ...current, ...preferences } }).eq('id', id);
     if (error) throw new Error(error.message);
+  }
+}
+
+// -- operations ---------------------------------------------------------------------------
+
+export class SupabaseOps implements OpsClient {
+  private readonly client: SupabaseClient;
+  constructor(client: SupabaseClient) {
+    this.client = client;
+  }
+
+  async workerOnline(): Promise<boolean> {
+    const { data, error } = await this.client.rpc('worker_online');
+    if (error) throw new Error(error.message);
+    return data === true;
+  }
+
+  async adminStats(): Promise<AdminStats> {
+    const { data, error } = await this.client.rpc('admin_stats');
+    if (error) throw new Error(error.message);
+    return data as AdminStats;
+  }
+
+  async recentErrors(): Promise<ClientErrorRow[]> {
+    const { data, error } = await this.client
+      .from('client_errors')
+      .select('kind, message, page, version, created_at')
+      .order('created_at', { ascending: false })
+      .limit(20);
+    if (error) throw new Error(error.message);
+    return ((data ?? []) as Row[]).map((r) => ({
+      kind: str(r.kind) as ErrorKind,
+      message: str(r.message),
+      page: str(r.page),
+      version: str(r.version),
+      createdAt: str(r.created_at),
+    }));
+  }
+
+  async reportError(report: ErrorReport): Promise<void> {
+    const { error } = await this.client.from('client_errors').insert({
+      kind: report.kind,
+      message: report.message.slice(0, 300),
+      page: report.page.slice(0, 100),
+      version: report.version.slice(0, 40),
+    });
+    if (error) throw new Error(error.message);
+  }
+
+  async deleteAccount(): Promise<void> {
+    const id = await userId(this.client);
+    // Files first: SQL can't delete storage objects, and the songs policy lets you delete yours.
+    const { data: files } = await this.client.storage.from('songs').list(id, { limit: 1000 });
+    const paths = (files ?? []).filter((f) => f.id !== null).map((f) => `${id}/${f.name}`);
+    if (paths.length > 0) {
+      const { error } = await this.client.storage.from('songs').remove(paths);
+      if (error) throw new Error(error.message);
+    }
+    const { error } = await this.client.rpc('delete_my_account');
+    if (error) throw new Error(error.message);
+    await this.client.auth.signOut({ scope: 'local' });
   }
 }
