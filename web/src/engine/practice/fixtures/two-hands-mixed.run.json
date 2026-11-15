@@ -1,0 +1,273 @@
+{
+  "about": "Two hands, four 2-second bars, sections A (bars 1-2) and B (bars 3-4). A mix of perfect, good, ok, missed and three wrong notes.",
+  "notes": [
+    {
+      "time": 0.0,
+      "songTime": 0.0,
+      "pitch": 60,
+      "hand": "right"
+    },
+    {
+      "time": 0.5,
+      "songTime": 0.5,
+      "pitch": 62,
+      "hand": "right"
+    },
+    {
+      "time": 1.0,
+      "songTime": 1.0,
+      "pitch": 64,
+      "hand": "right"
+    },
+    {
+      "time": 1.5,
+      "songTime": 1.5,
+      "pitch": 65,
+      "hand": "right"
+    },
+    {
+      "time": 0.0,
+      "songTime": 0.0,
+      "pitch": 48,
+      "hand": "left"
+    },
+    {
+      "time": 0.0,
+      "songTime": 0.0,
+      "pitch": 55,
+      "hand": "left"
+    },
+    {
+      "time": 2.0,
+      "songTime": 2.0,
+      "pitch": 60,
+      "hand": "right"
+    },
+    {
+      "time": 2.5,
+      "songTime": 2.5,
+      "pitch": 62,
+      "hand": "right"
+    },
+    {
+      "time": 3.0,
+      "songTime": 3.0,
+      "pitch": 64,
+      "hand": "right"
+    },
+    {
+      "time": 3.5,
+      "songTime": 3.5,
+      "pitch": 65,
+      "hand": "right"
+    },
+    {
+      "time": 2.0,
+      "songTime": 2.0,
+      "pitch": 50,
+      "hand": "left"
+    },
+    {
+      "time": 2.0,
+      "songTime": 2.0,
+      "pitch": 57,
+      "hand": "left"
+    },
+    {
+      "time": 4.0,
+      "songTime": 4.0,
+      "pitch": 60,
+      "hand": "right"
+    },
+    {
+      "time": 4.5,
+      "songTime": 4.5,
+      "pitch": 62,
+      "hand": "right"
+    },
+    {
+      "time": 5.0,
+      "songTime": 5.0,
+      "pitch": 64,
+      "hand": "right"
+    },
+    {
+      "time": 5.5,
+      "songTime": 5.5,
+      "pitch": 65,
+      "hand": "right"
+    },
+    {
+      "time": 4.0,
+      "songTime": 4.0,
+      "pitch": 52,
+      "hand": "left"
+    },
+    {
+      "time": 4.0,
+      "songTime": 4.0,
+      "pitch": 59,
+      "hand": "left"
+    },
+    {
+      "time": 6.0,
+      "songTime": 6.0,
+      "pitch": 60,
+      "hand": "right"
+    },
+    {
+      "time": 6.5,
+      "songTime": 6.5,
+      "pitch": 62,
+      "hand": "right"
+    },
+    {
+      "time": 7.0,
+      "songTime": 7.0,
+      "pitch": 64,
+      "hand": "right"
+    },
+    {
+      "time": 7.5,
+      "songTime": 7.5,
+      "pitch": 65,
+      "hand": "right"
+    },
+    {
+      "time": 6.0,
+      "songTime": 6.0,
+      "pitch": 48,
+      "hand": "left"
+    },
+    {
+      "time": 6.0,
+      "songTime": 6.0,
+      "pitch": 55,
+      "hand": "left"
+    }
+  ],
+  "presses": [
+    [
+      48,
+      0.0
+    ],
+    [
+      60,
+      0.0
+    ],
+    [
+      55,
+      0.005
+    ],
+    [
+      62,
+      0.51
+    ],
+    [
+      64,
+      0.98
+    ],
+    [
+      65,
+      1.53
+    ],
+    [
+      50,
+      1.96
+    ],
+    [
+      60,
+      2.06
+    ],
+    [
+      61,
+      2.25
+    ],
+    [
+      62,
+      2.42
+    ],
+    [
+      64,
+      3.095
+    ],
+    [
+      52,
+      4.07
+    ],
+    [
+      59,
+      4.07
+    ],
+    [
+      60,
+      4.12
+    ],
+    [
+      62,
+      4.35
+    ],
+    [
+      70,
+      5.0
+    ],
+    [
+      60,
+      6.0
+    ],
+    [
+      62,
+      6.5
+    ],
+    [
+      64,
+      7.0
+    ],
+    [
+      65,
+      7.5
+    ],
+    [
+      61,
+      7.75
+    ]
+  ],
+  "options": {
+    "startTime": 0,
+    "endTime": 8,
+    "sections": [
+      {
+        "label": "A",
+        "start": 0,
+        "end": 4
+      },
+      {
+        "label": "B",
+        "start": 4,
+        "end": 8
+      }
+    ],
+    "bars": [
+      {
+        "number": 1,
+        "start": 0,
+        "end": 2
+      },
+      {
+        "number": 2,
+        "start": 2,
+        "end": 4
+      },
+      {
+        "number": 3,
+        "start": 4,
+        "end": 6
+      },
+      {
+        "number": 4,
+        "start": 6,
+        "end": 8
+      }
+    ]
+  }
+}

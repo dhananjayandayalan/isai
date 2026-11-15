@@ -1,0 +1,293 @@
+{
+  "schemaVersion": "0.2.0",
+  "id": "example-twinkle-g-major",
+  "title": "Twinkle, Twinkle, Little Star",
+  "sourceType": "piano-solo",
+  "durationSec": 9.6,
+  "tempo": {
+    "bpm": 100,
+    "beats": [
+      0.0,
+      0.6,
+      1.2,
+      1.8,
+      2.4,
+      3.0,
+      3.6,
+      4.2,
+      4.8,
+      5.4,
+      6.0,
+      6.6,
+      7.2,
+      7.8,
+      8.4,
+      9.0
+    ],
+    "downbeats": [
+      0.0,
+      2.4,
+      4.8,
+      7.2
+    ]
+  },
+  "timeSignature": {
+    "num": 4,
+    "den": 4
+  },
+  "tonality": {
+    "key": "G",
+    "mode": "major",
+    "scale": [
+      7,
+      9,
+      11,
+      0,
+      2,
+      4,
+      6
+    ]
+  },
+  "chords": [
+    {
+      "start": 0.0,
+      "end": 2.4,
+      "root": 7,
+      "quality": "maj",
+      "label": "G"
+    },
+    {
+      "start": 2.4,
+      "end": 3.6,
+      "root": 0,
+      "quality": "maj",
+      "label": "C"
+    },
+    {
+      "start": 3.6,
+      "end": 4.8,
+      "root": 7,
+      "quality": "maj",
+      "label": "G"
+    },
+    {
+      "start": 4.8,
+      "end": 6.0,
+      "root": 0,
+      "quality": "maj",
+      "label": "C"
+    },
+    {
+      "start": 6.0,
+      "end": 7.2,
+      "root": 7,
+      "quality": "maj",
+      "label": "G"
+    },
+    {
+      "start": 7.2,
+      "end": 8.4,
+      "root": 2,
+      "quality": "maj",
+      "label": "D"
+    },
+    {
+      "start": 8.4,
+      "end": 9.6,
+      "root": 7,
+      "quality": "maj",
+      "label": "G"
+    }
+  ],
+  "notes": [
+    {
+      "start": 0.0,
+      "end": 2.35,
+      "midi": 43,
+      "velocity": 64,
+      "hand": "left",
+      "source": "arranged"
+    },
+    {
+      "start": 0.0,
+      "end": 0.55,
+      "midi": 67,
+      "velocity": 80,
+      "hand": "right",
+      "source": "arranged"
+    },
+    {
+      "start": 0.6,
+      "end": 1.15,
+      "midi": 67,
+      "velocity": 80,
+      "hand": "right",
+      "source": "arranged"
+    },
+    {
+      "start": 1.2,
+      "end": 1.75,
+      "midi": 74,
+      "velocity": 80,
+      "hand": "right",
+      "source": "arranged"
+    },
+    {
+      "start": 1.8,
+      "end": 2.35,
+      "midi": 74,
+      "velocity": 80,
+      "hand": "right",
+      "source": "arranged"
+    },
+    {
+      "start": 2.4,
+      "end": 3.55,
+      "midi": 48,
+      "velocity": 64,
+      "hand": "left",
+      "source": "arranged"
+    },
+    {
+      "start": 2.4,
+      "end": 2.95,
+      "midi": 76,
+      "velocity": 80,
+      "hand": "right",
+      "source": "arranged"
+    },
+    {
+      "start": 3.0,
+      "end": 3.55,
+      "midi": 76,
+      "velocity": 80,
+      "hand": "right",
+      "source": "arranged"
+    },
+    {
+      "start": 3.6,
+      "end": 4.75,
+      "midi": 43,
+      "velocity": 64,
+      "hand": "left",
+      "source": "arranged"
+    },
+    {
+      "start": 3.6,
+      "end": 4.75,
+      "midi": 74,
+      "velocity": 80,
+      "hand": "right",
+      "source": "arranged"
+    },
+    {
+      "start": 4.8,
+      "end": 5.95,
+      "midi": 48,
+      "velocity": 64,
+      "hand": "left",
+      "source": "arranged"
+    },
+    {
+      "start": 4.8,
+      "end": 5.35,
+      "midi": 72,
+      "velocity": 80,
+      "hand": "right",
+      "source": "arranged"
+    },
+    {
+      "start": 5.4,
+      "end": 5.95,
+      "midi": 72,
+      "velocity": 80,
+      "hand": "right",
+      "source": "arranged"
+    },
+    {
+      "start": 6.0,
+      "end": 7.15,
+      "midi": 43,
+      "velocity": 64,
+      "hand": "left",
+      "source": "arranged"
+    },
+    {
+      "start": 6.0,
+      "end": 6.55,
+      "midi": 71,
+      "velocity": 80,
+      "hand": "right",
+      "source": "arranged"
+    },
+    {
+      "start": 6.6,
+      "end": 7.15,
+      "midi": 71,
+      "velocity": 80,
+      "hand": "right",
+      "source": "arranged"
+    },
+    {
+      "start": 7.2,
+      "end": 8.35,
+      "midi": 50,
+      "velocity": 64,
+      "hand": "left",
+      "source": "arranged"
+    },
+    {
+      "start": 7.2,
+      "end": 7.75,
+      "midi": 69,
+      "velocity": 80,
+      "hand": "right",
+      "source": "arranged"
+    },
+    {
+      "start": 7.8,
+      "end": 8.35,
+      "midi": 69,
+      "velocity": 80,
+      "hand": "right",
+      "source": "arranged"
+    },
+    {
+      "start": 8.4,
+      "end": 9.55,
+      "midi": 43,
+      "velocity": 64,
+      "hand": "left",
+      "source": "arranged"
+    },
+    {
+      "start": 8.4,
+      "end": 9.55,
+      "midi": 67,
+      "velocity": 80,
+      "hand": "right",
+      "source": "arranged"
+    }
+  ],
+  "sections": [
+    {
+      "start": 0,
+      "end": 4.8,
+      "label": "Phrase 1"
+    },
+    {
+      "start": 4.8,
+      "end": 9.6,
+      "label": "Phrase 2"
+    }
+  ],
+  "meta": {
+    "pipelineVersion": "example",
+    "createdAt": "2026-10-13T00:00:00Z",
+    "confidence": {
+      "key": 1,
+      "tempo": 1,
+      "chords": 1
+    }
+  }
+}

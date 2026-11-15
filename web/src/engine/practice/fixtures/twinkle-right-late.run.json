@@ -1,0 +1,174 @@
+{
+  "about": "Twinkle, right hand, after a one-bar count-in (2.4 s). Every note is played 80 ms late.",
+  "notes": [
+    {
+      "time": 2.4,
+      "songTime": 0.0,
+      "pitch": 67,
+      "hand": "right"
+    },
+    {
+      "time": 3.0,
+      "songTime": 0.6,
+      "pitch": 67,
+      "hand": "right"
+    },
+    {
+      "time": 3.6,
+      "songTime": 1.2,
+      "pitch": 74,
+      "hand": "right"
+    },
+    {
+      "time": 4.2,
+      "songTime": 1.8,
+      "pitch": 74,
+      "hand": "right"
+    },
+    {
+      "time": 4.8,
+      "songTime": 2.4,
+      "pitch": 76,
+      "hand": "right"
+    },
+    {
+      "time": 5.4,
+      "songTime": 3.0,
+      "pitch": 76,
+      "hand": "right"
+    },
+    {
+      "time": 6.0,
+      "songTime": 3.6,
+      "pitch": 74,
+      "hand": "right"
+    },
+    {
+      "time": 7.2,
+      "songTime": 4.8,
+      "pitch": 72,
+      "hand": "right"
+    },
+    {
+      "time": 7.8,
+      "songTime": 5.4,
+      "pitch": 72,
+      "hand": "right"
+    },
+    {
+      "time": 8.4,
+      "songTime": 6.0,
+      "pitch": 71,
+      "hand": "right"
+    },
+    {
+      "time": 9.0,
+      "songTime": 6.6,
+      "pitch": 71,
+      "hand": "right"
+    },
+    {
+      "time": 9.6,
+      "songTime": 7.2,
+      "pitch": 69,
+      "hand": "right"
+    },
+    {
+      "time": 10.2,
+      "songTime": 7.8,
+      "pitch": 69,
+      "hand": "right"
+    },
+    {
+      "time": 10.8,
+      "songTime": 8.4,
+      "pitch": 67,
+      "hand": "right"
+    }
+  ],
+  "presses": [
+    [
+      67,
+      2.48
+    ],
+    [
+      67,
+      3.08
+    ],
+    [
+      74,
+      3.68
+    ],
+    [
+      74,
+      4.28
+    ],
+    [
+      76,
+      4.88
+    ],
+    [
+      76,
+      5.48
+    ],
+    [
+      74,
+      6.08
+    ],
+    [
+      72,
+      7.28
+    ],
+    [
+      72,
+      7.88
+    ],
+    [
+      71,
+      8.48
+    ],
+    [
+      71,
+      9.08
+    ],
+    [
+      69,
+      9.68
+    ],
+    [
+      69,
+      10.28
+    ],
+    [
+      67,
+      10.88
+    ]
+  ],
+  "options": {
+    "startTime": 2.4,
+    "endTime": 12.0,
+    "sections": [],
+    "bars": [
+      {
+        "number": 1,
+        "start": 0.0,
+        "end": 2.4
+      },
+      {
+        "number": 2,
+        "start": 2.4,
+        "end": 4.8
+      },
+      {
+        "number": 3,
+        "start": 4.8,
+        "end": 7.2
+      },
+      {
+        "number": 4,
+        "start": 7.2,
+        "end": 9.6
+      }
+    ]
+  }
+}

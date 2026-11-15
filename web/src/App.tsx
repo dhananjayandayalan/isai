@@ -1,35 +1,470 @@
-import { useMemo } from 'react';
-import example from '../../schema/examples/twinkle-g-major.json';
+import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type ReactNode } from 'react';
+import frere from '../../schema/examples/frere-jacques-a-cappella.json';
+import twinkle from '../../schema/examples/twinkle-g-major.json';
+import type { AudioSource } from './audio/engine';
+import { instrumentPart } from './audio/parts';
+import type { LoadedAudio } from './audio/types';
+import type { Voice } from './audio/voices';
+import { Devices } from './Devices';
+import { monitorMidi } from './engine/monitor';
+import { barsOfSong } from './engine/practice/bars';
+import type { PracticeMode } from './engine/practice/engine';
+import { LatencyCard } from './LatencyCard';
+import type { MidiInput } from './midi/MidiInput';
+import { MidiPanel } from './MidiPanel';
+import type { FrameScheduler } from './piano/PianoController';
+import { Practice, type AudioStatus } from './Practice';
+import { Results } from './Results';
+import { MemorySessionStore, type SessionStore } from './sessions/store';
+import type { NewSession, PerformanceSession, Session, SessionDraft } from './sessions/types';
+import { formatWhen, isoNow } from './sessions/wallClock';
+import { MemorySettingsStore, type AppSettings, type SettingsStore } from './settings/store';
 import { parseSong, SongParseError, type Song } from './song';
+import { SongOverview } from './SongOverview';
 
-interface AppProps {
-  /** Raw Song JSON. P0 loads a schema example; later phases load it from the worker. */
-  source?: unknown;
+/** Everything with side effects, injected so tests can pass fakes (main.tsx wires the real ones). */
+export interface AppDeps {
+  audio: AudioSource;
+  midi: MidiInput;
+  frames?: FrameScheduler;
+  /** Where the learner's setup is remembered; in memory when left out. */
+  settings?: SettingsStore;
+  /** Where practice sessions are kept; in memory when left out. */
+  sessions?: SessionStore;
+  /** The calendar date and time now (ISO 8601), for session records. */
+  now?: () => string;
 }
 
-type Loaded = { song: Song } | { error: string };
+/** The pages of a song. In local mode they are state; signed in, they follow the URL (P8). */
+export type View = 'song' | 'practice' | 'results' | 'devices';
 
-function load(source: unknown): Loaded {
+/** A song from the account (P8): the URL picks the page, and the account adds actions. */
+export interface CloudSong {
+  view: View;
+  onNavigate: (view: View, options?: { replace?: boolean }) => void;
+  /** Above the song: the way back to the library and the song's actions. */
+  header: ReactNode;
+  /** The line over the title, e.g. "Your song" or "Shared with the group". */
+  overline: string;
+}
+
+/** The page Done on the Devices screen goes back to, and what it says. */
+const RETURN_LABEL: Record<Exclude<View, 'devices'>, string> = {
+  song: 'Back to song',
+  practice: 'Back to practice',
+  results: 'Back to results',
+};
+
+interface AppProps {
+  /** Raw Song JSON to open first; defaults to the first example. */
+  source?: unknown;
+  deps?: AppDeps;
+  /** The page to open on; the song overview by default. */
+  view?: View;
+  /** Signed in: a song from the account instead of the example and file pickers. */
+  cloud?: CloudSong;
+}
+
+const EXAMPLES = [
+  { id: 'twinkle', label: 'Twinkle', json: twinkle as unknown },
+  { id: 'frere', label: 'Frère Jacques', json: frere as unknown },
+];
+
+/** `notJson` is set when an opened file couldn't be parsed as JSON at all. */
+type Choice = { id: string; json: unknown; notJson?: string };
+type Loaded = { song: Song } | { error: 'not-json' | 'invalid'; detail: string };
+
+/** How the practice screen opens: from the overview, or from a result's trouble spot. */
+interface Launch {
+  mode: PracticeMode;
+  loopBars: [number, number] | null;
+  /** Changes with every launch, so the practice screen starts afresh. */
+  nonce: number;
+}
+
+function load(choice: Choice): Loaded {
+  if (choice.notJson !== undefined) return { error: 'not-json', detail: choice.notJson };
   try {
-    return { song: parseSong(source) };
+    return { song: parseSong(choice.json) };
   } catch (e) {
-    return { error: e instanceof SongParseError ? e.errors.join('\n') : String(e) };
+    return { error: 'invalid', detail: e instanceof SongParseError ? e.errors.join('\n') : String(e) };
   }
 }
 
-export default function App({ source = example }: AppProps) {
-  const loaded = useMemo(() => load(source), [source]);
+function message(e: unknown): string {
+  return e instanceof Error ? e.message : String(e);
+}
+
+export default function App({ source, deps, view: firstView = 'song', cloud }: AppProps) {
+  const [choice, setChoice] = useState<Choice>(() =>
+    source === undefined ? { id: 'twinkle', json: twinkle } : { id: 'file', json: source },
+  );
+  const [fileName, setFileName] = useState<string | null>(null);
+  const [opens, setOpens] = useState(0);
+  const loaded = useMemo(() => load(choice), [choice]);
+  const song = 'song' in loaded ? loaded.song : null;
+
+  const [ownView, setOwnView] = useState<View>(cloud?.view ?? firstView);
+  const view = cloud ? cloud.view : ownView;
+  const navigate = cloud?.onNavigate;
+  const setView = useCallback(
+    (next: View) => (navigate ? navigate(next) : setOwnView(next)),
+    [navigate],
+  );
+  const [returnTo, setReturnTo] = useState<Exclude<View, 'devices'>>(firstView === 'devices' ? 'song' : firstView);
+  const [launch, setLaunch] = useState<Launch>({ mode: 'listen', loopBars: null, nonce: 0 });
+  const [shown, setShown] = useState<PerformanceSession | null>(null);
+
+  const settingsStore = useMemo(() => deps?.settings ?? new MemorySettingsStore(), [deps]);
+  const sessionStore = useMemo(() => deps?.sessions ?? new MemorySessionStore(), [deps]);
+  const [settings, setSettings] = useState<AppSettings>(() => settingsStore.load());
+  const saveSettings = useCallback(
+    (patch: Partial<AppSettings>) => setSettings(settingsStore.save(patch)),
+    [settingsStore],
+  );
+
+  // This song's sessions. Kept with the song id they belong to, so a stale list is never shown.
+  const [history, setHistory] = useState<{ songId: string; list: Session[] } | null>(null);
+  const [sessionsSaved, setSessionsSaved] = useState(true);
+  const [recorded, setRecorded] = useState(0);
+  const songId = song?.id ?? null;
+  useEffect(() => {
+    if (songId === null) return undefined;
+    let current = true;
+    sessionStore.list(songId).then(
+      (list) => {
+        if (!current) return;
+        setHistory({ songId, list });
+        setSessionsSaved(sessionStore.persistent);
+      },
+      (error: unknown) => {
+        // A store that can't be read is a store that doesn't keep anything: say so.
+        console.error('Isai: past sessions could not be read.', error);
+        if (!current) return;
+        setHistory({ songId, list: [] });
+        setSessionsSaved(false);
+      },
+    );
+    return () => {
+      current = false;
+    };
+  }, [songId, sessionStore, recorded]);
+  const sessions = history && history.songId === songId ? history.list : null;
+
+  const [audioStatus, setAudioStatus] = useState<AudioStatus>('idle');
+  const [audioError, setAudioError] = useState<string | null>(null);
+  const [deviceId, setDeviceId] = useState<string | null>(null);
+  const [playing, setPlaying] = useState(false);
+  const [calibrating, setCalibrating] = useState(false);
+  // Read by the monitor on every note, so a change takes effect at once.
+  const settingsRef = useRef(settings);
+  useEffect(() => {
+    settingsRef.current = settings;
+  }, [settings]);
+
+  // Your notes through Isai's piano, once audio has loaded and while the toggle is on.
+  useEffect(() => {
+    if (!deps) return undefined;
+    return monitorMidi(deps.midi, {
+      // The learner's part of the piano: Isai's notes on the same keys are left alone.
+      instrument: () => {
+        const piano = deps.audio.loaded?.piano;
+        return piano ? instrumentPart(piano, 'learner') : null;
+      },
+      enabled: () => settingsRef.current.appSound !== 'off',
+      velocityCurve: () => settingsRef.current.velocityCurve,
+    });
+  }, [deps]);
+
+  /**
+   * Put the app's sound on the chosen voice (the electric piano loads the first time).
+   * "Off" only silences your notes; Isai's own parts play on the grand piano.
+   */
+  const applyVoice = useCallback(
+    (audio: LoadedAudio | null | undefined, appSound: AppSettings['appSound']): Promise<void> | null => {
+      const voice: Voice = appSound === 'electric' ? 'electric' : 'grand';
+      if (!audio || audio.piano.voice === voice) return null;
+      setAudioStatus('loading');
+      return audio.piano.select(voice).then(setAudioStatus);
+    },
+    [],
+  );
+
+  const changeSettings = useCallback(
+    (patch: Partial<AppSettings>) => {
+      saveSettings(patch);
+      if (patch.appSound) void applyVoice(deps?.audio.loaded, patch.appSound);
+    },
+    [saveSettings, applyVoice, deps],
+  );
+
+  /**
+   * Load Tone.js and the piano on first use. Call it from a click and don't await anything
+   * first: `audio.load()` starts the audio context synchronously, inside the gesture.
+   */
+  const ensureAudio = useCallback(async (): Promise<LoadedAudio | null> => {
+    if (!deps) return null;
+    if (!deps.audio.loaded) setAudioStatus('loading');
+    try {
+      const audio = await deps.audio.load();
+      setAudioStatus(await audio.piano.loaded);
+      await applyVoice(audio, settingsRef.current.appSound);
+      setAudioError(null);
+      return audio;
+    } catch (e) {
+      console.error('Isai: sound could not start.', e);
+      setAudioError(message(e));
+      setAudioStatus('failed');
+      return null;
+    }
+  }, [deps, applyVoice]);
+
+  async function openFile(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    let next: Choice;
+    try {
+      next = { id: 'file', json: JSON.parse(await file.text()) as unknown };
+    } catch (e) {
+      next = { id: 'file', json: null, notJson: message(e) };
+    }
+    setFileName(file.name);
+    setOpens((n) => n + 1);
+    pick(next);
+  }
+
+  /**
+   * Open another song. A result belongs to the song it was played on, so leave that page,
+   * also when it is under the Devices screen (Done then goes to the new song's overview).
+   */
+  function pick(next: Choice) {
+    setChoice(next);
+    if (view === 'results') setView('song');
+    if (returnTo === 'results') setReturnTo('song');
+  }
+
+  function open(mode: PracticeMode, loopBars: [number, number] | null = null) {
+    setLaunch((before) => ({ mode, loopBars, nonce: before.nonce + 1 }));
+    setView('practice');
+  }
+
+  /** The Devices screen; Done goes back to where the learner was (practice keeps its state). */
+  function openDevices() {
+    if (view !== 'devices') setReturnTo(view);
+    setView('devices');
+  }
+
+  /** A run ended on the practice screen: keep it, and show a performance's result. */
+  const onSession = useCallback(
+    (draft: SessionDraft) => {
+      if (!song) return;
+      const record: NewSession = {
+        version: 1,
+        songId: song.id,
+        songTitle: song.title,
+        schemaVersion: song.schemaVersion,
+        pipelineVersion: song.meta.pipelineVersion,
+        ...draft,
+      };
+      if (record.mode === 'performance') {
+        setShown(record);
+        setView('results');
+      }
+      sessionStore.add(record).then(
+        () => {
+          setSessionsSaved(sessionStore.persistent);
+          setRecorded((n) => n + 1);
+        },
+        (error: unknown) => {
+          console.error('Isai: the session could not be saved.', error);
+          setSessionsSaved(false);
+        },
+      );
+    },
+    [song, sessionStore, setView],
+  );
+
+  const now = deps?.now ?? isoNow;
+  const offset = deviceId === null ? 0 : (settings.latencyOffsets[deviceId] ?? 0);
+  const onDevices = view === 'devices';
+  /** The page under the Devices screen, when it is open. */
+  const page = onDevices ? returnTo : view;
+  // Practice stays mounted while the Devices screen is open over it, so nothing is lost.
+  const practiceMounted = page === 'practice';
+  const showResults = page === 'results' && shown !== null;
+
+  // A results address with no result to show (opened directly, or after a reload): the song.
+  useEffect(() => {
+    if (navigate && view === 'results' && shown === null) navigate('song', { replace: true });
+  }, [navigate, view, shown]);
 
   return (
     <main className="app-main">
-      <div className="app-content">
-        {'song' in loaded ? <SongSummary song={loaded.song} /> : <SongError detail={loaded.error} />}
+      <div className="app-content stack-6">
+        <div className="row-between">
+          {cloud ? (
+            cloud.header
+          ) : (
+            <div className="seg" role="group" aria-label="Song">
+              {EXAMPLES.map((example) => (
+                <button
+                  key={example.id}
+                  type="button"
+                  className="seg-btn"
+                  aria-pressed={choice.id === example.id}
+                  onClick={() => pick({ id: example.id, json: example.json })}
+                >
+                  {example.label}
+                </button>
+              ))}
+            </div>
+          )}
+          <div className="row">
+            {!cloud && (
+              <label className="btn btn-secondary">
+                Open a .song.json file
+                <input
+                  type="file"
+                  accept=".json,application/json"
+                  className="sr-only"
+                  onChange={(e) => void openFile(e)}
+                />
+              </label>
+            )}
+            {deps && (
+              <button type="button" className="btn btn-secondary" aria-pressed={onDevices} onClick={openDevices}>
+                MIDI & keyboard
+              </button>
+            )}
+          </div>
+        </div>
+
+        {!song && 'error' in loaded && <SongError kind={loaded.error} detail={loaded.detail} fileName={fileName} />}
+
+        {song && showResults && !onDevices && (
+          <Results
+            session={shown}
+            when={formatWhen(shown.startedAt)}
+            saved={sessionsSaved}
+            barWord={barsOfSong(song).unit === 'bar' ? 'bar' : 'part'}
+            onPlayAgain={() => open('performance')}
+            onLoopInTraining={(from, to) => open('training', [from, to])}
+            onBack={() => setView('song')}
+          />
+        )}
+
+        {song && !showResults && (
+          <div hidden={onDevices} className="stack-6">
+            <SongSummary
+              song={song}
+              overline={cloud ? cloud.overline : choice.id === 'file' && fileName ? `From ${fileName}` : 'Example song'}
+            />
+            {practiceMounted ? (
+              <>
+                <div>
+                  <button type="button" className="btn btn-ghost" onClick={() => setView('song')}>
+                    Back to song
+                  </button>
+                </div>
+                <Practice
+                  key={`${choice.id}-${opens}-${launch.nonce}`}
+                  song={song}
+                  canPlay={deps !== undefined}
+                  midi={deps?.midi ?? null}
+                  frames={deps?.frames}
+                  keyboardConnected={deviceId !== null}
+                  audioStatus={audioStatus}
+                  audioError={audioError}
+                  ensureAudio={ensureAudio}
+                  initial={launch}
+                  size={settings.keyboardSize}
+                  onSizeChange={(keyboardSize) => saveSettings({ keyboardSize })}
+                  latencyOffset={offset}
+                  blocked={calibrating}
+                  onPlayingChange={setPlaying}
+                  onSession={onSession}
+                  now={now}
+                  display={{
+                    naming: {
+                      notation: settings.notation,
+                      octaves: settings.octaves,
+                      swaraDetail: settings.swaraDetail,
+                      minor: settings.minorSolfege,
+                    },
+                    lookahead: settings.lookahead,
+                    showOtherHand: settings.showOtherHand,
+                    metronome: settings.metronome,
+                  }}
+                  onNotationChange={(notation) => saveSettings({ notation })}
+                  onOpenDevices={openDevices}
+                />
+              </>
+            ) : (
+              <SongOverview
+                song={song}
+                sessions={sessions}
+                sessionsSaved={sessionsSaved}
+                formatWhen={formatWhen}
+                onStart={open}
+                onOpenResult={(session) => {
+                  setShown(session);
+                  setView('results');
+                }}
+              />
+            )}
+          </div>
+        )}
+
+        {/* Always mounted, hidden on the other pages: the keyboard panel holds the connection. */}
+        {deps && (
+          <div hidden={!onDevices}>
+            <Devices
+              midi={deps.midi}
+              settings={settings}
+              onChange={changeSettings}
+              onDone={() => setView(returnTo)}
+              doneLabel={RETURN_LABEL[returnTo]}
+              panel={
+                <MidiPanel
+                  midi={deps.midi}
+                  onConnect={() => void ensureAudio()}
+                  onConnectionChange={(id) => {
+                    setDeviceId(id);
+                    if (id !== null) saveSettings({ lastDeviceId: id });
+                  }}
+                  preferredDeviceId={settings.lastDeviceId}
+                />
+              }
+              latency={
+                <LatencyCard
+                  midi={deps.midi}
+                  deviceId={deviceId}
+                  offset={offset}
+                  onOffsetChange={(seconds) => {
+                    if (deviceId !== null) {
+                      saveSettings({ latencyOffsets: { ...settings.latencyOffsets, [deviceId]: seconds } });
+                    }
+                  }}
+                  ensureAudio={ensureAudio}
+                  busy={playing && practiceMounted}
+                  onRunningChange={setCalibrating}
+                />
+              }
+            />
+          </div>
+        )}
+
+        <p className="t-faint">
+          Piano sound: Salamander Grand Piano by Alexander Holm (CC-BY 3.0), via Tone.js. Electric piano:
+          Wurlitzer EP200 samples by Greg Sullivan (CC-BY 3.0).
+        </p>
       </div>
     </main>
   );
 }
 
-function SongSummary({ song }: { song: Song }) {
+function SongSummary({ song, overline }: { song: Song; overline: string }) {
   const stats = [
     { label: 'Key', value: `${song.tonality.key} ${song.tonality.mode}` },
     { label: 'Tempo', value: `${Math.round(song.tempo.bpm)} BPM` },
@@ -38,7 +473,7 @@ function SongSummary({ song }: { song: Song }) {
   return (
     <section className="stack-6" aria-labelledby="song-title">
       <div className="stack-2">
-        <span className="t-overline">Example song</span>
+        <span className="t-overline">{overline}</span>
         <h1 className="t-page-title" id="song-title">
           {song.title}
         </h1>
@@ -57,11 +492,23 @@ function SongSummary({ song }: { song: Song }) {
   );
 }
 
-function SongError({ detail }: { detail: string }) {
+interface SongErrorProps {
+  kind: 'not-json' | 'invalid';
+  detail: string;
+  fileName: string | null;
+}
+
+function SongError({ kind, detail, fileName }: SongErrorProps) {
   return (
     <div className="state state-error" role="alert">
       <h1 className="t-state-title">We couldn't read this song</h1>
-      <p className="t-secondary">The song file doesn't match the format Isai expects.</p>
+      <p className="t-secondary">
+        {kind === 'not-json'
+          ? `${fileName ?? 'That file'} isn't a song file. Isai opens the .song.json files ` +
+            'its own analysis writes. Pick an example song above, or open a different file.'
+          : "The song file doesn't match the format Isai expects. Pick an example song " +
+            'above, or open a different .song.json file.'}
+      </p>
       <p className="t-faint t-mono">{detail}</p>
     </div>
   );

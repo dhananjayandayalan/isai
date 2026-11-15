@@ -23,7 +23,14 @@ report, so friends can run the eval with whatever subset they have.
 4. Optional references, stored in this folder (they are text/MIDI, not audio):
    - `chords_lab`: a `.lab` file with one chord per line, `start end label` in seconds,
      Harte-style labels (`G:maj`, `A:min7`, `N` for no chord).
-   - `midi`: a reference MIDI of the piano part, for note onset F1 (piano-solo only).
+   - `midi`: a reference MIDI: the piano part for piano-solo (note F1), or the sung
+     melody on one track for a-cappella and full-mix (melody F1 and pitch accuracy).
+     A melody MIDI can be tapped in on a keyboard against the recording, or exported
+     from a transcription you've corrected by ear.
+   - `beats`: a `.beats` file, one beat per line, `time position-in-bar` (1 marks a
+     downbeat), for beat and downbeat F-measure. Tapping along in Sonic Visualiser or
+     Audacity and exporting the labels is enough. Add `expected.beats_per_bar` (3 or 4)
+     too if you know it.
 5. Run `/golden-eval <id>` to score just that song and check the entry works.
 
 ## Current entries

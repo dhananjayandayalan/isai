@@ -1,60 +1,311 @@
+import io
+import json
+import shutil
 import subprocess
 import sys
 from pathlib import Path
 
+import mido  # pyright: ignore[reportMissingTypeStubs]
+import numpy as np
 import pytest
 
-from isai.cli import analyse, main
-from isai.schema import load_json, validate_song
+import isai.cli
+import isai.pipeline
+from isai.assemble import SongInfo
+from isai.cli import main
+from isai.errors import ExitCode
+from isai.ingest import IngestLimits
+from isai.pipeline import Options, run
+from isai.schema import SongValidationError, current_version, load_json, validate_song
+from tests.synth import cadence, click_track, ffmpeg, silence, write_wav
+
+needs_ffmpeg = pytest.mark.skipif(
+    ffmpeg() is None, reason="ffmpeg is not on PATH (install ffmpeg 6+)"
+)
+RATE = 44_100
 
 
-@pytest.fixture
-def source(tmp_path: Path) -> Path:
-    path = tmp_path / "my song.txt"
-    path.write_text("not audio, the stub does not read it")
-    return path
+@pytest.fixture(scope="module")
+def song_file(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    """Eight seconds of a G major cadence over a 60 BPM 4/4 click, after a second of silence."""
+    music = cadence(7, "major", cycles=2, rate=RATE)
+    clicks, _ = click_track(60, 4, seconds=music.size / RATE, rate=RATE, start=0.0)
+    audio = np.concatenate(
+        [silence(1.0, RATE), music + 0.5 * clicks[: music.size], silence(0.5, RATE)]
+    )
+    return write_wav(tmp_path_factory.mktemp("song") / "cadence.wav", audio, RATE)
 
 
-def test_analyse_writes_valid_song(source: Path, tmp_path: Path) -> None:
-    out = analyse(source, tmp_path / "out")
-    assert out == tmp_path / "out" / "my song.song.json"
-    song = load_json(out)
+def analyse(song: Path, out: Path, *extra: str) -> int:
+    return main(["analyse", str(song), "--type", "full-mix", "--out", str(out), *extra])
+
+
+@needs_ffmpeg
+def test_analyse_writes_a_valid_song_and_a_midi_file(song_file: Path, tmp_path: Path) -> None:
+    assert analyse(song_file, tmp_path / "out", "--cache-dir", str(tmp_path / "cache")) == 0
+    song = load_json(tmp_path / "out" / "cadence.song.json")
     validate_song(song)
-    assert song["title"] == "my song"
-    assert song["meta"]["pipelineVersion"] == "0.1.0"
+    assert song["schemaVersion"] == current_version() == "0.3.0"
+    assert song["title"] == "cadence"
+    assert song["sourceType"] == "full-mix"
+    assert song["durationSec"] == pytest.approx(9.5, abs=0.01)
+    assert song["tempo"]["bpm"] == pytest.approx(60, rel=0.02)
+    assert song["timeSignature"] == {"num": 4, "den": 4}
+    assert (song["tonality"]["key"], song["tonality"]["mode"]) == ("G", "major")
+    assert song["tonality"]["scale"] == [7, 9, 11, 0, 2, 4, 6]
+    # Times are on the original audio: the first beat is after the second of silence.
+    assert song["tempo"]["beats"][0] == pytest.approx(1.0, abs=0.05)
+    assert set(song["tempo"]["downbeats"]) <= set(song["tempo"]["beats"])
+    # A full mix gives the (fake) vocal melody in the right hand over chords in the left.
+    notes = song["notes"]
+    assert {n["hand"] for n in notes} == {"left", "right"}
+    assert {n["source"] for n in notes} == {"arranged"}
+    assert min(n["start"] for n in notes) >= 0.9  # on the original timeline
+    chords = song["chords"]
+    assert chords and {c["label"] for c in chords} <= {
+        "G",
+        "C",
+        "D",
+        "Em",
+        "Am",
+        "Bm",
+        "D7",
+        "G/B",
+        "C/E",
+        "D/F#",
+    }
+    assert chords[0]["start"] >= 0.0 and chords[-1]["end"] <= song["durationSec"]
+    confidence = song["meta"]["confidence"]
+    assert confidence["key"] > 0 and confidence["tempo"] > 0 and confidence["chords"] > 0
+    assert confidence["notes"] == pytest.approx(0.9)
+    midi = mido.MidiFile(file=io.BytesIO((tmp_path / "out" / "cadence.mid").read_bytes()))
+    assert [t.name for t in midi.tracks[1:]] == ["Right hand", "Left hand"]
+    right = [m for m in midi.tracks[1] if m.type == "note_on" and m.velocity > 0]
+    left = [m for m in midi.tracks[2] if m.type == "note_on" and m.velocity > 0]
+    assert len(right) + len(left) == len(notes)
+    assert [m.text for m in midi.tracks[0] if m.type == "marker"] == [c["label"] for c in chords]
 
 
-def test_analyse_uses_given_title_and_fresh_id(source: Path, tmp_path: Path) -> None:
-    first = load_json(analyse(source, tmp_path / "a", title="Vaseegara"))
-    second = load_json(analyse(source, tmp_path / "b"))
-    assert first["title"] == "Vaseegara"
-    assert first["id"] != second["id"]
+@needs_ffmpeg
+def test_the_same_input_and_flags_give_byte_identical_output(
+    song_file: Path, tmp_path: Path
+) -> None:
+    fixed = ["--id", "repeatable", "--created-at", "2026-11-14T10:00:00+00:00"]
+    assert analyse(song_file, tmp_path / "a", "--no-cache", *fixed) == 0
+    assert analyse(song_file, tmp_path / "b", "--no-cache", *fixed) == 0
+    # A cached run gives the same bytes as a fresh one.
+    assert analyse(song_file, tmp_path / "c", "--cache-dir", str(tmp_path / "cache"), *fixed) == 0
+    assert analyse(song_file, tmp_path / "d", "--cache-dir", str(tmp_path / "cache"), *fixed) == 0
+    for name in ("cadence.song.json", "cadence.mid"):
+        first = (tmp_path / "a" / name).read_bytes()
+        for other in ("b", "c", "d"):
+            assert (tmp_path / other / name).read_bytes() == first, f"{other}/{name}"
 
 
-def test_main_success(source: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
-    assert main(["analyse", str(source), "--out", str(tmp_path / "out")]) == 0
-    assert "Wrote" in capsys.readouterr().out
+@needs_ffmpeg
+def test_the_cache_skips_finished_stages_and_no_cache_runs_them(
+    song_file: Path, tmp_path: Path
+) -> None:
+    info = SongInfo(
+        song_id="x", title="t", source_type="full-mix", created_at="2026-11-14T10:00:00+00:00"
+    )
+    cache = tmp_path / "cache"
+    first = run(song_file, info, Options(source_type="full-mix", cache_root=cache))
+    second = run(song_file, info, Options(source_type="full-mix", cache_root=cache))
+    fresh = run(song_file, info, Options(source_type="full-mix", cache_root=None))
+    rerun = run(
+        song_file, info, Options(source_type="full-mix", cache_root=cache, from_stage="tonality")
+    )
+    cached = lambda result: {r.name: r.cached for r in result.records}  # noqa: E731
+    stages = ("separate", "rhythm", "tonality", "melody", "bass", "harmony")
+
+    def every(value: bool) -> dict[str, bool]:
+        return {"ingest": False} | dict.fromkeys(stages, value)
+
+    assert cached(first) == every(False)
+    assert cached(second) == every(True)
+    assert cached(fresh) == every(False)
+    # From tonality on: separate and rhythm come from the cache, the rest re-run.
+    assert cached(rerun) == every(False) | {"separate": True, "rhythm": True}
+    assert first.song == second.song == fresh.song == rerun.song
 
 
-def test_main_missing_file(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
-    code = main(["analyse", str(tmp_path / "nope.wav"), "--out", str(tmp_path / "out")])
-    assert code == 2
+def test_an_ingest_change_reruns_the_stages_after_it(
+    song_file: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # A wider trim pad moves the offset and the audio the stages see, with no version bump.
+    info = SongInfo(
+        song_id="x", title="t", source_type="full-mix", created_at="2026-11-14T10:00:00+00:00"
+    )
+    cache = tmp_path / "cache"
+    run(song_file, info, Options(source_type="full-mix", cache_root=cache))
+    monkeypatch.setattr("isai.ingest.trim.PAD_SEC", 0.5)
+    changed = run(song_file, info, Options(source_type="full-mix", cache_root=cache))
+    fresh = run(song_file, info, Options(source_type="full-mix", cache_root=None))
+    assert not any(r.cached for r in changed.records)
+    assert len(changed.records) == 7  # ingest ... bass, harmony
+    assert changed.song == fresh.song
+
+
+@needs_ffmpeg
+def test_logs_each_stage_as_a_json_line(
+    song_file: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    assert analyse(song_file, tmp_path / "out", "--no-cache", "--log-json") == 0
+    lines = [json.loads(line) for line in capsys.readouterr().err.splitlines()]
+    assert [line["stage"] for line in lines] == [
+        "ingest",
+        "separate",
+        "rhythm",
+        "tonality",
+        "melody",
+        "bass",
+        "harmony",
+    ]
+    assert all(line["event"] == "stage" and line["seconds"] >= 0 for line in lines)
+    rhythm, tonality = lines[2]["detail"], lines[3]["detail"]
+    assert rhythm["tracker"].startswith("librosa")
+    assert rhythm["stable"] is True and rhythm["beatsPerBar"] == 4
+    assert abs(rhythm["bpm"] - 60) < 1
+    assert (tonality["key"], tonality["mode"]) == ("G", "major")
+
+
+def test_type_is_required_and_carnatic_is_for_later(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    audio = tmp_path / "x.wav"
+    audio.write_bytes(b"")
+    with pytest.raises(SystemExit) as exc:
+        main(["analyse", str(audio), "--out", str(tmp_path)])
+    assert exc.value.code == 2
+    with pytest.raises(SystemExit):
+        main(["analyse", str(audio), "--type", "polka", "--out", str(tmp_path)])
+    assert main(["analyse", str(audio), "--type", "carnatic", "--out", str(tmp_path)]) == 2
+    assert "coming in a later version" in capsys.readouterr().err
+
+
+def test_missing_input_exits_2(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    assert analyse(tmp_path / "nope.wav", tmp_path / "out") == 2
     assert "input file not found" in capsys.readouterr().err
     assert not (tmp_path / "out").exists()
 
 
-def test_main_requires_out(source: Path) -> None:
-    with pytest.raises(SystemExit) as exc:
-        main(["analyse", str(source)])
-    assert exc.value.code == 2
+def test_a_bad_created_at_exits_2(
+    song_file: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    for value in ("yesterday", "2026-11-14", "2026-11-14T10:00:00"):
+        assert analyse(song_file, tmp_path / "out", "--created-at", value) == 2
+        assert "ISO 8601" in capsys.readouterr().err
+    assert not (tmp_path / "out").exists()
 
 
-def test_console_script_runs(source: Path, tmp_path: Path) -> None:
+@needs_ffmpeg
+def test_decode_failure_exits_4(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    text = tmp_path / "notes.mp3"
+    text.write_text("not audio")
+    assert analyse(text, tmp_path / "out", "--no-cache") == 4
+    assert "not an audio file" in capsys.readouterr().err
+
+
+@needs_ffmpeg
+def test_too_long_exits_5(song_file: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    # The real limit is 12 minutes; a 2 s limit makes the 9.5 s test song too long.
+    original = isai.pipeline.ingest
+    monkeypatch.setattr(
+        isai.pipeline, "ingest", lambda path, _limits: original(path, IngestLimits(max_seconds=2))
+    )
+    assert analyse(song_file, tmp_path / "out", "--no-cache") == 5
+
+
+@needs_ffmpeg
+def test_silence_exits_6(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    silent = write_wav(tmp_path / "silent.wav", silence(2, RATE), RATE)
+    assert analyse(silent, tmp_path / "out", "--no-cache") == 6
+    assert "silent" in capsys.readouterr().err
+
+
+@needs_ffmpeg
+def test_schema_not_found_exits_3(
+    song_file: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("ISAI_SCHEMA_DIR", str(tmp_path / "empty"))
+    import isai.schema
+
+    isai.schema.load_schema.cache_clear()
+    isai.schema._validator.cache_clear()  # pyright: ignore[reportPrivateUsage]
+    try:
+        assert analyse(song_file, tmp_path / "out", "--no-cache") == 3
+    finally:
+        monkeypatch.delenv("ISAI_SCHEMA_DIR")
+        isai.schema.load_schema.cache_clear()
+        isai.schema._validator.cache_clear()  # pyright: ignore[reportPrivateUsage]
+
+
+@needs_ffmpeg
+def test_an_invalid_song_exits_1(
+    song_file: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def reject(_doc: object) -> None:
+        raise SongValidationError(["$.tempo: broken on purpose"])
+
+    monkeypatch.setattr("isai.assemble.validate_song", reject)
+    assert analyse(song_file, tmp_path / "out", "--no-cache") == 1
+
+
+def test_console_script_is_installed() -> None:
+    # The `isai` entry point installed next to this interpreter, not `python -m`. No models:
+    # the fake ones the other tests use don't reach a child process.
+    script = shutil.which("isai", path=str(Path(sys.executable).parent))
+    assert script is not None, "isai console script is not installed in this environment"
+    version = subprocess.run([script, "--version"], capture_output=True, text=True, check=False)
+    assert version.returncode == 0 and version.stdout.startswith("isai ")
+    missing = subprocess.run(
+        [script, "analyse", "no-such-file.mp3", "--type", "piano-solo", "--out", "out"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert missing.returncode == ExitCode.USAGE
+    assert "input file not found" in missing.stderr
+
+
+@pytest.mark.slow
+@needs_ffmpeg
+def test_console_script_runs(song_file: Path, tmp_path: Path) -> None:
+    # A full analysis through the installed script: the real models, in a child process.
+    script = shutil.which("isai", path=str(Path(sys.executable).parent))
+    assert script is not None, "isai console script is not installed in this environment"
     result = subprocess.run(
-        [sys.executable, "-m", "isai.cli", "analyse", str(source), "--out", str(tmp_path)],
+        [
+            script,
+            "analyse",
+            str(song_file),
+            "--type",
+            "piano-solo",
+            "--out",
+            str(tmp_path),
+            "--no-cache",
+        ],
         capture_output=True,
         text=True,
         check=False,
     )
     assert result.returncode == 0, result.stderr
-    validate_song(load_json(tmp_path / "my song.song.json"))
+    validate_song(load_json(tmp_path / "cadence.song.json"))
+
+
+def test_beat_tracker_flag_picks_the_tracker(
+    song_file: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    seen: list[object] = []
+    real_run = isai.cli.run
+
+    def spy(source: Path, info: SongInfo, options: Options):
+        seen.append(options.tracker)
+        return real_run(source, info, options)
+
+    monkeypatch.setattr(isai.cli, "run", spy)
+    assert analyse(song_file, tmp_path / "a", "--no-cache") == 0
+    assert analyse(song_file, tmp_path / "b", "--no-cache", "--beat-tracker", "beat-this") == 0
+    assert type(seen[0]).__name__ == "LibrosaTracker"  # the default (ADR 0014)
+    assert seen[1] is None  # Beat This! through the models

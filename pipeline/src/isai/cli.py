@@ -1,7 +1,10 @@
 """`isai` command line.
 
-P0: `isai analyse` is a stub. It checks the input exists and writes a placeholder Song
-copied from a schema example. No audio is read.
+`isai analyse song.mp3 --type full-mix --out out/` writes `out/song.song.json` and
+`out/song.mid`. Exit codes: 0 done, 1 invalid Song, 2 input missing or bad arguments,
+3 schema not found, 4 decode failed, 5 too long, 6 silent, 7 a model or torch missing.
+`isai models list` and `isai models fetch` manage the model weights.
+`isai worker [--once]` processes the analysis queue; `isai worker sweep` deletes old uploads.
 """
 
 from __future__ import annotations
@@ -15,33 +18,43 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from isai import __version__
-from isai.schema import SongValidationError, examples_dir, load_json, validate_song
+from jsonschema import FormatChecker
 
-PLACEHOLDER_EXAMPLE = "twinkle-g-major.json"
-
-
-def build_placeholder_song(source: Path, title: str | None = None) -> dict[str, Any]:
-    song: dict[str, Any] = load_json(examples_dir() / PLACEHOLDER_EXAMPLE)
-    song["id"] = uuid.uuid4().hex
-    song["title"] = title or source.stem
-    song["meta"]["pipelineVersion"] = __version__
-    song["meta"]["createdAt"] = datetime.now(UTC).isoformat(timespec="seconds")
-    validate_song(song)
-    return song
+from isai import __version__, models
+from isai.arrange import LEVELS
+from isai.assemble import SongInfo
+from isai.errors import ExitCode, ModelMissingError, PipelineError
+from isai.models import fetch as fetch_model
+from isai.pipeline import LATER_TYPES, STAGES, SUPPORTED_TYPES, Options, Result, run
+from isai.rhythm import LibrosaTracker
+from isai.schema import SchemaNotFoundError, SongValidationError
 
 
-def analyse(source: Path, out_dir: Path, title: str | None = None) -> Path:
-    """Write `<out_dir>/<stem>.song.json` for `source` and return its path."""
-    if not source.is_file():
-        raise FileNotFoundError(f"input file not found: {source}")
-    song = build_placeholder_song(source, title)
+def _write(song: dict[str, Any], midi: bytes, out_dir: Path, stem: str) -> tuple[Path, Path]:
     out_dir.mkdir(parents=True, exist_ok=True)
-    out_path = out_dir / f"{source.stem}.song.json"
-    with out_path.open("w", encoding="utf-8", newline="\n") as f:
+    song_path = out_dir / f"{stem}.song.json"
+    with song_path.open("w", encoding="utf-8", newline="\n") as f:
         json.dump(song, f, indent=2, ensure_ascii=False)
         f.write("\n")
-    return out_path
+    midi_path = out_dir / f"{stem}.mid"
+    midi_path.write_bytes(midi)
+    return song_path, midi_path
+
+
+def write_outputs(result: Result, out_dir: Path, stem: str) -> list[tuple[Path, Path]]:
+    """Write each arrangement's Song JSON and MIDI file; return their paths.
+
+    One arrangement is `<stem>.song.json`; several (`--level all`) are
+    `<stem>.<level>.song.json`.
+    """
+    arrangements = result.arrangements or {"": (result.song, result.midi)}
+    if len(arrangements) == 1:
+        song, midi = next(iter(arrangements.values()))
+        return [_write(song, midi, out_dir, stem)]
+    return [
+        _write(song, midi, out_dir, f"{stem}.{level}")
+        for level, (song, midi) in arrangements.items()
+    ]
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -49,26 +62,283 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--version", action="version", version=f"isai {__version__}")
     commands = parser.add_subparsers(dest="command", required=True)
 
-    analyse_cmd = commands.add_parser("analyse", help="analyse one song into Song JSON")
-    analyse_cmd.add_argument("file", type=Path, help="audio file to analyse")
-    analyse_cmd.add_argument("--out", type=Path, required=True, help="output directory")
-    analyse_cmd.add_argument("--title", help="song title (default: file name)")
+    analyse = commands.add_parser("analyse", help="analyse one song into Song JSON and MIDI")
+    analyse.add_argument("file", type=Path, help="audio file to analyse")
+    analyse.add_argument(
+        "--type",
+        required=True,
+        choices=[*SUPPORTED_TYPES, *LATER_TYPES],
+        help="what the recording is: solo piano, a full mix, or unaccompanied voice",
+    )
+    analyse.add_argument("--out", type=Path, required=True, help="output directory")
+    analyse.add_argument("--title", help="song title (default: file name)")
+    analyse.add_argument("--id", dest="song_id", help="Song id (default: a new random id)")
+    analyse.add_argument(
+        "--created-at",
+        help="creation time, ISO 8601 with a UTC offset (default: now); fix it for "
+        "repeatable output",
+    )
+    analyse.add_argument(
+        "--cache-dir", type=Path, default=Path(".cache"), help="stage cache (default: .cache)"
+    )
+    analyse.add_argument("--no-cache", action="store_true", help="run every stage afresh")
+    analyse.add_argument(
+        "--from-stage", choices=STAGES, help="re-run this stage and the ones after it"
+    )
+    analyse.add_argument(
+        "--log-json", action="store_true", help="log each stage as a JSON line on stderr"
+    )
+    analyse.add_argument(
+        "--device",
+        choices=["auto", "cpu", "cuda"],
+        default="auto",
+        help="where the models run (default: auto, the GPU when torch sees one)",
+    )
+    analyse.add_argument(
+        "--beat-tracker",
+        choices=["librosa", "beat-this"],
+        default="librosa",
+        help="beats and bars from librosa's tracker (default, ADR 0014) or Beat This! (a model)",
+    )
+    analyse.add_argument(
+        "--level",
+        choices=[*LEVELS, "all"],
+        default="medium",
+        help="arrangement level (default: medium); all writes one Song per level",
+    )
+    analyse.add_argument(
+        "--simplify",
+        choices=["easy", "medium"],
+        help="piano-solo: arrange the transcription at this level instead of keeping it",
+    )
+    analyse.add_argument(
+        "--keep-stems",
+        action="store_true",
+        help="full-mix: also write the separated stems to <out>/stems/ (local use only)",
+    )
+    models_parser = commands.add_parser("models", help="list or download the analysis models")
+    models_commands = models_parser.add_subparsers(dest="models_command", required=True)
+    models_commands.add_parser("list", help="each model, its licence and whether it's here")
+    fetch = models_commands.add_parser("fetch", help="download and verify models")
+    fetch.add_argument("names", nargs="*", help="model names (default: all)")
+
+    worker = commands.add_parser(
+        "worker", help="process the analysis queue (needs ISAI_SUPABASE_URL and a service key)"
+    )
+    worker.add_argument(
+        "action", nargs="?", choices=["run", "sweep"], default="run",
+        help="run (default): process jobs; sweep: delete uploads older than 24 h, then exit",
+    )  # fmt: skip
+    worker.add_argument("--once", action="store_true", help="process at most one job, then exit")
+    worker.add_argument(
+        "--device", choices=["auto", "cpu", "cuda"], default="auto", help="where the models run"
+    )
+
+    admin = commands.add_parser("admin", help="the owner's operations tools (service role)")
+    admin_commands = admin.add_subparsers(dest="admin_command", required=True)
+    admin_commands.add_parser("check", help="alerts and the rule 8 audit; exit 1 if any")
+    delete = admin_commands.add_parser("delete-user", help="delete a member and all their data")
+    delete.add_argument("email")
+    delete.add_argument("--yes", action="store_true", help="don't ask for confirmation")
+    backup = admin_commands.add_parser("backup", help="database rows and Song files, archived")
+    backup.add_argument("--out", type=Path, required=True)
+    restore = admin_commands.add_parser("restore", help="load a backup into an empty project")
+    restore.add_argument("archive", type=Path)
+    for sub in (backup, restore):
+        sub.add_argument(
+            "--passphrase-env",
+            metavar="VAR",
+            help="encrypt or decrypt with gpg, the passphrase in this environment variable",
+        )
     return parser
+
+
+def _models(args: argparse.Namespace) -> int:
+    if args.models_command == "list":
+        for model in models.REGISTRY.values():
+            try:
+                status = f"here ({models.model_path(model.name)})"
+            except ModelMissingError:
+                status = "missing"
+            size = f"{model.size / 1e6:.0f} MB"
+            print(f"{model.name}: {model.what}; {size}; {model.licence}; {status}")
+        return ExitCode.OK
+    unknown = [name for name in args.names if name not in models.REGISTRY]
+    if unknown:
+        known = ", ".join(models.REGISTRY)
+        print(f"isai: unknown model {', '.join(unknown)} (known: {known})", file=sys.stderr)
+        return ExitCode.USAGE
+    for name in args.names or list(models.REGISTRY):
+        try:
+            path = fetch_model(name)
+        except ModelMissingError as e:
+            print(f"isai: {e}", file=sys.stderr)
+            return e.exit_code
+        except OSError as e:
+            print(f"isai: downloading {name} failed: {e}", file=sys.stderr)
+            return ExitCode.MODEL_MISSING
+        print(f"{name}: {path}")
+    return ExitCode.OK
+
+
+def _created_at(value: str | None) -> str:
+    if value is None:
+        return datetime.now(UTC).isoformat(timespec="seconds")
+    # The schema's own check (RFC 3339), so a bad value fails here, before the analysis.
+    if not FormatChecker().conforms(value, "date-time"):
+        raise ValueError(
+            "--created-at must be an ISO 8601 date and time with a UTC offset, "
+            f"like 2026-11-14T10:00:00+05:30, got {value!r}"
+        )
+    return value
+
+
+def _worker(args: argparse.Namespace) -> int:
+    import signal
+
+    from isai.worker.analyser import SubprocessAnalyser
+    from isai.worker.loop import Worker, WorkerConfig
+    from isai.worker.repository import StoreSongRepository
+    from isai.worker.supabase_impl import (
+        SettingsError,
+        SupabaseJobQueue,
+        SupabaseObjectStore,
+        connect,
+        load_settings,
+    )
+
+    try:
+        settings = load_settings()
+    except SettingsError as e:
+        print(f"isai: {e}", file=sys.stderr)
+        return ExitCode.USAGE
+    client = connect(settings)
+    store = SupabaseObjectStore(client)
+    worker = Worker(
+        SupabaseJobQueue(client),
+        store,
+        StoreSongRepository(store),
+        SubprocessAnalyser(device=args.device),
+        WorkerConfig(worker_id=settings.worker_id),
+    )
+    if args.action == "sweep":
+        deleted = worker.sweep()
+        print(f"Deleted {len(deleted)} uploads older than 24 hours")
+        return ExitCode.OK
+
+    def on_signal(_signum: int, _frame: object) -> None:
+        if worker.stop.is_set():
+            worker.abort.set()  # second time: put the current job back in the queue now
+        else:
+            worker.stop.set()
+            print("isai: finishing the current job; press Ctrl+C again to release it",
+                  file=sys.stderr)  # fmt: skip
+
+    signal.signal(signal.SIGINT, on_signal)
+    signal.signal(signal.SIGTERM, on_signal)
+    worker.log("start", once=args.once)
+    count = worker.run(once=args.once)
+    worker.log("stop", processed=count)
+    return ExitCode.OK
+
+
+def _admin(args: argparse.Namespace) -> int:
+    import os
+
+    from isai import admin
+    from isai.worker.supabase_impl import SettingsError, connect, load_settings
+
+    try:
+        client = connect(load_settings())
+    except SettingsError as e:
+        print(f"isai: {e}", file=sys.stderr)
+        return ExitCode.USAGE
+    if args.admin_command == "check":
+        alerts = admin.check(client)
+        for alert in alerts:
+            print(f"{alert.alert}: {alert.detail}")
+        if not alerts:
+            print("All clear")
+        return 1 if alerts else ExitCode.OK
+    if args.admin_command == "delete-user":
+        if not args.yes and input(f"Delete {args.email} and all their data? [y/N] ") != "y":
+            return ExitCode.OK
+        removed = admin.delete_user(client, args.email)
+        print(f"Deleted: {removed}")
+        return ExitCode.OK
+    passphrase = os.environ.get(args.passphrase_env) if args.passphrase_env else None
+    if args.passphrase_env and not passphrase:
+        print(f"isai: {args.passphrase_env} is empty", file=sys.stderr)
+        return ExitCode.USAGE
+    try:
+        db_url = admin.database_url()
+    except ValueError as e:
+        print(f"isai: {e}", file=sys.stderr)
+        return ExitCode.USAGE
+    if args.admin_command == "backup":
+        result = admin.backup(client, db_url, args.out, passphrase)
+        print(
+            f"Wrote {result.path} ({result.song_files} Song files, encrypted: {result.encrypted})"
+        )
+        return ExitCode.OK
+    restored = admin.restore(client, db_url, args.archive, passphrase)
+    print(f"Restored {restored['song_files']} Song files and the database rows")
+    return ExitCode.OK
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = _parser().parse_args(argv)
-    if args.command == "analyse":
-        try:
-            out_path = analyse(args.file, args.out, args.title)
-        except FileNotFoundError as e:
-            print(f"isai: {e}", file=sys.stderr)
-            return 2
-        except SongValidationError as e:
-            print(f"isai: {e}", file=sys.stderr)
-            return 1
-        print(f"Wrote {out_path}")
-    return 0
+    if args.command == "admin":
+        return _admin(args)
+    if args.command == "models":
+        return _models(args)
+    if args.command == "worker":
+        return _worker(args)
+    source: Path = args.file
+    if args.type in LATER_TYPES:
+        print(f"isai: {args.type} songs are coming in a later version", file=sys.stderr)
+        return ExitCode.USAGE
+    if not source.is_file():
+        print(f"isai: input file not found: {source}", file=sys.stderr)
+        return ExitCode.USAGE
+    try:
+        info = SongInfo(
+            song_id=args.song_id or uuid.uuid4().hex,
+            title=args.title or source.stem,
+            source_type=args.type,
+            created_at=_created_at(args.created_at),
+        )
+    except ValueError as e:
+        print(f"isai: {e}", file=sys.stderr)
+        return ExitCode.USAGE
+    options = Options(
+        source_type=args.type,
+        cache_root=None if args.no_cache else args.cache_dir,
+        from_stage=args.from_stage,
+        log_json=args.log_json,
+        device=args.device,
+        keep_stems=args.out / "stems" if args.keep_stems else None,
+        tracker=None if args.beat_tracker == "beat-this" else LibrosaTracker(),
+        levels=LEVELS if args.level == "all" else (args.level,),
+        simplify=args.simplify if args.type == "piano-solo" else None,
+    )
+    try:
+        result = run(source, info, options)
+    except SchemaNotFoundError as e:
+        # A broken install, not a user mistake: say so and how to fix it.
+        print(f"isai: {e}. Is the repo's schema/ folder present?", file=sys.stderr)
+        return ExitCode.SCHEMA_NOT_FOUND
+    except PipelineError as e:
+        print(f"isai: {e}", file=sys.stderr)
+        return e.exit_code
+    except SongValidationError as e:
+        print(f"isai: {e}", file=sys.stderr)
+        return ExitCode.INVALID_SONG
+    for song_path, midi_path in write_outputs(result, args.out, source.stem):
+        print(f"Wrote {song_path} and {midi_path}")
+    if result.stem_files:
+        print(f"Wrote {len(result.stem_files)} stems to {result.stem_files[0].parent}")
+    return ExitCode.OK
 
 
 if __name__ == "__main__":

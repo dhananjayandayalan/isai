@@ -82,7 +82,7 @@
         <button type="button" class="btn btn-primary btn-play" aria-label="Play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="width: 22px; height: 22px"><path d="M7 4l14 8-14 8z"/></svg></button>
       </div>
       <div class="row">
-        <div class="seg" role="group" aria-label="Mode"><button type="button" class="seg-btn" aria-pressed="true">Learn</button><button type="button" class="seg-btn" aria-pressed="false">Perform</button></div>
+        <div class="seg" role="group" aria-label="Mode"><button type="button" class="seg-btn" aria-pressed="true">Learn</button><button type="button" class="seg-btn" aria-pressed="false">Perform</button><button type="button" class="seg-btn" aria-pressed="false" disabled>Later <span class="chip">Coming soon</span></button></div>
         <div class="seg" role="group" aria-label="Hands"><button type="button" class="seg-btn" aria-pressed="false">Left</button><button type="button" class="seg-btn" aria-pressed="true">Both</button><button type="button" class="seg-btn" aria-pressed="false">Right</button></div>
         <button type="button" class="filter" aria-pressed="true">Everything 7</button>
         <button type="button" class="filter" aria-pressed="false">Carnatic 1</button>
@@ -155,13 +155,55 @@
         <div class="note-left" style="position: absolute; left: 40%; bottom: 0; width: 44px; height: 110px"></div>
         <div class="note-ghost" style="position: absolute; left: 60%; bottom: 0; width: 44px; height: 80px"></div>
       </div>
+      <div class="stack-2">
+        <span class="t-muted">Range (seek bar), enabled and disabled</span>
+        <input type="range" class="range" aria-label="Position" min="0" max="100" value="35">
+        <input type="range" class="range" aria-label="Position (disabled)" min="0" max="100" value="35" disabled>
+      </div>
+      <span class="t-muted">Piano frame with static keys</span>
       <div class="piano row" style="gap: 3px; flex-wrap: nowrap; height: 90px">
         <span class="piano-key-white" style="flex: 1; height: 100%"></span><span class="piano-key-white" style="flex: 1; height: 100%"></span><span class="piano-key-white" style="flex: 1; height: 100%"></span><span class="piano-key-white" style="flex: 1; height: 100%"></span><span class="piano-key-white" style="flex: 1; height: 100%"></span><span class="piano-key-white" style="flex: 1; height: 100%"></span><span class="piano-key-white" style="flex: 1; height: 100%"></span>
       </div>
+      <span class="t-muted">Piano frame with <code>.piano-canvas</code> (drawn here from the fixed piano tokens)</span>
+      <div class="piano"><canvas class="piano-canvas" id="piano-canvas" role="img" aria-label="Piano canvas sample"></canvas></div>
     </div>
   </section>
 </div>
 <script>
+  // .piano-canvas sample: seven white keys and five black keys, one song-note pill per hand,
+  // and the practice marks.
+  (function () {
+    const canvas = document.getElementById('piano-canvas');
+    const token = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+    const width = canvas.clientWidth, height = 90, ratio = window.devicePixelRatio || 1;
+    canvas.style.height = height + 'px';
+    canvas.width = width * ratio; canvas.height = height * ratio;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(ratio, ratio);
+    ctx.fillStyle = token('--piano-frame'); ctx.fillRect(0, 0, width, height);
+    const w = width / 7;
+    for (let i = 0; i < 7; i++) { ctx.fillStyle = token('--piano-white'); ctx.fillRect(i * w + 1, 0, w - 2, height); }
+    for (const i of [1, 2, 4, 5, 6]) { ctx.fillStyle = token('--piano-black'); ctx.fillRect(i * w - w * 0.29, 0, w * 0.58, height * 0.62); }
+    const pill = (i, fill) => {
+      ctx.fillStyle = token(fill); ctx.strokeStyle = token('--piano-pill-edge'); ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.rect(i * w + w * 0.2, height - 22, w * 0.6, 14); ctx.fill(); ctx.stroke();
+    };
+    pill(0, '--piano-pill-left'); pill(4, '--piano-pill-right');
+    // Practice: the step after this one is an outlined pill; a key played right gets a
+    // disc, one that isn't in the step a disc with a cross (shape, not hue).
+    ctx.strokeStyle = token('--piano-pill-left'); ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.rect(2 * w + w * 0.2, height - 22, w * 0.6, 14); ctx.stroke();
+    const disc = (i, fill, cross) => {
+      const x = i * w + w / 2, y = height - 15, r = 8;
+      ctx.fillStyle = token(fill); ctx.strokeStyle = token('--piano-pill-edge');
+      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      if (!cross) return;
+      ctx.strokeStyle = token('--piano-pill-right');
+      ctx.beginPath(); ctx.moveTo(x - 4, y - 4); ctx.lineTo(x + 4, y + 4); ctx.moveTo(x + 4, y - 4); ctx.lineTo(x - 4, y + 4); ctx.stroke();
+    };
+    disc(5, '--piano-correct', false); disc(6, '--piano-wrong', true);
+  })();
+
   // Colour swatches, read from the live tokens.
   const names = ['bg','bg-deep','sidebar','surface','surface-sunken','surface-raised','fill','fill-strong','border','border-strong','text','text-2','text-3','text-4','accent','on-accent','data-1','data-2','data-3','data-4','hand-left','inverse'];
   const box = document.getElementById('swatches');

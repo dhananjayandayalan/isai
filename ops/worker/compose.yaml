@@ -1,0 +1,37 @@
+# The worker on the owner's GPU PC (ADR 0016). Docker Desktop with the WSL2 backend and an
+# NVIDIA driver; start it with Docker Desktop's "Start when you sign in" enabled.
+#   docker compose -f ops/worker/compose.yaml up -d
+# Secrets come from ops/worker/.env (never committed): ISAI_SUPABASE_URL,
+# ISAI_SUPABASE_SERVICE_KEY, ISAI_WORKER_ID. See docs/runbooks/.
+services:
+  worker:
+    image: ${ISAI_WORKER_IMAGE:-ghcr.io/OWNER/isai-worker:latest}
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      ISAI_WORKER_ID: ${ISAI_WORKER_ID:-owner-pc}
+    volumes:
+      - models:/models
+    # One job at a time on one GPU (P8); these caps keep a bad file from taking the PC.
+    mem_limit: 12g
+    cpus: 6
+    pids_limit: 512
+    read_only: true
+    tmpfs:
+      - /tmp/isai:size=8g
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    stop_grace_period: 25m # the first stop signal lets the current job finish (20 min limit)
+    logging:
+      driver: json-file
+      options: { max-size: 20m, max-file: "14" } # about 14 days of JSON logs
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+volumes:
+  models:

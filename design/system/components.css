@@ -152,6 +152,7 @@ a { color: var(--text); }
   font: inherit; font-size: var(--text-sm); font-weight: var(--weight-bold); cursor: pointer;
 }
 .seg-btn[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+.seg-btn:disabled { color: var(--text-4); cursor: not-allowed; }   /* a choice that isn't built yet */
 .seg-btn svg { width: var(--icon-sm); height: var(--icon-sm); }
 .seg-fill { display: flex; } .seg-fill .seg-btn { flex: 1; } /* full-width variant, e.g. sidebar theme switch */
 
@@ -168,6 +169,8 @@ a { color: var(--text); }
 /* Forms                                                               */
 /* ------------------------------------------------------------------ */
 .field { display: flex; flex-direction: column; gap: var(--space-2); }
+.range { width: 100%; min-height: var(--control-md); margin: 0; accent-color: var(--text); background: transparent; cursor: pointer; }
+.range:disabled { cursor: default; opacity: .5; }
 .label { font-size: var(--text-sm); font-weight: var(--weight-bold); }
 .input, .select {
   height: var(--control-md); padding: 0 var(--space-4);
@@ -243,6 +246,13 @@ a { color: var(--text); }
   background-size: 22px 22px; animation: isai-stripes .8s linear infinite;
 }
 
+/* Histogram (results timing): <div class="histogram" role="img" aria-label="…">
+   <span class="histogram-bar is-in" style="height: 60%"></span> … </div>. The height is data. */
+.histogram { display: flex; align-items: flex-end; gap: var(--space-1); height: 160px; border-bottom: var(--border-width-thin) solid var(--border-strong); }
+.histogram-bar { flex: 1; min-height: 2px; border-radius: var(--radius-xs) var(--radius-xs) 0 0; background: var(--data-3); }
+.histogram-bar.is-in { background: var(--data-1); }   /* inside the "perfect" window */
+.histogram-axis { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: var(--text-2xs); color: var(--text-3); }
+
 /* Skeleton: put on any empty block with a fixed height. */
 .skeleton {
   background: linear-gradient(90deg, var(--surface-raised) 25%, var(--fill-strong) 50%, var(--surface-raised) 75%);
@@ -294,9 +304,11 @@ a { color: var(--text); }
 .piano { background: var(--piano-frame); border-radius: 0 0 var(--radius-xl) var(--radius-xl); padding: 6px 6px 8px; }
 .piano-key-white { background: var(--piano-white); border-radius: 0 0 var(--radius-sm) var(--radius-sm); }
 .piano-key-black { background: var(--piano-black); border-radius: 0 0 var(--radius-sm) var(--radius-sm); }
+.piano-canvas { display: block; width: 100%; } /* the renderer sets its height from the key width */
 
 /* Falling-notes stage */
 .stage { position: relative; background: var(--surface-sunken); border: var(--border-width) solid var(--border); border-bottom: 0; border-radius: var(--radius-xl) var(--radius-xl) 0 0; overflow: hidden; }
+.stage-canvas { display: block; width: 100%; } /* falling notes or the staff; the controller sets its height */
 .note-right { background: var(--hand-right); border: var(--border-width) solid var(--hand-right-border); color: var(--on-hand-right); border-radius: var(--radius-md); }
 .note-left  { background: var(--hand-left);  border: var(--border-width) solid var(--hand-left-border);  color: var(--on-hand-left);  border-radius: var(--radius-md); }
 .note-ghost { background: transparent;        border: var(--border-width) solid var(--border-strong);    color: var(--text-4);        border-radius: var(--radius-md); }

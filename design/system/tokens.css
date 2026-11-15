@@ -108,6 +108,8 @@
   --piano-pill-right: #F5F5F5;
   --piano-pill-left: #6E6E6E;
   --piano-pill-edge: #121212;
+  --piano-correct: #FFFFFF;      /* the mark on a key you played right */
+  --piano-wrong: #2E2E2E;        /* the mark (with a cross) on a key that isn't in the step */
 }
 
 /* ------------------------------------------------------------------ */

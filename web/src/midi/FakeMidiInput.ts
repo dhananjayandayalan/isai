@@ -1,4 +1,13 @@
-import type { MidiDevice, MidiInput, MidiNoteEvent, MidiNoteListener, Unsubscribe } from './MidiInput';
+import {
+  PEDAL_DOWN_AT,
+  type MidiDevice,
+  type MidiDevicesListener,
+  type MidiInput,
+  type MidiNoteEvent,
+  type MidiNoteListener,
+  type MidiPedalListener,
+  type Unsubscribe,
+} from './MidiInput';
 
 export const FAKE_DEVICE: MidiDevice = { id: 'fake-keyboard', name: 'Fake keyboard' };
 
@@ -9,11 +18,16 @@ export interface FakeNoteOptions {
   time?: number;
 }
 
-/** In-memory `MidiInput` for tests: call `emitNoteOn` / `emitNoteOff` to play it. */
+/**
+ * In-memory `MidiInput` for tests: `emitNoteOn`, `emitNoteOff` and `emitPedal` play it,
+ * and `setDevices` plugs keyboards in or out.
+ */
 export class FakeMidiInput implements MidiInput {
   private readonly devices: MidiDevice[];
   private readonly noteOn = new Set<MidiNoteListener>();
   private readonly noteOff = new Set<MidiNoteListener>();
+  private readonly pedal = new Set<MidiPedalListener>();
+  private readonly devicesChanged = new Set<MidiDevicesListener>();
   private connectedId: string | null = null;
 
   constructor(devices: MidiDevice[] = [FAKE_DEVICE]) {
@@ -49,6 +63,37 @@ export class FakeMidiInput implements MidiInput {
     return subscribe(this.noteOff, listener);
   }
 
+  onPedal(listener: MidiPedalListener): Unsubscribe {
+    return subscribe(this.pedal, listener);
+  }
+
+  onDevicesChanged(listener: MidiDevicesListener): Unsubscribe {
+    return subscribe(this.devicesChanged, listener);
+  }
+
+  /** Press (value 64 or more) or lift the sustain pedal. */
+  emitPedal(value: number, options: Omit<FakeNoteOptions, 'velocity'> = {}): void {
+    const deviceId = this.requireConnected();
+    const event = {
+      down: value >= PEDAL_DOWN_AT,
+      value,
+      channel: options.channel ?? 0,
+      time: options.time ?? 0,
+      deviceId,
+    };
+    for (const listener of [...this.pedal]) listener(event);
+  }
+
+  /**
+   * Plug keyboards in or out: the list becomes `devices` and listeners hear about it. Like
+   * the real adapter, a connected device that goes stays connected until the caller
+   * disconnects.
+   */
+  setDevices(devices: MidiDevice[]): void {
+    this.devices.splice(0, this.devices.length, ...devices);
+    for (const listener of [...this.devicesChanged]) listener([...this.devices]);
+  }
+
   emitNoteOn(note: number, options: FakeNoteOptions = {}): void {
     this.emit(this.noteOn, note, { velocity: 100, ...options });
   }
@@ -57,10 +102,13 @@ export class FakeMidiInput implements MidiInput {
     this.emit(this.noteOff, note, { velocity: 0, ...options });
   }
 
+  private requireConnected(): string {
+    if (this.connectedId === null) throw new Error('FakeMidiInput: connect() before emitting notes');
+    return this.connectedId;
+  }
+
   private emit(listeners: Set<MidiNoteListener>, note: number, options: FakeNoteOptions): void {
-    if (this.connectedId === null) {
-      throw new Error('FakeMidiInput: connect() before emitting notes');
-    }
+    const deviceId = this.requireConnected();
     if (!Number.isInteger(note) || note < 0 || note > 127) {
       throw new RangeError(`MIDI note must be 0-127, got ${note}`);
     }
@@ -69,13 +117,13 @@ export class FakeMidiInput implements MidiInput {
       velocity: options.velocity ?? 0,
       channel: options.channel ?? 0,
       time: options.time ?? 0,
-      deviceId: this.connectedId,
+      deviceId,
     };
     for (const listener of [...listeners]) listener(event);
   }
 }
 
-function subscribe(listeners: Set<MidiNoteListener>, listener: MidiNoteListener): Unsubscribe {
+function subscribe<T>(listeners: Set<T>, listener: T): Unsubscribe {
   listeners.add(listener);
   return () => {
     listeners.delete(listener);

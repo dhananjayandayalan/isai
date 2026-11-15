@@ -5,9 +5,9 @@
  */
 export interface Song {
   /**
-   * Version of this schema the file was written against.
+   * Version of this schema the file was written against. Every supported version is listed, newest last; the pipeline writes the newest (ADR 0008).
    */
-  schemaVersion: '0.1.0';
+  schemaVersion: '0.1.0' | '0.2.0' | '0.3.0';
   /**
    * Stable identifier of the song analysis.
    */
@@ -35,6 +35,10 @@ export interface Tempo {
    * Beat times in seconds from the start of the audio.
    */
   beats: number[];
+  /**
+   * Times in seconds of the first beat of each bar, from the start of the audio. Optional; added in 0.2.0.
+   */
+  downbeats?: number[];
 }
 export interface TimeSignature {
   num: number;
@@ -125,4 +129,8 @@ export interface Confidence {
   key: number;
   tempo: number;
   chords: number;
+  /**
+   * Confidence in the transcribed notes. Optional; added in 0.3.0.
+   */
+  notes?: number;
 }

@@ -107,7 +107,9 @@ The theme switch appears in three places: the sidebar (icons only, `.seg.seg-fil
 
 ### Fixed (same in every theme)
 
-`--piano-frame`, `--piano-white`, `--piano-white-hint`, `--piano-white-active`, `--piano-black`, `--piano-black-active`, `--piano-label`, `--piano-pill-right`, `--piano-pill-left`, `--piano-pill-edge`.
+`--piano-frame`, `--piano-white`, `--piano-white-hint`, `--piano-white-active`, `--piano-black`, `--piano-black-active`, `--piano-label`, `--piano-pill-right`, `--piano-pill-left`, `--piano-pill-edge`, `--piano-correct`, `--piano-wrong`.
+
+On the practice keyboard: a key to press now is `--piano-white-active` / `--piano-black-active` with a pill in its hand's colour; the step after is the same pill outlined; the hand you aren't practising is `--piano-white-hint` with a faint pill; a key you played right gets a `--piano-correct` disc and one that isn't in the step a `--piano-wrong` disc with a cross. Right and wrong differ by shape, not hue (rule 3).
 
 ### Type
 
@@ -156,9 +158,11 @@ Copy these shapes. Change the words, not the classes.
 
 **Buttons**: `<button class="btn btn-primary">`, `.btn-secondary`, `.btn-ghost`, `.btn-quiet`; add `.btn-lg` for the main action on a page; `.btn-icon` + `aria-label` for icon-only; `.btn-play` for play/pause. Busy: `disabled aria-busy="true"` and a `.spinner` before the label, and change the label ("Saving…").
 
-**Segmented control**: `<div class="seg" role="group" aria-label="Hands"><button class="seg-btn" aria-pressed="true">Both</button>…</div>`.
+**Segmented control**: `<div class="seg" role="group" aria-label="Hands"><button class="seg-btn" aria-pressed="true">Both</button>…</div>`. A choice that isn't built yet is a `disabled` `.seg-btn` with a `.chip` saying "Coming soon".
 
 **Filters**: `<button class="filter" aria-pressed="false">Carnatic <span class="t-mono">1</span></button>`.
+
+**Range** (seek bars): `<input type="range" class="range" aria-label="Position">`.
 
 **Field**: `<div class="field"><label class="label" for="x">Email</label><input class="input" id="x" aria-invalid="true" aria-describedby="x-err"><span class="field-error" id="x-err">…</span></div>`.
 
@@ -170,9 +174,11 @@ Copy these shapes. Change the words, not the classes.
 
 **Loaders**: `.skeleton` with a height; `.progress > span[style=width]`; `.progress-lg.progress-striped` for uploads; `.loader-eq` (3–5 spans) for "Isai is listening"; `.spinner` for actions under a second; `.loader-keys` (8 spans) only for the practice start-up.
 
+**Histogram** (results timing): `<div class="histogram" role="img" aria-label="…">` holding one `<span class="histogram-bar" style="height: 60%">` per bin, with `.is-in` on the bins inside the "perfect" window, and a `.histogram-axis` row of labels under it. The chart is one image to a screen reader, so the `aria-label` must say what it shows.
+
 **Feedback**: `.alert` (inverted, blocking problem in a form), `.alert-quiet` (inline hint); `.toast-success|info|warning|error`; `.state.state-empty|state-error` for whole-panel states with a `.state-icon`.
 
-**Music**: `.stage` (falling notes) with `.note-right`, `.note-left`, `.note-ghost` (hand not being practised); `.piano`, `.piano-key-white`, `.piano-key-black`; `.chord-now`, `.chord-next`. The animation itself runs on canvas/`requestAnimationFrame` (CLAUDE.md rule 5): read the token values once with `getComputedStyle(document.documentElement).getPropertyValue('--hand-left')` and re-read when the theme changes.
+**Music**: `.stage` (falling notes) with `.note-right`, `.note-left`, `.note-ghost` (hand not being practised); `.stage > .stage-canvas` (a full-width `<canvas>` for falling notes or the scrolling staff, drawn in the keyboard's frame loop and sitting straight on top of `.piano`); `.piano`, `.piano-key-white`, `.piano-key-black`, `.piano-canvas` (a full-width `<canvas>` inside `.piano`); `.chord-now`, `.chord-next`. The animation itself runs on canvas/`requestAnimationFrame` (CLAUDE.md rule 5): read the token values once with `getComputedStyle(document.documentElement).getPropertyValue('--hand-left')` and re-read when the theme changes.
 
 ## 5. Screens and what they use
 

@@ -1,0 +1,35 @@
+# The beat-tracking spike (P3 plan, commit 10). Its own environment, so the candidates'
+# dependencies (torch, madmom) stay out of the pipeline until ADR 0009 picks one.
+#
+#   uv sync                    # librosa baseline + Beat This! (CPU torch)
+#   uv sync --extra madmom     # also madmom, if it builds on this machine
+#   uv run python run.py --synth
+#   uv run python run.py --manifest ../../../tests/golden/manifest.yaml
+
+[project]
+name = "isai-spike-beats"
+version = "0.0.0"
+requires-python = ">=3.11"
+dependencies = [
+    "isai",
+    "pyyaml>=6.0",
+    "torch>=2.5",
+    "beat-this",
+]
+
+[project.optional-dependencies]
+madmom = ["madmom"]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+isai = { path = "../..", editable = true }
+torch = { index = "pytorch-cpu" }
+beat-this = { git = "https://github.com/CPJKU/beat_this" }
+madmom = { git = "https://github.com/CPJKU/madmom" }
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true

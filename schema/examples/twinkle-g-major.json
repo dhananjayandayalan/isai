@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "0.1.0",
+  "schemaVersion": "0.3.0",
   "id": "example-twinkle-g-major",
   "title": "Twinkle, Twinkle, Little Star",
   "sourceType": "piano-solo",
@@ -23,6 +23,12 @@
       7.8,
       8.4,
       9.0
+    ],
+    "downbeats": [
+      0.0,
+      2.4,
+      4.8,
+      7.2
     ]
   },
   "timeSignature": {
@@ -281,7 +287,8 @@
     "confidence": {
       "key": 1,
       "tempo": 1,
-      "chords": 1
+      "chords": 1,
+      "notes": 1
     }
   }
 }
