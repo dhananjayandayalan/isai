@@ -1,0 +1,12 @@
+# Only what the worker image needs: pipeline/ and schema/ (and the entrypoint).
+*
+!pipeline/pyproject.toml
+!pipeline/uv.lock
+!pipeline/README.md
+!pipeline/src/
+!schema/
+!ops/worker/entrypoint.sh
+**/__pycache__
+**/*.pyc
+**/.env
+**/.env.*
