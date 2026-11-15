@@ -41,6 +41,11 @@ export function createSupabaseApi(url: string, anonKey: string): Api {
   const client = createClient(url, anonKey, {
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' },
   });
+  return apiFromClient(client, url, anonKey);
+}
+
+/** The same API over a client made elsewhere (the end-to-end test signs in its own). */
+export function apiFromClient(client: SupabaseClient, url: string, anonKey: string): Api {
   return {
     auth: new SupabaseAuth(client),
     songs: new SupabaseSongs(client),
