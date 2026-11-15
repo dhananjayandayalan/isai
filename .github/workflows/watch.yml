@@ -1,0 +1,34 @@
+# Alerts (P9, ADR 0016): every 15 minutes, check production. A failed run is the alert:
+# GitHub emails the owner about failed scheduled runs (Settings > Notifications > Actions).
+# Off until the owner sets WATCH_ENABLED=true and the production secrets.
+name: Watch production
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    if: vars.WATCH_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    environment: production-watch
+    steps:
+      - uses: actions/checkout@v4
+      - name: The site answers
+        run: curl --fail --silent --show-error --max-time 20 --output /dev/null "${{ vars.SITE_URL }}"
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.13.0"
+      # No torch: the check only talks to Supabase.
+      - run: uv sync --frozen --no-dev
+        working-directory: pipeline
+      - name: Jobs failing twice, an old queue, a silent worker, the rule 8 audit
+        run: uv run isai admin check
+        working-directory: pipeline
+        env:
+          ISAI_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          ISAI_SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}

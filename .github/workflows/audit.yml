@@ -1,0 +1,41 @@
+# Weekly dependency audit (P9). A failure means a known vulnerability in a dependency.
+name: Dependency audit
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: pnpm audit --prod --audit-level high
+
+  pipeline:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: pipeline
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.13.0"
+      - run: uv export --frozen --no-dev --extra cpu --no-hashes --no-emit-project --output-file requirements.txt
+      # Every dependency is pinned by the export, so no resolving; torch (PyTorch index) and
+      # beat-this (a git pin) are skipped by pip-audit and reviewed by hand.
+      - run: uvx pip-audit --requirement requirements.txt --disable-pip --no-deps
