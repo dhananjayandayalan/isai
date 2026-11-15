@@ -13,6 +13,7 @@ dependencies = [
     "rfc3339-validator>=0.1.4",
     "scipy>=1.17.1",
     "soundfile>=0.14.0",
+    "supabase>=2.20",
 ]
 
 # The models (P4) need torch. Pick one build: `uv sync --extra cuda` (NVIDIA GPU) or

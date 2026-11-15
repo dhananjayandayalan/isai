@@ -375,6 +375,19 @@ begin
 end;
 $$;
 
+-- A worker shutting down puts its job back in the queue, as if never claimed. The upload
+-- stays: the next attempt needs it (the 24 h rule still covers it).
+create function public.release_job(p_job_id uuid, p_worker_id text) returns boolean
+language plpgsql security definer set search_path = ''
+as $$
+begin
+  update public.jobs set status = 'queued', queued_at = now(), worker_id = null,
+                         leased_until = null, stage = null, attempts = greatest(attempts - 1, 0)
+  where id = p_job_id and worker_id = p_worker_id and status = 'running';
+  return found;
+end;
+$$;
+
 -- Leases that ran out go back to the queue, at most 2 attempts in all; then the job
 -- fails with `timeout`. Jobs whose upload is over 24 h old fail with `upload_expired`
 -- (the worker's sweep deletes the object itself). Returns the jobs it changed.
@@ -415,12 +428,14 @@ $$;
 revoke execute on function
   public.claim_job(text, integer), public.renew_lease(uuid, text, integer),
   public.set_stage(uuid, text, text, jsonb), public.finish_job(uuid, text, jsonb),
-  public.fail_job(uuid, text, text, text), public.requeue_expired()
+  public.fail_job(uuid, text, text, text), public.requeue_expired(),
+  public.release_job(uuid, text)
   from public, anon, authenticated;
 grant execute on function
   public.claim_job(text, integer), public.renew_lease(uuid, text, integer),
   public.set_stage(uuid, text, text, jsonb), public.finish_job(uuid, text, jsonb),
-  public.fail_job(uuid, text, text, text), public.requeue_expired()
+  public.fail_job(uuid, text, text, text), public.requeue_expired(),
+  public.release_job(uuid, text)
   to service_role;
 revoke execute on function public.create_upload(text, text, text, text),
   public.submit_job(uuid), public.queue_position(uuid) from public, anon;

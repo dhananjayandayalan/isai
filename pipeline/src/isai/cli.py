@@ -4,6 +4,7 @@
 `out/song.mid`. Exit codes: 0 done, 1 invalid Song, 2 input missing or bad arguments,
 3 schema not found, 4 decode failed, 5 too long, 6 silent, 7 a model or torch missing.
 `isai models list` and `isai models fetch` manage the model weights.
+`isai worker [--once]` processes the analysis queue; `isai worker sweep` deletes old uploads.
 """
 
 from __future__ import annotations
@@ -120,6 +121,18 @@ def _parser() -> argparse.ArgumentParser:
     models_commands.add_parser("list", help="each model, its licence and whether it's here")
     fetch = models_commands.add_parser("fetch", help="download and verify models")
     fetch.add_argument("names", nargs="*", help="model names (default: all)")
+
+    worker = commands.add_parser(
+        "worker", help="process the analysis queue (needs ISAI_SUPABASE_URL and a service key)"
+    )
+    worker.add_argument(
+        "action", nargs="?", choices=["run", "sweep"], default="run",
+        help="run (default): process jobs; sweep: delete uploads older than 24 h, then exit",
+    )  # fmt: skip
+    worker.add_argument("--once", action="store_true", help="process at most one job, then exit")
+    worker.add_argument(
+        "--device", choices=["auto", "cpu", "cuda"], default="auto", help="where the models run"
+    )
     return parser
 
 
@@ -163,10 +176,61 @@ def _created_at(value: str | None) -> str:
     return value
 
 
+def _worker(args: argparse.Namespace) -> int:
+    import signal
+
+    from isai.worker.analyser import SubprocessAnalyser
+    from isai.worker.loop import Worker, WorkerConfig
+    from isai.worker.repository import StoreSongRepository
+    from isai.worker.supabase_impl import (
+        SettingsError,
+        SupabaseJobQueue,
+        SupabaseObjectStore,
+        connect,
+        load_settings,
+    )
+
+    try:
+        settings = load_settings()
+    except SettingsError as e:
+        print(f"isai: {e}", file=sys.stderr)
+        return ExitCode.USAGE
+    client = connect(settings)
+    store = SupabaseObjectStore(client)
+    worker = Worker(
+        SupabaseJobQueue(client),
+        store,
+        StoreSongRepository(store),
+        SubprocessAnalyser(device=args.device),
+        WorkerConfig(worker_id=settings.worker_id),
+    )
+    if args.action == "sweep":
+        deleted = worker.sweep()
+        print(f"Deleted {len(deleted)} uploads older than 24 hours")
+        return ExitCode.OK
+
+    def on_signal(_signum: int, _frame: object) -> None:
+        if worker.stop.is_set():
+            worker.abort.set()  # second time: put the current job back in the queue now
+        else:
+            worker.stop.set()
+            print("isai: finishing the current job; press Ctrl+C again to release it",
+                  file=sys.stderr)  # fmt: skip
+
+    signal.signal(signal.SIGINT, on_signal)
+    signal.signal(signal.SIGTERM, on_signal)
+    worker.log("start", once=args.once)
+    count = worker.run(once=args.once)
+    worker.log("stop", processed=count)
+    return ExitCode.OK
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     if args.command == "models":
         return _models(args)
+    if args.command == "worker":
+        return _worker(args)
     source: Path = args.file
     if args.type in LATER_TYPES:
         print(f"isai: {args.type} songs are coming in a later version", file=sys.stderr)

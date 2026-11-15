@@ -1,7 +1,7 @@
 -- The job queue: claim, lease, requeue, finish, fail, the daily cap, expired uploads.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(21);
+select plan(23);
 
 insert into public.invites (email) values ('q@test.local');
 insert into auth.users (id, email) values ('00000000-0000-0000-0000-0000000000a1', 'q@test.local');
@@ -52,6 +52,15 @@ select is(public.renew_lease((select job_id from c1), 'w2', 60), false,
 select is(public.renew_lease((select job_id from c1), 'w1', 60), true, 'the owner of the lease can');
 select is(public.set_stage((select job_id from c1), 'w1', 'separate', '{"ingest": 1.5}'), true,
   'the stage is recorded');
+
+-- A worker shutting down releases its job: queued again, the attempt not counted.
+select is(public.release_job((select job_id from c1), 'w1'), true, 'the job is released');
+select results_eq(
+  $$select status, attempts from public.jobs where id = (select job_id from c1)$$,
+  $$values ('queued'::text, 0)$$, 'a released job is queued again without using an attempt');
+create temp table c1b on commit drop as select * from public.claim_job('w1', 60);
+drop table c1;
+create temp table c1 on commit drop as select * from c1b;
 
 -- The lease runs out: back in the queue, then a second expiry fails it.
 update public.jobs set leased_until = now() - interval '1 second' where id = (select job_id from c1);

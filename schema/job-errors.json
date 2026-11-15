@@ -1,0 +1,35 @@
+{
+  "$comment": "Why an analysis job failed: the codes the worker writes to jobs.error_code, and what the web tells the learner (STYLE_GUIDE section 7). Shared by pipeline/src/isai/worker/errors.py and web/src/api/jobErrors.ts; tests on both sides check every code is here.",
+  "decode_failed": {
+    "message": "Isai couldn't read that file as audio.",
+    "next": "Try exporting it again as MP3 or WAV, then upload it once more."
+  },
+  "too_long": {
+    "message": "That recording is longer than Isai can analyse.",
+    "next": "Trim it to under 12 minutes and upload it again."
+  },
+  "silent": {
+    "message": "Isai couldn't hear anything in that recording.",
+    "next": "Check the file plays with sound, then upload it again."
+  },
+  "unsupported_type": {
+    "message": "Isai can't analyse that kind of recording yet.",
+    "next": "Choose piano solo, full song or voice only, then upload it again."
+  },
+  "model_failed": {
+    "message": "The analysis machine hit a problem with one of its models.",
+    "next": "Try again later. If it keeps happening, tell the owner."
+  },
+  "timeout": {
+    "message": "The analysis took too long and was stopped.",
+    "next": "Try a shorter recording, or upload it again later."
+  },
+  "upload_expired": {
+    "message": "The analysis didn't start within a day, so the audio was deleted.",
+    "next": "Upload the recording again when the analysis machine is back."
+  },
+  "internal": {
+    "message": "Something went wrong while analysing your song.",
+    "next": "Upload it again. If it keeps happening, tell the owner."
+  }
+}
