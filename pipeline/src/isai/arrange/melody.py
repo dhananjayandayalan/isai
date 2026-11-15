@@ -6,9 +6,7 @@
    so most of the melody sits in C4-C6.
 4. Onsets snap to a grid chosen per song: 1/8, triplets or 1/16, the coarsest that
    explains most onsets within 30 ms.
-5. Ornaments fold into the note they decorate: easy and medium keep nothing shorter than
-   an 8th, full nothing shorter than a 16th.
-6. Each beat keeps at most a level's number of notes (easy 2, medium 4, full no cap),
+5. Each beat keeps at most a level's number of notes (easy 2, medium 4, full no cap),
    on-beat and longer notes first.
 """
 
@@ -27,9 +25,6 @@ LOW, HIGH = 60, 84  # C4 to C6
 GRID_TOLERANCE = 0.03
 GRID_SHARE = 0.8
 RATE_CAP: dict[str, int | None] = {"easy": 2, "medium": 4, "full": None}
-# The shortest melody note a level keeps, in beats: an 8th, or a 16th at full.
-MIN_NOTE_BEATS: dict[str, float] = {"easy": 0.5, "medium": 0.5, "full": 0.25}
-FOLD_GAP = 0.05  # notes closer than this belong to one gesture
 
 
 def beat_length(beats: Sequence[float], bpm: float) -> float:
@@ -169,29 +164,6 @@ def cap_rate(
     return out
 
 
-def fold_ornaments(notes: Sequence[TNote], min_len: float) -> list[TNote]:
-    """Fold notes shorter than `min_len` into the melody note they decorate.
-
-    A sung melody carries gamakas, slides and grace notes; a keyboard player keeps the
-    main notes. A short note that follows another closely is absorbed by it (the earlier
-    note rings on), so the strong-beat onsets stay where they are. An isolated short note
-    is lengthened to `min_len` if there's room before the next note, else dropped.
-    """
-    ordered = sorted(notes, key=lambda n: n.start)
-    out: list[TNote] = []
-    for i, n in enumerate(ordered):
-        if n.end - n.start >= min_len - 1e-6:
-            out.append(n)
-        elif out and n.start - out[-1].end <= FOLD_GAP:
-            last = out[-1]
-            out[-1] = TNote(last.start, n.end, last.midi, last.velocity)
-        else:
-            room = ordered[i + 1].start if i + 1 < len(ordered) else n.start + min_len
-            if room - n.start >= min_len - 1e-6:
-                out.append(TNote(n.start, round(n.start + min_len, 3), n.midi, n.velocity))
-    return out
-
-
 def right_hand(
     notes: Sequence[TNote], beats: Sequence[float], bpm: float, level: Level
 ) -> list[TNote]:
@@ -202,5 +174,4 @@ def right_hand(
     placed = [n for phrase in phrases(line, beat) for n in place_octave(phrase)]
     division = choose_division(placed, beats, beat)
     snapped = quantise(placed, beats, beat, division)
-    folded = fold_ornaments(snapped, MIN_NOTE_BEATS[level] * beat)
-    return cap_rate(folded, beats, beat, RATE_CAP[level])
+    return cap_rate(snapped, beats, beat, RATE_CAP[level])
