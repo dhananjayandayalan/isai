@@ -25,7 +25,7 @@ up and check every package.
 
   | Model | For | Licence |
   |---|---|---|
-  | `beat-this` (Beat This! final0) | beats and bar starts | MIT |
+  | `beat-this` (Beat This! final0) | beats and bar starts, only with `--beat-tracker beat-this` | MIT |
   | `hdemucs` (torchaudio Hybrid Demucs, MUSDB-HQ + extra) | full-mix separation | MIT |
   | `piano-bytedance` (Kong et al. 2021) | piano notes, velocities, pedal | CC BY 4.0 |
   | torchcrepe "full" (inside the package) | melody and bass pitch | MIT |
@@ -58,7 +58,7 @@ between the hands, nothing shorter than a 1/16, A0–C8) before they're written.
 | `--no-cache` | run every stage afresh |
 | `--from-stage <stage>` | re-run that stage and the ones after it: `separate`, `rhythm`, `tonality`, `piano`, `melody`, `bass` or `harmony` |
 | `--device auto\|cpu\|cuda` | where the models run (default `auto`: the GPU when torch sees one) |
-| `--beat-tracker beat-this\|librosa` | beats and bars from Beat This! (default, ADR 0009) or librosa's tracker (no model, no torch) |
+| `--beat-tracker librosa\|beat-this` | beats and bars from librosa's tracker (default, ADR 0014; no model, no torch) or Beat This! (ADR 0009) |
 | `--level easy\|medium\|full\|all` | the arrangement level (default `medium`); `all` writes `<stem>.easy.song.json`, `.medium` and `.full` (and their `.mid`) from one analysis |
 | `--simplify easy\|medium` | piano-solo: arrange the transcription's top line over the recognised chords instead of keeping it |
 | `--keep-stems` | full-mix: also write the four stems to `<out>/stems/` as WAVs. For local listening only; without it no audio leaves `.cache/` (rule 8), and the worker never passes it |

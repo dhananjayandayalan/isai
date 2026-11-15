@@ -287,6 +287,6 @@ def test_beat_tracker_flag_picks_the_tracker(
 
     monkeypatch.setattr(isai.cli, "run", spy)
     assert analyse(song_file, tmp_path / "a", "--no-cache") == 0
-    assert analyse(song_file, tmp_path / "b", "--no-cache", "--beat-tracker", "librosa") == 0
-    assert seen[0] is None  # the default: Beat This! through the models
-    assert type(seen[1]).__name__ == "LibrosaTracker"
+    assert analyse(song_file, tmp_path / "b", "--no-cache", "--beat-tracker", "beat-this") == 0
+    assert type(seen[0]).__name__ == "LibrosaTracker"  # the default (ADR 0014)
+    assert seen[1] is None  # Beat This! through the models

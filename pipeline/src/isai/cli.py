@@ -95,9 +95,9 @@ def _parser() -> argparse.ArgumentParser:
     )
     analyse.add_argument(
         "--beat-tracker",
-        choices=["beat-this", "librosa"],
-        default="beat-this",
-        help="beats and bars from Beat This! (default) or librosa's tracker (no model)",
+        choices=["librosa", "beat-this"],
+        default="librosa",
+        help="beats and bars from librosa's tracker (default, ADR 0014) or Beat This! (a model)",
     )
     analyse.add_argument(
         "--level",
@@ -191,7 +191,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         log_json=args.log_json,
         device=args.device,
         keep_stems=args.out / "stems" if args.keep_stems else None,
-        tracker=LibrosaTracker() if args.beat_tracker == "librosa" else None,
+        tracker=None if args.beat_tracker == "beat-this" else LibrosaTracker(),
         levels=LEVELS if args.level == "all" else (args.level,),
         simplify=args.simplify if args.type == "piano-solo" else None,
     )

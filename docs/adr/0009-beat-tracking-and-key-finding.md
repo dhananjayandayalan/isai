@@ -9,6 +9,10 @@ supersedes: null
 
 # 0009 — Beat tracking with Beat This!, key finding with profiles and notes
 
+> **The beat-tracker choice is superseded by [0014](0014-beat-tracker-back-to-librosa.md)**
+> (accepted): librosa is the default again after the owner's listening test. The key
+> finding below still stands.
+
 ## Context
 
 Every timed thing Isai writes hangs off the beat grid: bars and the loop picker, the

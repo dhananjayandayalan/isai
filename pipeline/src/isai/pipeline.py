@@ -34,7 +34,14 @@ from isai.ingest import INGEST_VERSION, IngestLimits, ingest
 from isai.ingest.types import LOW_RATE, RATE, Ingested
 from isai.midi_out import MidiNote, song_midi
 from isai.models import model_path
-from isai.rhythm import RHYTHM_VERSION, BeatThisTracker, BeatTracker, Rhythm, analyse_rhythm
+from isai.rhythm import (
+    RHYTHM_VERSION,
+    BeatThisTracker,
+    BeatTracker,
+    LibrosaTracker,
+    Rhythm,
+    analyse_rhythm,
+)
 from isai.rhythm.derive import filled_downbeats, filled_grid
 from isai.runner import Runner, StageRecord
 from isai.separate import SEPARATE_VERSION, STEM_RATE, HDemucsSeparator, Separator, Stems
@@ -100,8 +107,9 @@ class Options:
     log_json: bool = False
     log_stream: TextIO | None = None
     limits: IngestLimits = field(default_factory=IngestLimits)
-    tracker: BeatTracker | None = None
-    """A beat tracker to use instead of the default (`--beat-tracker librosa`)."""
+    tracker: BeatTracker | None = field(default_factory=LibrosaTracker)
+    """The beat tracker (ADR 0014: librosa). None uses the models' Beat This!
+    (`--beat-tracker beat-this`)."""
     device: DeviceChoice = "auto"
     models: Models | None = None
     keep_stems: Path | None = None

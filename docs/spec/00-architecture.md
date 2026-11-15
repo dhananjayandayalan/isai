@@ -235,10 +235,11 @@ The service-role key never reaches the browser, the repo or CI logs.
 | 0005 | One practice engine with training and performance policies (P2) | proposed |
 | 0006 | Performance scoring, latency model and local practice records (P6) | proposed |
 | next | Schema evolution policy (P3, before the first schema change) | expected |
-| 0009 | Beat tracking (Beat This!) and key finding (P3) | accepted |
+| 0009 | Beat tracking (Beat This!) and key finding (P3); tracker superseded by 0014 | accepted |
 | 0010 | Source separation: torchaudio Hybrid Demucs (P4) | proposed |
 | 0011 | Piano transcription: ByteDance high-resolution model (P4) | proposed |
 | 0012 | Pitch tracking: torchcrepe without dither (P4) | proposed |
+| 0014 | Beat tracker back to librosa, Beat This! as an option (P5, supersedes 0009 in part) | accepted |
 | next | Analysis models: chords (P5), if a learned recogniser is adopted | expected, after the spike |
 | next | `MidiInput` gains pedal and device-change events (P7, amends 0003) | expected |
 | next | Backend: Supabase, jobs-table queue, auth model, `api/` boundary (P8) | expected |
