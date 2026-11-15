@@ -112,12 +112,18 @@ the owner's ears and the golden audio. Plans: `docs/spec/plans/P3.md`, `P4.md`, 
   - `9b1dcef`: Beat This! replaces librosa as the beat tracker (ADR 0009).
   - `d97a6cc`: chords and patterns sit on a gap-filled beat grid (harmony version 2),
     and the left hand re-anchors at each bar start.
-- Next steps:
-  - A/B the same song before and after. `--beat-tracker librosa` isolates the tracker;
-    `git stash` or a worktree at `fe867f9` gives the full "before" state.
-  - Find which commit hurt the notes and chords, and fix or revert it, keeping whatever
-    did fix the timing.
-  - "Keys" may mean the piano keys (notes), not the musical key, which stayed D minor.
+- A/B done (2026-11-15, same stems and melody stage for every run):
+  - **Notes:** `994470c` was the cause and is reverted (`72df139`). It dropped 26% of
+    right-hand notes at medium.
+  - **Chords:** the tracker causes them, not the grid. Beat This! and librosa sit about
+    half a beat apart at 60–100 s and 140–215 s. Chords match "before" 67% of the time
+    with Beat This! and 91% with librosa (same current code).
+  - `9b1dcef` doesn't run on its own (it imports `filled_grid` from `d97a6cc`).
+- **Waiting on the owner's ears:** two click-track files (song plus beat clicks, bar
+  starts accented), one per tracker. Which one clicks on the beat at 60–100 s and
+  140–200 s decides the tracker. If librosa wins, switch the default back via a new ADR
+  that supersedes ADR 0009. If Beat This! wins, ask which bars' chords sound wrong.
+- "Keys" means the piano keys (notes), not the musical key, which stayed D minor.
 - Don't judge by proxy numbers alone (drum-onset alignment, notes per second): they
   improved while the result sounded worse. Ask the owner which bars or times sound wrong,
   never for the song's tempo or key; finding those is the app's job.
