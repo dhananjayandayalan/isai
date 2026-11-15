@@ -10,12 +10,19 @@
     "test": "vitest",
     "lint": "eslint .",
     "typecheck": "tsc -b --noEmit",
-    "gen:types": "node scripts/gen-types.mjs"
+    "gen:types": "node scripts/gen-types.mjs",
+    "db:start": "supabase start --workdir ..",
+    "db:stop": "supabase stop --workdir ..",
+    "db:reset": "supabase db reset --workdir ..",
+    "db:test": "supabase test db --workdir ..",
+    "db:status": "supabase status --workdir .."
   },
   "dependencies": {
+    "@supabase/supabase-js": "2.119.0",
     "ajv-formats": "^3.0.1",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
+    "react-router": "8.5.1",
     "tone": "^15.1.22"
   },
   "devDependencies": {
@@ -33,6 +40,7 @@
     "globals": "^17.13.0",
     "jsdom": "^30.1.2",
     "json-schema-to-typescript": "^16.0.0",
+    "supabase": "3.1.0",
     "typescript": "~6.0.3",
     "typescript-eslint": "~8.71.1",
     "vite": "^8.3.4",
